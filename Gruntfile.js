@@ -142,7 +142,7 @@ module.exports = function (grunt) {
                         'styles/fonts/{,*/}*.*',
                         'styles/*.css',
                         'fonts/{,*/}*.*',
-                        'bower_components/**/*.*',
+                        'components/**',
                         'other_components/**/*.*',
                         'elements/**/*.*'
                     ]
@@ -161,14 +161,14 @@ module.exports = function (grunt) {
         // Run some tasks in parallel to speed up build process
         concurrent: {
             server: [
-                'compass:server',
+                //'compass:server',
                 'copy:styles'
             ],
             test: [
                 'copy:styles'
             ],
             dist: [
-                'compass',
+                //'compass',
                 'copy:styles',
                 'imagemin',
                 'svgmin'
@@ -249,11 +249,12 @@ module.exports = function (grunt) {
                     stderr: true
                 },
                 command: 'rm -rf <%= yeoman.dist %>/components/* && '+
+                         'rm -rf <%= yeoman.dist %>/elements && '+
                          'mkdir <%= yeoman.dist %>/components/polymer && '+
-                         'mkdir <%= yeoman.dist %>/components/jquery && '+
+                         'mkdir -p <%= yeoman.dist %>/components/jquery/dist && '+
                          'cp <%= yeoman.app %>/components/polymer/polymer.js <%= yeoman.dist %>/components/polymer && '+
                          'cp <%= yeoman.app %>/components/polymer/polymer.js.map <%= yeoman.dist %>/components/polymer && '+
-                         'cp <%= yeoman.app %>/components/jquery/jquery.js <%= yeoman.dist %>/components/jquery'
+                         'cp <%= yeoman.app %>/components/jquery/dist/jquery.js <%= yeoman.dist %>/components/jquery/dist'
             },
             // datanucleusenhance run 'ant compile' as well
             'appengine-compile' : {
@@ -269,6 +270,13 @@ module.exports = function (grunt) {
                     stderr: true
                 },
                 command: 'node server'
+            },
+            'build-server' : {
+                options: {
+                    stdout: true,
+                    stderr: true
+                },
+                command: 'node server.js --build'
             }
         }
 
@@ -279,11 +287,15 @@ module.exports = function (grunt) {
         'shell:server'
     ]);
 
+    grunt.registerTask('build-server', [
+        'shell:build-server'
+    ]);
+
     grunt.registerTask('build', [
         'clean:dist',
         'useminPrepare',
         'concurrent:dist',
-        'autoprefixer',
+        //'autoprefixer',
         'concat',
         'uglify',
         'copy:dist',
