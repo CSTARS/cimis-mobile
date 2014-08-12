@@ -1,0 +1,26 @@
+{
+  "name": "dwr-mobile",
+  "version": "0.0.0",
+  "authors": [
+    "Justin Merz <jrmerz@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.2.0",
+    "font-awesome": "~4.1.0",
+    "polymer": "Polymer/polymer#~0.3.5",
+    "core-elements": "Polymer/core-elements#~0.3.5",
+    "paper-elements": "Polymer/paper-elements#~0.3.5",
+    "animate-css": "~3.2.0",
+    "google-map": "~0.3.1"
+  }
+}

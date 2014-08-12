@@ -1,0 +1,21 @@
+{
+  "name": "dwr-mobile",
+  "version": "0.0.0",
+  "description": "DWR mobile app",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jrmerz@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.8.3",
+    "grunt": "^0.4.5",
+    "grunt-vulcanize": "^0.4.1",
+    "grunt-manifest": "^0.4.0",
+    "grunt-shell": "^0.7.0",
+    "load-grunt-tasks": "^0.6.0",
+    "time-grunt": "^0.4.0",
+    "jshint-stylish": "^0.4.0"
+  }
+}

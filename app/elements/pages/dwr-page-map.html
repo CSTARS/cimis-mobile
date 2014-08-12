@@ -1,0 +1,28 @@
+<link rel="import" href="../../components/google-map/google-map.html">
+
+<polymer-element name="dwr-page-map">
+    <template>
+        <style>
+            :host {
+                width: 100%;
+                height: 100%;
+                display: block;
+                position: absolute;
+                top: 0px;
+                left: 0px;
+            }
+            google-map {
+                display: block;
+                height: 100%;
+            }
+        </style>
+        <google-map id="root" latitude="37.77493" longitude="-122.41942"></google-map>
+    </template>
+    <script>
+        Polymer('dwr-page-map', {
+            onShow : function() {
+                google.maps.event.trigger(this.$.root.map, 'resize');
+            }
+        });
+    </script>
+</polymer-element>

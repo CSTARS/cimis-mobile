@@ -1,0 +1,21 @@
+<!doctype html>
+<html manifest="/manifest.appcache">
+    <head>
+        <title>DWR - Mobile App</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <!-- build:js /scripts/app.js -->
+        <script src="components/platform/platform.js"></script>
+        <script src="components/jquery/dist/jquery.js"></script> 
+        <!-- endbuild -->
+
+        <link rel="stylesheet" href="/styles/deep.css" shim-shadowdom>
+
+        <link rel="import" href="components/polymer/polymer.html">
+        <link rel="import" href="elements/dwr-app.html">
+    </head>
+    <body>
+        <dwr-app></dwr-app>
+    </body>
+</html>

@@ -1,0 +1,92 @@
+<link rel="import" href="../components/core-scaffold/core-scaffold.html">
+<link rel="import" href="../components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../components/core-menu/core-menu.html">
+<link rel="import" href="../components/core-item/core-item.html">
+<link rel="import" href="../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../components/core-icons/maps-icons.html">
+<link rel="import" href="../components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../components/core-animated-pages/transitions/slide-from-right.html">
+<link rel="import" href="pages/dwr-page-hourly.html">
+<link rel="import" href="pages/dwr-page-now.html">
+<link rel="import" href="pages/dwr-page-settings.html">
+<link rel="import" href="pages/dwr-page-map.html">
+
+<polymer-element name="dwr-app">
+	<template>
+        <style>
+            core-item {
+                color: #888;
+            }
+            core-item.core-selected {
+                color: #333;
+            }
+            core-animated-pages {
+                width: 100%;
+                height: 100%;
+                display: block;
+                position: absolute;
+                top: 0px;
+                left: 0px;
+            }
+        </style>
+
+		<core-scaffold>
+        	<core-header-panel navigation flex mode="seamed">
+            	<core-toolbar>DWR Mobile App</core-toolbar>
+            	<core-menu theme="core-light-theme" selected="{{selected}}" selectedItem="{{selectedItem}}">
+                    <core-item icon="today" label="Now"></core-item>
+                    <core-item icon="view-list" label="Hourly"></core-item>
+                    <core-item icon="maps:map" label="Map"></core-item>
+                    <core-item icon="settings" label="Settings"></core-item>
+                </core-menu>
+            </core-header-panel>
+
+            <div tool style="width:100%">
+                <paper-tabs hidden?="{{!showTabs}}" selected="{{selected}}">
+                    <paper-tab>Now</paper-tab>
+                    <paper-tab>Hourly</paper-tab>
+                </paper-tabs>
+            </div>
+
+            <core-animated-pages selected="{{selected}}" transitions="slide-from-right">
+                <dwr-page-now  id="now"></dwr-page-now>
+                <dwr-page-hourly id="hourly"></dwr-page-hourly>
+                <dwr-page-map id="map"></dwr-page-map>
+                <dwr-page-settings id="settings"></dwr-page-settings>
+            </core-animated-pages>
+        </core-scaffold>
+	</template>
+	<script>
+		Polymer('dwr-app', {
+            selected : 0,
+            selectedItem : {},
+
+            // current page we are on
+            page : '',
+
+            // show tabs
+            showTabs : true,
+
+            observe : {
+                selected : '_updatePage'
+            },
+
+            _updatePage : function() {
+                this.async(function(){
+                    this.page = this.selectedItem.label.toLowerCase();
+
+                    if( this.page == 'settings' || this.page == 'map' ) {
+                        this.showTabs = false;
+                    } else {
+                        this.showTabs = true;
+                    }
+
+                    if( this.$[this.page] && this.$[this.page].onShow ) {
+                        this.$[this.page].onShow();
+                    }
+                });
+            }
+
+		});
+	</script>
+</polymer-element>
