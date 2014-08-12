@@ -4156,6 +4156,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </defs></svg>
 </core-iconset-svg>
 
+<!--
+Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!--
+`core-pages` is used to select one of its children to show. One use is to cycle through a list of children "pages".
+
+Example: 
+
+    <core-pages selected="0">
+      <div>One</div>
+      <div>Two</div>
+      <div>Three</div>
+    </core-pages>
+
+    <script>
+      document.addEventListener('click', function(e) {
+        var pages = document.querySelector('core-pages');
+        pages.selected = (pages.selected + 1) % pages.children.length;
+      });
+    </script>
+
+@group Polymer Core Elements
+@class core-pages
+@extends core-selector
+-->
+
+
+
+
+<polymer-element name="core-pages" extends="core-selector" selected="0" notap="" assetpath="components/core-pages/">
+<template>
+
+  <style>/*
+Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+:host {
+  display: block;
+  position: relative;
+}
+
+polyfill-next-selector { content: ':host > *'; }
+::content > * {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  visibility: hidden;
+  z-index: -1000;
+}
+
+polyfill-next-selector { content: ':host > .core-selected'; }
+::content > .core-selected {
+  visibility: visible;
+  z-index: auto;
+}</style>
+
+  <shadow></shadow>
+
+</template>
+<script>Polymer('core-pages');</script></polymer-element>
+
 
 
 <!--
@@ -5789,6 +5863,7 @@ it operates on the page rather than the page's children.
 
 <polymer-element name="dwr-page-hourly" assetpath="elements/pages/">
     <template>
+        <content select="paper-tabs"></content>
         hourly content
     </template>
     <script>
@@ -5799,6 +5874,7 @@ it operates on the page rather than the page's children.
 </polymer-element>
 <polymer-element name="dwr-page-now" assetpath="elements/pages/">
     <template>
+        <content select="paper-tabs"></content>
         now content
     </template>
     <script>
@@ -7111,16 +7187,15 @@ information on the API.
         });
     </script>
 </polymer-element>
-<polymer-element name="dwr-map-search" assetpath="elements/ui/">
+<polymer-element name="dwr-map-search" attributes="phone" assetpath="elements/ui/">
     <template>
         <style>
             .form-control {
                 display: inline-block !important;
-                width: 200px !important;
             }
         </style>
-        <input type="text" class="form-control" value="{{searchText}}" on-keypress="{{_onKeyPress}}">
-        <a class="btn btn-default" on-tap="{{_fire}}">
+        <input type="text" style="width:{{phone?&apos;100px&apos;:&apos;200px&apos;}}" class="form-control" value="{{searchText}}" on-keypress="{{_onKeyPress}}">
+        <a class="btn btn-default btn-sm" on-tap="{{_fire}}">
             <core-icon icon="search"></core-icon>
         </a>
     </template>
@@ -7138,10 +7213,42 @@ information on the API.
         });
     </script>
 </polymer-element>
+<polymer-element name="dwr-select-location" assetpath="elements/ui/">
+    <template>
+        <style>
+            span {
+                color: #888;
+                font-size: 14px;
+                padding: 5px 2px;
+                border-bottom: 1px solid #ccc;
+            }
+        </style>
+        <core-icon icon="maps:place"></core-icon>
+
+        <span hidden?="{{location.name != &apos;&apos;}}">
+            Select Location
+        </span>
+
+    </template>
+    <script>
+        Polymer('dwr-select-location', {
+            location : {
+                name : '',
+                lat : 0,
+                lng : 0
+            }
+
+        });
+    </script>
+</polymer-element>
 
 <polymer-element name="dwr-app" assetpath="elements/">
 	<template>
         <style>
+            :host {
+                display: block;
+                height: 100%;
+            }
             core-item {
                 color: #888;
             }
@@ -7152,13 +7259,21 @@ information on the API.
                 background-color: #eee;
                 border-radius: 4px;
             }
-            core-animated-pages {
+            .full-height {
                 width: 100%;
                 height: 100%;
                 display: block;
                 position: absolute;
                 top: 0px;
                 left: 0px;
+            }
+            @media( max-width: 640px ) {
+                paper-tab.core-selected {
+                    background-color: transparent !important;
+                }
+                core-pages {
+                    margin-top: 65px;
+                }
             }
         </style>
 
@@ -7174,19 +7289,42 @@ information on the API.
             </core-header-panel>
 
             <div tool="" style="width:100%">
-                <paper-tabs hidden?="{{!showTabs}}" selected="{{selected}}">
-                    <paper-tab>Now</paper-tab>
-                    <paper-tab>Hourly</paper-tab>
-                </paper-tabs>
-                <dwr-map-search hidden?="{{page != &apos;map&apos;}}" on-search="{{_searchMap}}"></dwr-map-search>
+                <div layout="" horizontal="">
+                    <div flex="">
+                        <paper-tabs hidden?="{{!showTabs || phoneScreen}}" selected="{{selected}}" style="margin: -10px 0">
+                            <paper-tab>Now</paper-tab>
+                            <paper-tab>Hourly</paper-tab>
+                        </paper-tabs>
+                        <dwr-map-search hidden?="{{page != &apos;map&apos;}}" phone="{{phoneScreen}}" on-search="{{_searchMap}}"></dwr-map-search>
+                    </div>
+                    <div>
+                        <dwr-select-location></dwr-select-location>
+                    </div>
+                </div>
             </div>
 
-            <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right">
-                <dwr-page-now id="now"></dwr-page-now>
-                <dwr-page-hourly id="hourly"></dwr-page-hourly>
-                <dwr-page-map id="map"></dwr-page-map>
-                <dwr-page-settings id="settings"></dwr-page-settings>
-            </core-animated-pages>
+            <core-media-query query="max-width: 640px" querymatches="{{phoneScreen}}"></core-media-query>
+
+            <div class="full-height">
+                <div vertical="" layout="" style="height:100%">
+                    <div>
+                        <paper-tabs hidden?="{{!phoneScreen || !showTabs}}" selected="{{selected}}">
+                            <paper-tab>Now</paper-tab>
+                            <paper-tab>Hourly</paper-tab>
+                        </paper-tabs>
+                    </div>
+                    <div flex="" style="position:relative">
+
+                        <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right" class="full-height">
+                            <dwr-page-now id="now"></dwr-page-now>
+                            <dwr-page-hourly id="hourly"></dwr-page-hourly>
+                            <dwr-page-map id="map"></dwr-page-map>
+                            <dwr-page-settings id="settings"></dwr-page-settings>
+                        </core-animated-pages>
+                    </div>
+                </div>
+            </div>
+
         </core-scaffold>
 	</template>
 	<script>
@@ -7196,6 +7334,8 @@ information on the API.
 
             // current page we are on
             page : '',
+
+            phoneScreen : false,
 
             // show tabs
             showTabs : true,
