@@ -6977,6 +6977,90 @@ Fired when the Maps API has fully loaded.
 </script>
 </polymer-element>
 
+<!-- Copyright (c) 2014 Google Inc. All rights reserved. -->
+
+
+
+<!--
+Provides Google Maps Places API functionality.
+
+See https://developers.google.com/maps/documentation/javascript/places for more
+information on the API.
+
+#### Example:
+
+    <template is="auto-binding">
+      <google-map-search map="{{map}}" query="Pizza"
+                         result="{{result}}"></google-map-search>
+      <google-map map="{{map}}" latitude="37.779"
+                  longitude="-122.3892"></google-map>
+      <div>Result: {{result.latitude}}, {{result.longitude}}</div>
+    </template>
+    <script>
+      document.querySelector('google-map-search').search();
+    </script>
+
+@element google-map-search
+@status alpha
+@homepage http://googlewebcomponents.github.io/google-map/
+-->
+
+<polymer-element name="google-map-search" attributes="query result map" assetpath="components/google-map/">
+  <script>
+    Polymer('google-map-search', {
+
+      /**
+       * TAhe Google map object.
+       *
+       * @attribute map
+       * @type google.maps.Map
+       * @default null
+       */
+      map: null,
+
+      /**
+       * The search query.
+       *
+       * @attribute query
+       * @type string
+       * @default null
+       */
+      query: null,
+
+      /**
+       * The search result.
+       *
+       * @attribute result
+       * @type object
+       */
+
+      observe: {
+        query: 'search',
+        map: 'search'
+      },
+
+      /**
+       * Performance a search using for `query` for the search term.
+       *
+       * @method search
+       */
+      search: function() {
+        if (this.query && this.map) {
+          var places = new google.maps.places.PlacesService(this.map);
+          places.textSearch({query: this.query}, this.gotResults.bind(this));
+        }
+      },
+      gotResults: function(results, status) {
+        this.result = {
+          latitude: results[0].geometry.location.lat(),
+          longitude: results[0].geometry.location.lng(),
+          show: true
+        }
+      }
+    });
+  </script>
+</polymer-element>
+
 
 <polymer-element name="dwr-page-map" assetpath="elements/pages/">
     <template>
@@ -6993,13 +7077,62 @@ Fired when the Maps API has fully loaded.
                 display: block;
                 height: 100%;
             }
+            .shadow {
+                position: absolute;
+                width: 100%;
+                height:1px;
+                top: -1px;
+                left: 1px;
+                box-shadow: 0 0 5px black;
+            }
         </style>
-        <google-map id="root" latitude="37.77493" longitude="-122.41942"></google-map>
+        
+        <google-map-search id="search" map="{{$.root.map}}" query="{{query}}" result="{{result}}"></google-map-search>
+        <google-map id="root" latitude="{{result.latitude}}" longitude="{{result.longitude}}"></google-map>
+        <div class="shadow"></div>
     </template>
     <script>
         Polymer('dwr-page-map', {
+            query : '',
+            result : {
+                latitude : 37.77493,
+                longitude : -122.41942
+            },
+
             onShow : function() {
+                if( !window.google ) return;
                 google.maps.event.trigger(this.$.root.map, 'resize');
+            },
+            search : function(query) {
+                this.query = query;
+                this.$.search.search();
+            }
+        });
+    </script>
+</polymer-element>
+<polymer-element name="dwr-map-search" assetpath="elements/ui/">
+    <template>
+        <style>
+            .form-control {
+                display: inline-block !important;
+                width: initial !important;
+            }
+        </style>
+        <input type="text" class="form-control" value="{{searchText}}" on-keypress="{{_onKeyPress}}">
+        <a class="btn btn-default" on-tap="{{_fire}}">
+            <core-icon icon="search"></core-icon>
+        </a>
+    </template>
+    <script>
+        Polymer('dwr-map-search', {
+            searchText : '',
+
+            _onKeyPress : function(e) {
+                if( e.which == 13 ) this._fire();
+            },
+
+            _fire : function() {
+                this.fire('search', this.searchText); 
             }
         });
     </script>
@@ -7024,10 +7157,10 @@ Fired when the Maps API has fully loaded.
             }
         </style>
 
-		<core-scaffold>
+		<core-scaffold id="scaffold">
         	<core-header-panel navigation="" flex="" mode="seamed">
             	<core-toolbar>DWR Mobile App</core-toolbar>
-            	<core-menu theme="core-light-theme" selected="{{selected}}" selecteditem="{{selectedItem}}">
+            	<core-menu selected="{{selected}}" selecteditem="{{selectedItem}}">
                     <core-item icon="today" label="Now"></core-item>
                     <core-item icon="view-list" label="Hourly"></core-item>
                     <core-item icon="maps:map" label="Map"></core-item>
@@ -7040,9 +7173,10 @@ Fired when the Maps API has fully loaded.
                     <paper-tab>Now</paper-tab>
                     <paper-tab>Hourly</paper-tab>
                 </paper-tabs>
+                <dwr-map-search hidden?="{{page != &apos;map&apos;}}" on-search="{{_searchMap}}"></dwr-map-search>
             </div>
 
-            <core-animated-pages selected="{{selected}}" transitions="slide-from-right">
+            <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right">
                 <dwr-page-now id="now"></dwr-page-now>
                 <dwr-page-hourly id="hourly"></dwr-page-hourly>
                 <dwr-page-map id="map"></dwr-page-map>
@@ -7065,6 +7199,19 @@ Fired when the Maps API has fully loaded.
                 selected : '_updatePage'
             },
 
+            ready : function() {
+                var hash = window.location.hash || '';
+                hash = hash.replace(/#/,'');
+                if( hash == '' ) return;
+
+                for( var i = 0; i < this.$.pages.children.length; i++ ) {
+                    if( this.$.pages.children[i].id == hash ) {
+                        this.selected = i;
+                        break;
+                    }
+                }
+            },
+
             _updatePage : function() {
                 this.async(function(){
                     this.page = this.selectedItem.label.toLowerCase();
@@ -7078,12 +7225,41 @@ Fired when the Maps API has fully loaded.
                     if( this.$[this.page] && this.$[this.page].onShow ) {
                         this.$[this.page].onShow();
                     }
+
+                    window.location.hash = this.page;
+                    this.$.scaffold.closeDrawer();
                 });
+            },
+
+            // wire up header text map with map page
+            _searchMap : function(e) {
+                this.$.map.search(e.detail);
             }
 
 		});
 	</script>
 </polymer-element></div>
+
+        <style shim-shadowdom="">
+            html /deep/ core-toolbar {
+                background-color: #f8f8f8;
+                border-color: #e7e7e7;
+                position: relative;
+
+                border: 1px solid transparent;
+                box-shadow: 0 0 5px #333;
+                color: #333;
+            }
+            html /deep/ paper-ripple#ink {
+                color: #5bc0de;
+            }
+            html /deep/ paper-tabs /deep/ #selectionBar {
+                background-color: #46b8da;
+            }
+            html /deep/ paper-tab.core-selected {
+                background-color: #eee;
+            }
+        </style>
     </head>
     <body>
         <dwr-app></dwr-app>

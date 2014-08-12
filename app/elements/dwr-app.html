@@ -10,6 +10,7 @@
 <link rel="import" href="pages/dwr-page-now.html">
 <link rel="import" href="pages/dwr-page-settings.html">
 <link rel="import" href="pages/dwr-page-map.html">
+<link rel="import" href="ui/dwr-map-search.html">
 
 <polymer-element name="dwr-app">
 	<template>
@@ -30,10 +31,10 @@
             }
         </style>
 
-		<core-scaffold>
+		<core-scaffold id="scaffold">
         	<core-header-panel navigation flex mode="seamed">
             	<core-toolbar>DWR Mobile App</core-toolbar>
-            	<core-menu theme="core-light-theme" selected="{{selected}}" selectedItem="{{selectedItem}}">
+            	<core-menu selected="{{selected}}" selectedItem="{{selectedItem}}">
                     <core-item icon="today" label="Now"></core-item>
                     <core-item icon="view-list" label="Hourly"></core-item>
                     <core-item icon="maps:map" label="Map"></core-item>
@@ -46,10 +47,11 @@
                     <paper-tab>Now</paper-tab>
                     <paper-tab>Hourly</paper-tab>
                 </paper-tabs>
+                <dwr-map-search hidden?="{{page != 'map'}}" on-search="{{_searchMap}}"></dwr-map-search>
             </div>
 
-            <core-animated-pages selected="{{selected}}" transitions="slide-from-right">
-                <dwr-page-now  id="now"></dwr-page-now>
+            <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right">
+                <dwr-page-now id="now"></dwr-page-now>
                 <dwr-page-hourly id="hourly"></dwr-page-hourly>
                 <dwr-page-map id="map"></dwr-page-map>
                 <dwr-page-settings id="settings"></dwr-page-settings>
@@ -71,6 +73,19 @@
                 selected : '_updatePage'
             },
 
+            ready : function() {
+                var hash = window.location.hash || '';
+                hash = hash.replace(/#/,'');
+                if( hash == '' ) return;
+
+                for( var i = 0; i < this.$.pages.children.length; i++ ) {
+                    if( this.$.pages.children[i].id == hash ) {
+                        this.selected = i;
+                        break;
+                    }
+                }
+            },
+
             _updatePage : function() {
                 this.async(function(){
                     this.page = this.selectedItem.label.toLowerCase();
@@ -84,7 +99,15 @@
                     if( this.$[this.page] && this.$[this.page].onShow ) {
                         this.$[this.page].onShow();
                     }
+
+                    window.location.hash = this.page;
+                    this.$.scaffold.closeDrawer();
                 });
+            },
+
+            // wire up header text map with map page
+            _searchMap : function(e) {
+                this.$.map.search(e.detail);
             }
 
 		});

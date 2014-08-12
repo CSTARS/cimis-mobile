@@ -1,0 +1,27 @@
+<polymer-element name="dwr-map-search">
+    <template>
+        <style>
+            .form-control {
+                display: inline-block !important;
+                width: initial !important;
+            }
+        </style>
+        <input type="text" class="form-control" value="{{searchText}}" on-keypress="{{_onKeyPress}}" />
+        <a class="btn btn-default" on-tap="{{_fire}}">
+            <core-icon icon="search"></core-icon>
+        </a>
+    </template>
+    <script>
+        Polymer('dwr-map-search', {
+            searchText : '',
+
+            _onKeyPress : function(e) {
+                if( e.which == 13 ) this._fire();
+            },
+
+            _fire : function() {
+                this.fire('search', this.searchText); 
+            }
+        });
+    </script>
+</polymer-element>
