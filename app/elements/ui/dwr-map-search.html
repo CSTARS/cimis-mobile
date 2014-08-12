@@ -1,13 +1,12 @@
-<polymer-element name="dwr-map-search">
+<polymer-element name="dwr-map-search" attributes="phone">
     <template>
         <style>
             .form-control {
                 display: inline-block !important;
-                width: 200px !important;
             }
         </style>
-        <input type="text" class="form-control" value="{{searchText}}" on-keypress="{{_onKeyPress}}" />
-        <a class="btn btn-default" on-tap="{{_fire}}">
+        <input type="text" style="width:{{phone?'100px':'200px'}}" class="form-control" value="{{searchText}}" on-keypress="{{_onKeyPress}}" />
+        <a class="btn btn-default btn-sm" on-tap="{{_fire}}">
             <core-icon icon="search"></core-icon>
         </a>
     </template>

@@ -1,0 +1,28 @@
+<polymer-element name="dwr-select-location">
+    <template>
+        <style>
+            span {
+                color: #888;
+                font-size: 14px;
+                padding: 5px 2px;
+                border-bottom: 1px solid #ccc;
+            }
+        </style>
+        <core-icon icon="maps:place"></core-icon>
+
+        <span hidden?="{{location.name != ''}}">
+            Select Location
+        </span>
+
+    </template>
+    <script>
+        Polymer('dwr-select-location', {
+            location : {
+                name : '',
+                lat : 0,
+                lng : 0
+            }
+
+        });
+    </script>
+</polymer-element>
