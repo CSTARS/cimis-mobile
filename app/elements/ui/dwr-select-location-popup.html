@@ -1,0 +1,161 @@
+<link rel="import" href="../../components/core-localstorage/core-localstorage.html">
+<link rel="import" href="dwr-popup.html">
+<link rel="import" href="google-map-search.html">
+
+<polymer-element name="dwr-select-location-popup" attributes="map selectedLocation">
+    <template>
+        <style>
+            img {
+                width: 16px;
+                height: 16px;
+            }
+            li {
+                cursor: pointer;
+                padding: 3px;
+            }
+            li:hover {
+                background-color: #eee;
+                border-radius: 3px;
+            }
+            tr.selected {
+                background-color: #eee;
+            }
+            tr td {
+                vertical-align: middle !important;
+            }
+        </style>
+
+        <core-localstorage name="currentLocations" value="{{currentLocations}}" on-core-localstorage-load="{{_updateSelected}}"></core-localstorage>
+        <google-map-search id="search" map="{{map}}" query="{{searchText}}" results="{{searchResults}}" on-search-complete="{{_onSearchComplete}}"></google-map-search>
+
+        <dwr-popup id="popup" label="Set Location">
+            <div popup-body>
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="inputSearch" class="col-sm-2 control-label">Search</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inputSearch" placeholder="Location name" value="{{searchText}}" on-keypress="{{_onKeyPress}}" />
+                        </div>
+                    </div>
+                </div>
+
+                <template bind if="{{searched}}">
+                    <div hidden?="{{!searching}}">
+                        Searching...
+                    </div>
+                    <div hidden?="{{searching}}">
+                        <ul style="list-style:none">
+                            <template repeat="{{result, i in searchResults}}">
+                                <li on-tap="{{_addLocation}}" index="{{i}}"><img src="{{result.icon}}" /> <a>{{result.name}} - {{result.address}}</a></li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
+                <h4 style="margin-top:30px">Saved Locations</h4>
+
+                <table class="table" hidden?="{{currentLocations.length == 0}}">
+                    <tr template repeat="{{loc, i in currentLocations}}" class="{{loc.selected ? 'selected' : ''}}">
+                        <td style="white-space:nowrap">
+                            <input type="checkbox" checked="{{loc.selected}}" on-tap="{{_select}}" index="{{i}}" />
+                            {{loc.selected ? 'Selected' : ''}}
+                        </td>
+                        <td>
+                            <img src="{{loc.icon}}" /> {{loc.name}} - {{loc.address}}
+                        </td>
+                        <td>
+                            <a class="btn btn-link" on-tap="{{_remove}}" index="{{i}}" ><core-icon  icon="delete"></core-icon></a>
+                        </td>
+                    </tr>
+                </table>
+                <span hidden?="{{currentLocations.length > 0}}">None</span>
+            </div>
+
+            <div popup-footer>
+                <a class="btn btn-default" data-dismiss="modal">Close</a>
+            </div>
+        </dwr-popup>
+    </template>
+    <script>
+        Polymer('dwr-select-location-popup', {
+            searched : false,
+            searching : false,
+            searchText : '',
+            searchResults : [],
+
+            currentLocations : [],
+            selectedLocation : null,
+
+            ready : function() {
+                this.$.popup.target = this;
+            },
+
+            show : function() {
+                this.$.popup.show();
+            },
+
+            _onKeyPress : function(e) {
+                if( e.which == 13 ) {
+                    if( this.searchText == '' ) {
+                        this.searchResults = [];
+                        return;
+                    }
+
+                    this.searched = true;
+                    this.searching = true;
+                    this.$.search.search();
+                }
+            },
+
+            _onSearchComplete : function() {
+                this.searching = false;
+            },
+
+            _addLocation : function(e) {
+                var loc = this.searchResults.splice([parseInt(e.currentTarget.getAttribute('index'))], 1)[0];
+
+                this.currentLocations.push(loc);
+                loc.selected = true;
+
+                for( var i = 0; i < this.currentLocations.length-1; i++ ) {
+                    this.currentLocations[i].selected = false;
+                }
+                this._updateSelected();
+            },
+
+            _select : function(e) {
+                var checked = $(e.currentTarget).is(':checked');
+
+                var index = parseInt(e.currentTarget.getAttribute('index'));
+                for( var i = 0; i < this.currentLocations.length; i++ ) {
+                    // manually deselect... dom doesn't seem to update w/ 'checked' attribute removed
+
+                    this.currentLocations[i].selected = (i == index) ? checked : false;
+                }
+                this._updateSelected();
+            },
+
+            _remove : function(e) {
+                var index = parseInt(e.currentTarget.getAttribute('index'));
+                var isSelected = false;
+
+                var loc = this.currentLocations.splice(index, 1)[0];
+                if( loc.selected && this.currentLocations.length > 0 ) {
+                    this.currentLocations[0].selected = true;
+                }
+                this._updateSelected();
+            },
+
+            _updateSelected : function() {
+                for( var i = 0; i < this.currentLocations.length; i++ ) {
+                    if( this.currentLocations[i].selected ) {
+                        this.selectedLocation = this.currentLocations[i];
+                        return;
+                    }
+                }
+                this.selectedLocation = null;
+            }
+
+        });
+    </script>
+</polymer-element>

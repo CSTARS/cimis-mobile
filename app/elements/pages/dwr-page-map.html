@@ -1,7 +1,7 @@
 <link rel="import" href="../../components/google-map/google-map.html">
-<link rel="import" href="../../components/google-map/google-map-search.html">
 
-<polymer-element name="dwr-page-map">
+
+<polymer-element name="dwr-page-map" attributes="map location">
     <template>
         <style>
             :host {
@@ -26,25 +26,19 @@
             }
         </style>
         
-        <google-map-search id="search" map="{{$.root.map}}" query="{{query}}" result="{{result}}"></google-map-search>
-        <google-map id="root" latitude="{{result.latitude}}" longitude="{{result.longitude}}"></google-map>
+        <google-map id="root" map="{{map}}" latitude="{{location.latitude}}" longitude="{{location.longitude}}">
+            <google-map-marker hidden?="{{!location}}" latitude="{{location.latitude}}" longitude="{{location.longitude}}" icon="{{location.icon}}"></google-map-marker>
+        </google-map>
         <div class="shadow"></div>
     </template>
     <script>
         Polymer('dwr-page-map', {
-            query : '',
-            result : {
-                latitude : 37.77493,
-                longitude : -122.41942
-            },
+            map : null,
+            location : null,
 
             onShow : function() {
                 if( !window.google ) return;
                 google.maps.event.trigger(this.$.root.map, 'resize');
-            },
-            search : function(query) {
-                this.query = query;
-                this.$.search.search();
             }
         });
     </script>

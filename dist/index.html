@@ -7054,92 +7054,9 @@ Fired when the Maps API has fully loaded.
 </script>
 </polymer-element>
 
-<!-- Copyright (c) 2014 Google Inc. All rights reserved. -->
 
 
-
-<!--
-Provides Google Maps Places API functionality.
-
-See https://developers.google.com/maps/documentation/javascript/places for more
-information on the API.
-
-#### Example:
-
-    <template is="auto-binding">
-      <google-map-search map="{{map}}" query="Pizza"
-                         result="{{result}}"></google-map-search>
-      <google-map map="{{map}}" latitude="37.779"
-                  longitude="-122.3892"></google-map>
-      <div>Result: {{result.latitude}}, {{result.longitude}}</div>
-    </template>
-    <script>
-      document.querySelector('google-map-search').search();
-    </script>
-
-@element google-map-search
-@status alpha
-@homepage http://googlewebcomponents.github.io/google-map/
--->
-
-<polymer-element name="google-map-search" attributes="query result map" assetpath="components/google-map/">
-  <script>
-    Polymer('google-map-search', {
-
-      /**
-       * TAhe Google map object.
-       *
-       * @attribute map
-       * @type google.maps.Map
-       * @default null
-       */
-      map: null,
-
-      /**
-       * The search query.
-       *
-       * @attribute query
-       * @type string
-       * @default null
-       */
-      query: null,
-
-      /**
-       * The search result.
-       *
-       * @attribute result
-       * @type object
-       */
-
-      observe: {
-        query: 'search',
-        map: 'search'
-      },
-
-      /**
-       * Performance a search using for `query` for the search term.
-       *
-       * @method search
-       */
-      search: function() {
-        if (this.query && this.map) {
-          var places = new google.maps.places.PlacesService(this.map);
-          places.textSearch({query: this.query}, this.gotResults.bind(this));
-        }
-      },
-      gotResults: function(results, status) {
-        this.result = {
-          latitude: results[0].geometry.location.lat(),
-          longitude: results[0].geometry.location.lng(),
-          show: true
-        }
-      }
-    });
-  </script>
-</polymer-element>
-
-
-<polymer-element name="dwr-page-map" assetpath="elements/pages/">
+<polymer-element name="dwr-page-map" attributes="map location" assetpath="elements/pages/">
     <template>
         <style>
             :host {
@@ -7164,80 +7081,674 @@ information on the API.
             }
         </style>
         
-        <google-map-search id="search" map="{{$.root.map}}" query="{{query}}" result="{{result}}"></google-map-search>
-        <google-map id="root" latitude="{{result.latitude}}" longitude="{{result.longitude}}"></google-map>
+        <google-map id="root" map="{{map}}" latitude="{{location.latitude}}" longitude="{{location.longitude}}">
+            <google-map-marker hidden?="{{!location}}" latitude="{{location.latitude}}" longitude="{{location.longitude}}" icon="{{location.icon}}"></google-map-marker>
+        </google-map>
         <div class="shadow"></div>
     </template>
     <script>
         Polymer('dwr-page-map', {
-            query : '',
-            result : {
-                latitude : 37.77493,
-                longitude : -122.41942
-            },
+            map : null,
+            location : null,
 
             onShow : function() {
                 if( !window.google ) return;
                 google.maps.event.trigger(this.$.root.map, 'resize');
-            },
-            search : function(query) {
-                this.query = query;
-                this.$.search.search();
             }
         });
     </script>
 </polymer-element>
-<polymer-element name="dwr-map-search" attributes="phone" assetpath="elements/ui/">
-    <template>
-        <style>
-            .form-control {
-                display: inline-block !important;
-            }
-        </style>
-        <input type="text" style="width:{{phone?&apos;100px&apos;:&apos;200px&apos;}}" class="form-control" value="{{searchText}}" on-keypress="{{_onKeyPress}}">
-        <a class="btn btn-default btn-sm" on-tap="{{_fire}}">
-            <core-icon icon="search"></core-icon>
-        </a>
+<!--
+Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!--
+Element access to localStorage.  The "name" property
+is the key to the data ("value" property) stored in localStorage.
+
+`core-localstorage` automatically saves the value to localStorage when
+value is changed.  Note that if value is an object auto-save will be
+triggered only when value is a different instance.
+
+    <core-localstorage name="my-app-storage" value="{{value}}"></core-localstorage>
+
+@group Polymer Core Elements
+@element core-localstorage
+@blurb Element access to localStorage.
+@url github.io
+@categories Data
+-->
+
+
+
+<polymer-element name="core-localstorage" attributes="name value useRaw autoSaveDisabled" hidden assetpath="components/core-localstorage/">
+<script>
+
+  Polymer('core-localstorage', {
+    
+    /**
+     * Fired when a value is loaded from localStorage.
+     * @event core-localstorage-load
+     */
+     
+    /**
+     * The key to the data stored in localStorage.
+     *
+     * @attribute name
+     * @type string
+     * @default null
+     */
+    name: '',
+    
+    /**
+     * The data associated with the specified name.
+     *
+     * @attribute value
+     * @type object
+     * @default null
+     */
+    value: null,
+    
+    /**
+     * If true, the value is stored and retrieved without JSON processing.
+     *
+     * @attribute useRaw
+     * @type boolean
+     * @default false
+     */
+    useRaw: false,
+    
+    /**
+     * If true, auto save is disabled.
+     *
+     * @attribute autoSaveDisabled
+     * @type boolean
+     * @default false
+     */
+    autoSaveDisabled: false,
+    
+    attached: function() {
+      // wait for bindings are all setup
+      this.async('load');
+    },
+    
+    valueChanged: function() {
+      if (this.loaded && !this.autoSaveDisabled) {
+        this.save();
+      }
+    },
+    
+    load: function() {
+      var v = localStorage.getItem(this.name);
+      if (this.useRaw) {
+        this.value = v;
+      } else {
+        // localStorage has a flaw that makes it difficult to determine
+        // if a key actually exists or not (getItem returns null if the
+        // key doesn't exist, which is not distinguishable from a stored
+        // null value)
+        // however, if not `useRaw`, an (unparsed) null value unambiguously
+        // signals that there is no value in storage (a stored null value would
+        // be escaped, i.e. "null")
+        // in this case we save any non-null current (default) value
+        if (v === null) {
+          if (this.value !== null) {
+            this.save();
+          }
+        } else {
+          try {
+            v = JSON.parse(v);
+          } catch(x) {
+          }
+          this.value = v;
+        }
+      }
+      this.loaded = true;
+      this.asyncFire('core-localstorage-load');
+    },
+    
+    /** 
+     * Saves the value to localStorage.
+     *
+     * @method save
+     */
+    save: function() {
+      var v = this.useRaw ? this.value : JSON.stringify(this.value);
+      localStorage.setItem(this.name, v);
+    }
+    
+  });
+
+</script>
+</polymer-element>
+
+<polymer-element name="dwr-popup" attributes="label target" assetpath="elements/ui/">
+    <template>      
+        <div class="modal fade" id="root">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header" id="header" style="display: {{label.length == 0 ? &apos;none&apos; : &apos;block&apos;}}">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&#xD7;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">{{label}}</h4>
+              </div>
+              <div class="modal-body" id="body">
+                <content select="[popup-body]"></content>
+              </div>
+              <div class="modal-footer" id="footer">
+                <content select="[popup-footer]"></content>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
     </template>
     <script>
-        Polymer('dwr-map-search', {
-            searchText : '',
+        Polymer('dwr-popup', {
+            ele : {},
+            target : {},
+            label : '',
+            initd : false,
 
-            _onKeyPress : function(e) {
-                if( e.which == 13 ) this._fire();
+          ready : function() {
+            this.ele = {};
+            this.target = {};
+            this.lanel = '';
+            this.initd = false;
+          },
+
+          targetChanged: function() {
+              if( this.initd ) return;
+              this.initd = true;
+
+              this.async(function(){
+                  this.ele = this.$.root;
+
+                this.target.parentNode.removeChild(this.target);
+                document.querySelector('body').appendChild(this.target);
+
+                $(this.ele).modal({show:false});
+                
+                $(this.querySelectorAll('[data-dismiss="modal"]'))
+                    .on('click', function(){
+                        this.hide();
+                    }.bind(this));
+              });
+              
+          },
+
+          show: function() {
+              $(this.ele).modal('show');
+          },
+
+          hide: function() {
+              $(this.ele).modal('hide');
+          }
+      });
+
++function ($) {
+  'use strict';
+
+  // MODAL CLASS DEFINITION
+  // ======================
+
+  var Modal = function (element, options) {
+    this.options   = options
+    this.$element  = $(element)
+    this.$backdrop =
+    this.isShown   = null
+
+    if (this.options.remote) {
+      this.$element
+        .find('.modal-content')
+        .load(this.options.remote, $.proxy(function () {
+          this.$element.trigger('loaded.bs.modal')
+        }, this))
+    }
+  }
+
+  Modal.DEFAULTS = {
+    backdrop: true,
+    keyboard: true,
+    show: true
+  }
+
+  Modal.prototype.toggle = function (_relatedTarget) {
+    return this[!this.isShown ? 'show' : 'hide'](_relatedTarget)
+  }
+
+  Modal.prototype.show = function (_relatedTarget) {
+    var that = this
+    var e    = $.Event('show.bs.modal', { relatedTarget: _relatedTarget })
+
+    this.$element.trigger(e)
+
+    if (this.isShown || e.isDefaultPrevented()) return
+
+    this.isShown = true;
+
+    this.escape();
+
+    this.$element.on('click.dismiss.bs.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
+
+    // JM
+    $(document.body).addClass('modal-open');
+
+    this.backdrop(function () {
+      var transition = $.support.transition && that.$element.hasClass('fade')
+
+      // JM
+      //if (!that.$element.parent().length) {
+      //  that.$element.appendTo(document.body) // don't move modals dom position
+      //}
+
+      that.$element
+        .show()
+        .scrollTop(0)
+
+      if (transition) {
+        that.$element[0].offsetWidth // force reflow
+      }
+
+      that.$element
+        .addClass('in')
+        .attr('aria-hidden', false)
+
+      that.enforceFocus()
+
+      var e = $.Event('shown.bs.modal', { relatedTarget: _relatedTarget })
+
+      transition ?
+        that.$element.find('.modal-dialog') // wait for modal to slide in
+          .one($.support.transition.end, function () {
+            that.$element.focus().trigger(e)
+          })
+          .emulateTransitionEnd(300) :
+        that.$element.focus().trigger(e)
+    })
+  }
+
+  Modal.prototype.hide = function (e) {
+    if (e) e.preventDefault()
+
+    e = $.Event('hide.bs.modal')
+
+    this.$element.trigger(e)
+
+    if (!this.isShown || e.isDefaultPrevented()) return
+
+    this.isShown = false
+
+    this.escape()
+
+    $(document).off('focusin.bs.modal')
+
+    this.$element
+      .removeClass('in')
+      .attr('aria-hidden', true)
+      .off('click.dismiss.bs.modal')
+
+    // JM
+    $(document.body).removeClass('modal-open');
+
+    $.support.transition && this.$element.hasClass('fade') ?
+      this.$element
+        .one($.support.transition.end, $.proxy(this.hideModal, this))
+        .emulateTransitionEnd(300) :
+      this.hideModal()
+  }
+
+  Modal.prototype.enforceFocus = function () {
+    $(document)
+      .off('focusin.bs.modal') // guard against infinite focus loop
+      .on('focusin.bs.modal', $.proxy(function (e) {
+        if (this.$element[0] !== e.target && !this.$element.has(e.target).length) {
+          this.$element.focus()
+        }
+      }, this))
+  }
+
+  Modal.prototype.escape = function () {
+    if (this.isShown && this.options.keyboard) {
+      this.$element.on('keyup.dismiss.bs.modal', $.proxy(function (e) {
+        e.which == 27 && this.hide()
+      }, this))
+    } else if (!this.isShown) {
+      this.$element.off('keyup.dismiss.bs.modal')
+    }
+  }
+
+  Modal.prototype.hideModal = function () {
+    var that = this
+    this.$element.hide()
+    this.backdrop(function () {
+      that.removeBackdrop()
+      that.$element.trigger('hidden.bs.modal')
+    })
+  }
+
+  Modal.prototype.removeBackdrop = function () {
+    this.$backdrop && this.$backdrop.remove()
+    this.$backdrop = null
+  }
+
+  Modal.prototype.backdrop = function (callback) {
+    var animate = this.$element.hasClass('fade') ? 'fade' : ''
+
+    if (this.isShown && this.options.backdrop) {
+      var doAnimate = $.support.transition && animate
+
+      this.$backdrop = $('<div class="modal-backdrop ' + animate + '" />')
+        .appendTo(document.body)
+
+      this.$element.on('click.dismiss.bs.modal', $.proxy(function (e) {
+        if (e.target !== e.currentTarget) return
+        this.options.backdrop == 'static'
+          ? this.$element[0].focus.call(this.$element[0])
+          : this.hide.call(this)
+      }, this))
+
+      if (doAnimate) this.$backdrop[0].offsetWidth // force reflow
+
+      this.$backdrop.addClass('in')
+
+      if (!callback) return
+
+      doAnimate ?
+        this.$backdrop
+          .one($.support.transition.end, callback)
+          .emulateTransitionEnd(150) :
+        callback()
+
+    } else if (!this.isShown && this.$backdrop) {
+      this.$backdrop.removeClass('in')
+
+      $.support.transition && this.$element.hasClass('fade') ?
+        this.$backdrop
+          .one($.support.transition.end, callback)
+          .emulateTransitionEnd(150) :
+        callback()
+
+    } else if (callback) {
+      callback()
+    }
+  }
+
+
+  // MODAL PLUGIN DEFINITION
+  // =======================
+
+  var old = $.fn.modal
+
+  $.fn.modal = function (option, _relatedTarget) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.modal')
+      var options = $.extend({}, Modal.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data) $this.data('bs.modal', (data = new Modal(this, options)))
+      if (typeof option == 'string') data[option](_relatedTarget)
+      else if (options.show) data.show(_relatedTarget)
+    })
+  }
+
+  $.fn.modal.Constructor = Modal
+
+
+  // MODAL NO CONFLICT
+  // =================
+
+  $.fn.modal.noConflict = function () {
+    $.fn.modal = old
+    return this
+  }
+
+
+  // MODAL DATA-API
+  // ==============
+
+  $(document).on('click.bs.modal.data-api', '[data-toggle="modal"]', function (e) {
+    var $this   = $(this)
+    var href    = $this.attr('href')
+    var $target = $($this.attr('data-target') || (href && href.replace(/.*(?=#[^\s]+$)/, ''))) //strip for ie7
+    var option  = $target.data('bs.modal') ? 'toggle' : $.extend({ remote: !/#/.test(href) && href }, $target.data(), $this.data())
+
+    if ($this.is('a')) e.preventDefault()
+
+    $target
+      .modal(option, this)
+      .one('hide', function () {
+        $this.is(':visible') && $this.focus()
+      })
+  })
+
+  // JM - These events to do bubble correctly, manually adding/removing body class in fn 
+  //$(document)
+  //  .on('show.bs.modal', '.modal', function () { $(document.body).addClass('modal-open') })
+  //  .on('hidden.bs.modal', '.modal', function () { $(document.body).removeClass('modal-open') })
+
+}(jQuery);
+    </script>
+</polymer-element>
+
+<polymer-element name="google-map-search" attributes="query results map" assetpath="elements/ui/">
+  <script>
+    Polymer('google-map-search', {
+
+      map: null,
+      query: null,
+
+      search: function() {
+        if (this.query && this.map) {
+          var places = new google.maps.places.PlacesService(this.map);
+          places.textSearch({query: this.query}, this.gotResults.bind(this));
+        }
+      },
+      gotResults: function(results, status) {
+        this.results = [];
+
+        for( var i = 0; i < results.length; i++ ) {
+          console.log(results[i]);
+          this.results.push({
+            name : results[i].name,
+            address : results[i].formatted_address,
+            icon : results[i].icon,
+            latitude: results[i].geometry.location.lat(),
+            longitude: results[i].geometry.location.lng(),
+            show: true
+          });
+        }
+
+        this.fire('search-complete');
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="dwr-select-location-popup" attributes="map selectedLocation" assetpath="elements/ui/">
+    <template>
+        <style>
+            img {
+                width: 16px;
+                height: 16px;
+            }
+            li {
+                cursor: pointer;
+                padding: 3px;
+            }
+            li:hover {
+                background-color: #eee;
+                border-radius: 3px;
+            }
+            tr.selected {
+                background-color: #eee;
+            }
+            tr td {
+                vertical-align: middle !important;
+            }
+        </style>
+
+        <core-localstorage name="currentLocations" value="{{currentLocations}}" on-core-localstorage-load="{{_updateSelected}}"></core-localstorage>
+        <google-map-search id="search" map="{{map}}" query="{{searchText}}" results="{{searchResults}}" on-search-complete="{{_onSearchComplete}}"></google-map-search>
+
+        <dwr-popup id="popup" label="Set Location">
+            <div popup-body="">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="inputSearch" class="col-sm-2 control-label">Search</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inputSearch" placeholder="Location name" value="{{searchText}}" on-keypress="{{_onKeyPress}}">
+                        </div>
+                    </div>
+                </div>
+
+                <template bind="" if="{{searched}}">
+                    <div hidden?="{{!searching}}">
+                        Searching...
+                    </div>
+                    <div hidden?="{{searching}}">
+                        <ul style="list-style:none">
+                            <template repeat="{{result, i in searchResults}}">
+                                <li on-tap="{{_addLocation}}" index="{{i}}"><img src="{{result.icon}}"> <a>{{result.name}} - {{result.address}}</a></li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
+                <h4 style="margin-top:30px">Saved Locations</h4>
+
+                <table class="table" hidden?="{{currentLocations.length == 0}}">
+                    <tr template="" repeat="{{loc, i in currentLocations}}" class="{{loc.selected ? &apos;selected&apos; : &apos;&apos;}}">
+                        <td style="white-space:nowrap">
+                            <input type="checkbox" checked="{{loc.selected}}" on-tap="{{_select}}" index="{{i}}">
+                            {{loc.selected ? &apos;Selected&apos; : &apos;&apos;}}
+                        </td>
+                        <td>
+                            <img src="{{loc.icon}}"> {{loc.name}} - {{loc.address}}
+                        </td>
+                        <td>
+                            <a class="btn btn-link" on-tap="{{_remove}}" index="{{i}}"><core-icon icon="delete"></core-icon></a>
+                        </td>
+                    </tr>
+                </table>
+                <span hidden?="{{currentLocations.length &gt; 0}}">None</span>
+            </div>
+
+            <div popup-footer="">
+                <a class="btn btn-default" data-dismiss="modal">Close</a>
+            </div>
+        </dwr-popup>
+    </template>
+    <script>
+        Polymer('dwr-select-location-popup', {
+            searched : false,
+            searching : false,
+            searchText : '',
+            searchResults : [],
+
+            currentLocations : [],
+            selectedLocation : null,
+
+            ready : function() {
+                this.$.popup.target = this;
             },
 
-            _fire : function() {
-                this.fire('search', this.searchText); 
+            show : function() {
+                this.$.popup.show();
+            },
+
+            _onKeyPress : function(e) {
+                if( e.which == 13 ) {
+                    if( this.searchText == '' ) {
+                        this.searchResults = [];
+                        return;
+                    }
+
+                    this.searched = true;
+                    this.searching = true;
+                    this.$.search.search();
+                }
+            },
+
+            _onSearchComplete : function() {
+                this.searching = false;
+            },
+
+            _addLocation : function(e) {
+                var loc = this.searchResults.splice([parseInt(e.currentTarget.getAttribute('index'))], 1)[0];
+
+                this.currentLocations.push(loc);
+                loc.selected = true;
+
+                for( var i = 0; i < this.currentLocations.length-1; i++ ) {
+                    this.currentLocations[i].selected = false;
+                }
+                this._updateSelected();
+            },
+
+            _select : function(e) {
+                var checked = $(e.currentTarget).is(':checked');
+
+                var index = parseInt(e.currentTarget.getAttribute('index'));
+                for( var i = 0; i < this.currentLocations.length; i++ ) {
+                    // manually deselect... dom doesn't seem to update w/ 'checked' attribute removed
+
+                    this.currentLocations[i].selected = (i == index) ? checked : false;
+                }
+                this._updateSelected();
+            },
+
+            _remove : function(e) {
+                var index = parseInt(e.currentTarget.getAttribute('index'));
+                var isSelected = false;
+
+                var loc = this.currentLocations.splice(index, 1)[0];
+                if( loc.selected && this.currentLocations.length > 0 ) {
+                    this.currentLocations[0].selected = true;
+                }
+                this._updateSelected();
+            },
+
+            _updateSelected : function() {
+                for( var i = 0; i < this.currentLocations.length; i++ ) {
+                    if( this.currentLocations[i].selected ) {
+                        this.selectedLocation = this.currentLocations[i];
+                        return;
+                    }
+                }
+                this.selectedLocation = null;
             }
+
         });
     </script>
 </polymer-element>
-<polymer-element name="dwr-select-location" assetpath="elements/ui/">
-    <template>
-        <style>
-            span {
-                color: #888;
-                font-size: 14px;
-                padding: 5px 2px;
-                border-bottom: 1px solid #ccc;
-            }
-        </style>
-        <core-icon icon="maps:place"></core-icon>
 
-        <span hidden?="{{location.name != &apos;&apos;}}">
-            Select Location
-        </span>
+<polymer-element name="dwr-select-location" attributes="map location" assetpath="elements/ui/">
+    <template>
+
+        <a on-tap="{{select}}" class="btn {{location ? &apos;btn-success&apos; : &apos;btn-default&apos;}}" style="margin: -5px 0 -5px 15px">
+            <core-icon icon="maps:place"></core-icon>
+            <span hidden?="{{location}}">
+                Select Location
+            </span>
+            <span hidden?="{{!location}}">
+                {{location.name}}
+            </span>
+        </a>
+
+        <dwr-select-location-popup id="popup" map="{{map}}" selectedlocation="{{location}}"></dwr-select-location-popup>     
 
     </template>
     <script>
         Polymer('dwr-select-location', {
-            location : {
-                name : '',
-                lat : 0,
-                lng : 0
-            }
+            location : null,
 
+            select : function(){
+                this.$.popup.show();
+            }
         });
     </script>
 </polymer-element>
@@ -7291,14 +7802,17 @@ information on the API.
             <div tool="" style="width:100%">
                 <div layout="" horizontal="">
                     <div flex="">
-                        <paper-tabs hidden?="{{!showTabs || phoneScreen}}" selected="{{selected}}" style="margin: -10px 0">
-                            <paper-tab>Now</paper-tab>
-                            <paper-tab>Hourly</paper-tab>
-                        </paper-tabs>
+                        <template bind="" if="{{showTabs &amp;&amp; !phoneScreen}}">
+                            <paper-tabs selected="{{selected}}" style="margin: -10px 0">
+                                <paper-tab>Now</paper-tab>
+                                <paper-tab>Hourly</paper-tab>
+                            </paper-tabs>
+                        </template>
+
                         <dwr-map-search hidden?="{{page != &apos;map&apos;}}" phone="{{phoneScreen}}" on-search="{{_searchMap}}"></dwr-map-search>
                     </div>
                     <div>
-                        <dwr-select-location></dwr-select-location>
+                        <dwr-select-location map="{{gmap}}" location="{{location}}"></dwr-select-location>
                     </div>
                 </div>
             </div>
@@ -7308,17 +7822,19 @@ information on the API.
             <div class="full-height">
                 <div vertical="" layout="" style="height:100%">
                     <div>
-                        <paper-tabs hidden?="{{!phoneScreen || !showTabs}}" selected="{{selected}}">
-                            <paper-tab>Now</paper-tab>
-                            <paper-tab>Hourly</paper-tab>
-                        </paper-tabs>
+                        <template bind="" if="{{phoneScreen &amp;&amp; showTabs}}">
+                            <paper-tabs selected="{{selected}}">
+                                <paper-tab>Now</paper-tab>
+                                <paper-tab>Hourly</paper-tab>
+                            </paper-tabs>
+                        </template>
                     </div>
                     <div flex="" style="position:relative">
 
                         <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right" class="full-height">
                             <dwr-page-now id="now"></dwr-page-now>
                             <dwr-page-hourly id="hourly"></dwr-page-hourly>
-                            <dwr-page-map id="map"></dwr-page-map>
+                            <dwr-page-map id="map" map="{{gmap}}" location="{{location}}"></dwr-page-map>
                             <dwr-page-settings id="settings"></dwr-page-settings>
                         </core-animated-pages>
                     </div>
@@ -7334,6 +7850,11 @@ information on the API.
 
             // current page we are on
             page : '',
+
+            // google map object
+            gmap : null,
+            // current location
+            location: null,
 
             phoneScreen : false,
 

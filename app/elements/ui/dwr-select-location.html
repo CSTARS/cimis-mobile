@@ -1,28 +1,28 @@
-<polymer-element name="dwr-select-location">
-    <template>
-        <style>
-            span {
-                color: #888;
-                font-size: 14px;
-                padding: 5px 2px;
-                border-bottom: 1px solid #ccc;
-            }
-        </style>
-        <core-icon icon="maps:place"></core-icon>
+<link rel="import" href="dwr-select-location-popup.html">
 
-        <span hidden?="{{location.name != ''}}">
-            Select Location
-        </span>
+<polymer-element name="dwr-select-location" attributes="map location">
+    <template>
+
+        <a on-tap="{{select}}" class="btn {{location ? 'btn-success' : 'btn-default'}}" style="margin: -5px 0 -5px 15px">
+            <core-icon icon="maps:place"></core-icon>
+            <span hidden?="{{location}}">
+                Select Location
+            </span>
+            <span hidden?="{{!location}}">
+                {{location.name}}
+            </span>
+        </a>
+
+        <dwr-select-location-popup id="popup" map="{{map}}" selectedLocation="{{location}}" ></dwr-select-location-popup>     
 
     </template>
     <script>
         Polymer('dwr-select-location', {
-            location : {
-                name : '',
-                lat : 0,
-                lng : 0
-            }
+            location : null,
 
+            select : function(){
+                this.$.popup.show();
+            }
         });
     </script>
 </polymer-element>

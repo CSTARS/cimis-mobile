@@ -5400,7 +5400,7 @@ html /deep/ .modal.in .modal-dialog {
        -o-transform: translate3d(0, 0, 0);
           transform: translate3d(0, 0, 0);
 }
-html /deep/ .modal-open .modal {
+.modal-open /deep/ .modal {
   overflow-x: hidden;
   overflow-y: auto;
 }

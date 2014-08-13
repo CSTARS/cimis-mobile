@@ -11,7 +11,6 @@
 <link rel="import" href="pages/dwr-page-now.html">
 <link rel="import" href="pages/dwr-page-settings.html">
 <link rel="import" href="pages/dwr-page-map.html">
-<link rel="import" href="ui/dwr-map-search.html">
 <link rel="import" href="ui/dwr-select-location.html">
 
 <polymer-element name="dwr-app">
@@ -63,14 +62,17 @@
             <div tool style="width:100%" >
                 <div layout horizontal>
                     <div flex>
-                        <paper-tabs hidden?="{{!showTabs || phoneScreen}}" selected="{{selected}}" style="margin: -10px 0">
-                            <paper-tab>Now</paper-tab>
-                            <paper-tab>Hourly</paper-tab>
-                        </paper-tabs>
+                        <template bind if="{{showTabs && !phoneScreen}}">
+                            <paper-tabs selected="{{selected}}" style="margin: -10px 0">
+                                <paper-tab>Now</paper-tab>
+                                <paper-tab>Hourly</paper-tab>
+                            </paper-tabs>
+                        </template>
+
                         <dwr-map-search hidden?="{{page != 'map'}}" phone="{{phoneScreen}}" on-search="{{_searchMap}}"></dwr-map-search>
                     </div>
                     <div>
-                        <dwr-select-location></dwr-select-location>
+                        <dwr-select-location map="{{gmap}}" location="{{location}}"></dwr-select-location>
                     </div>
                 </div>
             </div>
@@ -80,17 +82,19 @@
             <div class="full-height">
                 <div vertical layout style="height:100%">
                     <div>
-                        <paper-tabs hidden?="{{!phoneScreen || !showTabs}}" selected="{{selected}}">
-                            <paper-tab>Now</paper-tab>
-                            <paper-tab>Hourly</paper-tab>
-                        </paper-tabs>
+                        <template bind if="{{phoneScreen && showTabs}}">
+                            <paper-tabs selected="{{selected}}">
+                                <paper-tab>Now</paper-tab>
+                                <paper-tab>Hourly</paper-tab>
+                            </paper-tabs>
+                        </template>
                     </div>
                     <div flex style="position:relative">
 
                         <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right" class="full-height">
                             <dwr-page-now id="now"></dwr-page-now>
                             <dwr-page-hourly id="hourly"></dwr-page-hourly>
-                            <dwr-page-map id="map"></dwr-page-map>
+                            <dwr-page-map id="map" map="{{gmap}}" location="{{location}}"></dwr-page-map>
                             <dwr-page-settings id="settings"></dwr-page-settings>
                         </core-animated-pages>
                     </div>
@@ -106,6 +110,11 @@
 
             // current page we are on
             page : '',
+
+            // google map object
+            gmap : null,
+            // current location
+            location: null,
 
             phoneScreen : false,
 
