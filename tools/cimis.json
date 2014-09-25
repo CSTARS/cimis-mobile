@@ -1,0 +1,13 @@
+{
+    "load2redis": {
+        // REDIS Has to be run under tunnel
+        "redis": {
+                "host":"pes1255.casil.ucdavis.edu:8080",
+                "cert":"~/crt.foo",
+                "password":"REDISisKwel"
+                },
+        "cimis": {
+            "base":"http://cimis.casil.ucdavis.edu/cimis/",
+        },
+    }
+}
