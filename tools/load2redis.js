@@ -1,24 +1,32 @@
 #! /usr/bin/node
 
-var asciiLoader = require("loadCompressedAscii");
+var flatconfig = require('flatconfig');
+var path=require('path');
+var Tunnel=require("tunnel-ssh");
+var async=require("async");
+var http = require('http');
+var Zlib = require('zlibjs');
 
-/*
- load2redis - This command takes a new date, downloads the data from a CIMIS server,
- and for each pixel, creates a new daily input data, and then pushes that onto the REDIS
- server
- 
- load2redis [--config=~/cimis.json] [--force][--verbose][--dry-run] [date=(yesterday)] 
- [cimis=http://cimis.casil.ucdavis.edu] redis=Address of server
- 
- Command line arguments 
- date='[ Date you are interested in downloading (default=yesterday)
+// Load the configuration
+var args = flatconfig.parseArgs(process.argv.slice(2));
+var config = flatconfig.loadConfig(
+              path.resolve(process.env.HOME, 'cimis.json'), 
+              path.resolve(process.cwd(), args['config']),
+              args);
 
- load2redis will look in the sepcified config file, if exists, for inputs.
- This is specfied as :
- 
-*/
+console.log(config);
 
-// Connect to Server - Fail
+//var tunnel = new Tunnel(config.redis);
+//tunnel.connect(function (error) {
+//    console.log(error);
+    //or start your remote connection here .... 
+    //mongoose.connect(...);
+    
+
+    //close tunnel to exit script 
+//    tunnel.close();
+//});
+
 var parms=["ETo","K","Rnl","Rso","Tdew","Tn","Tx","U2"];
 
 //var pixels={
@@ -29,8 +37,9 @@ var parms=["ETo","K","Rnl","Rso","Tdew","Tn","Tx","U2"];
 // Foreach parameter in parms
 async.eachSeries(parms,
     function(parm, next){
+        var url=config.cimis.base+'/'+config.date+'/'+parm+'.asc.gz';
         // fetch $cimis/$date/${parm}.asc.gz
-        asciiLoader.loadCompressedASCIIFile(url,function(resp){
+        uncompress(url,function(ascii){
             addParameter(parm,ascii);
             next();
         });
@@ -52,25 +61,21 @@ function addParameter(parm,ascii) {
             
             var kvp ={};
             var row,v,value;
+            var r,c;
             
             for ( r=0; r<=header.rows; r++) {
                 var values = row.split(' ');
                 for (c=0; c<=header.cols; c++) {
                     var pixel_value=values[c];
                     if (v != header.no_data ) {
-                      key= (($r*2000+header.start)/1000) + ':' + ($c*2000+header.ul);
+                      var key= ((r*2000+header.start)/1000) + ':' + (c*2000+header.ul);
                       var kv = kvp[key] || {};
                       kv[parm]=pixel_value;
                       kvp[key]=kv;
                     }
                 }
             }
-            
-            next();
-        });
-    }
-    
-});
+}
 
 // Zipcode - Should we make this on our end, or get from server? 
 // I like let's try making it on our own, in that case we don't have to 
