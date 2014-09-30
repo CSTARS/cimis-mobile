@@ -2,7 +2,15 @@
     "run": {
         "@path": "/.c9/runners",
         "configs": {
-            "json()": {},
+            "json()": {
+                "redis runner": {
+                    "runner": "Node.js (default)",
+                    "command": "tools/load2redis.js",
+                    "debug": true,
+                    "env": {},
+                    "name": "redis runner"
+                }
+            },
             "@inited": "true"
         }
     },
