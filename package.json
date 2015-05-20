@@ -8,14 +8,7 @@
   },
   "author": "jrmerz@gmail.com",
   "license": "ISC",
-  "dependencies": {
-    "express": "^4.8.3",
-    "grunt": "^0.4.5",
-    "grunt-vulcanize": "^0.4.1",
-    "grunt-manifest": "^0.4.0",
-    "grunt-shell": "^0.7.0",
-    "load-grunt-tasks": "^0.6.0",
-    "time-grunt": "^0.4.0",
+  "devDependencies": {
     "jshint-stylish": "^0.4.0",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-usemin": "^2.3.0",
@@ -28,6 +21,15 @@
     "grunt-contrib-compass": "^0.9.1",
     "grunt-contrib-imagemin": "^0.8.0",
     "grunt-contrib-cssmin": "^0.10.0",
-    "grunt-svgmin": "^0.4.0"
+    "grunt-svgmin": "^0.4.0",
+    "grunt": "^0.4.5",
+    "grunt-vulcanize": "^0.4.1",
+    "grunt-manifest": "^0.4.0",
+    "grunt-shell": "^0.7.0",
+    "load-grunt-tasks": "^0.6.0",
+    "time-grunt": "^0.4.0"
+  },
+  "dependencies": {
+    "express": "^4.8.3"
   }
 }

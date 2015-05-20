@@ -1,45 +1,33 @@
-<link rel="import" href="../../components/google-map/google-map.html">
+<dom-module id="dwr-page-map">
+  <style>
+    :host {
+      display: block;
+      height: 100%;
+    }
+  </style>
 
+  <template>
+    <div id="map" style="height: 100%"></div>
+  </template>
 
-<polymer-element name="dwr-page-map" attributes="map location">
-    <template>
-        <style>
-            :host {
-                width: 100%;
-                height: 100%;
-                display: block;
-                position: absolute;
-                top: 0px;
-                left: 0px;
-            }
-            google-map {
-                display: block;
-                height: 100%;
-            }
-            .shadow {
-                position: absolute;
-                width: 100%;
-                height:1px;
-                top: -1px;
-                left: 1px;
-                box-shadow: 0 0 5px black;
-            }
-        </style>
-        
-        <google-map id="root" map="{{map}}" latitude="{{location.latitude}}" longitude="{{location.longitude}}">
-            <google-map-marker hidden?="{{!location}}" latitude="{{location.latitude}}" longitude="{{location.longitude}}" icon="{{location.icon}}"></google-map-marker>
-        </google-map>
-        <div class="shadow"></div>
-    </template>
-    <script>
-        Polymer('dwr-page-map', {
-            map : null,
-            location : null,
+</dom-module>
 
-            onShow : function() {
-                if( !window.google ) return;
-                google.maps.event.trigger(this.$.root.map, 'resize');
-            }
-        });
-    </script>
-</polymer-element>
+<script>
+  Polymer({
+
+    is : 'dwr-page-map',
+
+    ready : function() {
+        var mapOptions = {
+          center: { lat: -34.397, lng: 150.644},
+          zoom: 8
+        };
+        this.map = new google.maps.Map(this.$.map, mapOptions);
+    },
+
+    onShow : function() {
+        if( !window.google ) return;
+        google.maps.event.trigger(this.$.map, 'resize');
+    }
+  });
+</script>

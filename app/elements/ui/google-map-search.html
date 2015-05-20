@@ -1,33 +1,40 @@
-<polymer-element name="google-map-search" attributes="query results map">
-  <script>
-    Polymer('google-map-search', {
+<dom-module id="google-map-search">
 
-      map: null,
-      query: null,
+</dom-module>
 
-      search: function() {
-        if (this.query && this.map) {
-          var places = new google.maps.places.PlacesService(this.map);
-          places.textSearch({query: this.query}, this.gotResults.bind(this));
-        }
-      },
-      gotResults: function(results, status) {
-        this.results = [];
+<script>
+  Polymer({
 
-        for( var i = 0; i < results.length; i++ ) {
-          console.log(results[i]);
-          this.results.push({
-            name : results[i].name,
-            address : results[i].formatted_address,
-            icon : results[i].icon,
-            latitude: results[i].geometry.location.lat(),
-            longitude: results[i].geometry.location.lng(),
-            show: true
-          });
-        }
+    is : 'google-map-search',
 
-        this.fire('search-complete');
+    ready : function() {
+        this.map = null;
+        this.query = null;
+    }
+
+    search: function() {
+      if (this.query && this.map) {
+        var places = new google.maps.places.PlacesService(this.map);
+        places.textSearch({query: this.query}, this.gotResults.bind(this));
       }
-    });
-  </script>
-</polymer-element>
+    },
+    
+    gotResults: function(results, status) {
+      this.results = [];
+
+      for( var i = 0; i < results.length; i++ ) {
+        console.log(results[i]);
+        this.results.push({
+          name : results[i].name,
+          address : results[i].formatted_address,
+          icon : results[i].icon,
+          latitude: results[i].geometry.location.lat(),
+          longitude: results[i].geometry.location.lng(),
+          show: true
+        });
+      }
+
+      this.fire('search-complete');
+    }
+  });
+</script>

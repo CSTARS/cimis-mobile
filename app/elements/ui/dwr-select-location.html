@@ -1,9 +1,16 @@
+
+
+
+
+
+
+<!--
 <link rel="import" href="dwr-select-location-popup.html">
 
 <polymer-element name="dwr-select-location" attributes="map location">
     <template>
 
-        <a on-tap="{{select}}" class="btn {{location ? 'btn-success' : 'btn-default'}}" style="margin: -5px 0 -5px 15px">
+        <a on-click="{{select}}" class="btn {{location ? 'btn-success' : 'btn-default'}}" style="margin: -5px 0 -5px 15px">
             <core-icon icon="maps:place"></core-icon>
             <span hidden?="{{location}}">
                 Select Location
@@ -13,7 +20,7 @@
             </span>
         </a>
 
-        <dwr-select-location-popup id="popup" map="{{map}}" selectedLocation="{{location}}" ></dwr-select-location-popup>     
+        <dwr-select-location-popup id="popup" map="{{map}}" selectedLocation="{{location}}" ></dwr-select-location-popup>
 
     </template>
     <script>
@@ -26,3 +33,4 @@
         });
     </script>
 </polymer-element>
+-->

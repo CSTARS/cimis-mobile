@@ -1,4 +1,109 @@
-<link rel="import" href="../components/core-scaffold/core-scaffold.html">
+<dom-module id="dwr-app">
+	<style>
+		:host {
+				display: block;
+				height: 100%;
+		}
+		.menu a {
+			display: block;
+			border-bottom: 1px solid #eee;
+			padding: 15px;
+			text-align: left;
+		}
+
+		.toggleButton {
+			color: white;
+			display: none;
+			margin-left: 10px;
+		}
+		.toggleButton:hover {
+			color: white;
+		}
+		@media(max-width: 640px) {
+			.toggleButton {
+				display: inline-block;
+			}
+		}
+
+		.fullbleed {
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+		}
+	</style>
+
+	<template>
+
+		<paper-drawer-panel id="drawer">
+
+			<paper-header-panel drawer style="background-color: white; height: 100%">
+				<paper-toolbar>
+					<div></div>
+				</paper-toolbar>
+
+				<div class="menu">
+					<a class="btn btn-link" id="nowBtn">Now</a>
+					<a class="btn btn-link" id="hourlyBtn">Hourly</a>
+					<a class="btn btn-link" id="mapBtn">Map</a>
+					<a class="btn btn-link" id="settingBtn">Setting</a>
+				</div>
+			</paper-header-panel>
+
+			<paper-header-panel main style="height:100%">
+				<paper-toolbar>
+					<a class="btn btn-link toggleButton" on-click="toggle"><i class="fa fa-bars" ></i></a>
+
+					<div>DWR Mobile App</div>
+				</paper-toolbar>
+
+				<div class="fullbleed">
+					<dwr-page-map id="map"></dwr-page-map>
+				</div>
+			</paper-header-panel>
+		</paper-drawer-panel>
+
+	</template>
+</dom-module>
+
+<script>
+	Polymer({
+		is : 'dwr-app',
+
+		ready : function() {
+			this.$.nowBtn.setAttribute('href', '#now');
+			this.$.hourlyBtn.setAttribute('href', '#hourly');
+			this.$.mapBtn.setAttribute('href', '#map');
+			this.$.settingBtn.setAttribute('href', '#settings');
+
+			this.updatePage();
+			$(window).on('hashchange', this.updatePage.bind(this));
+		},
+
+		toggle : function() {
+			this.$.drawer.togglePanel();
+		},
+
+		updatePage : function() {
+			var hash = window.location.hash || '';
+			this.page = hash.replace(/#/,'');
+
+			if( this.page == 'settings' || this.page == 'map' ) {
+					this.showTabs = false;
+			} else {
+					this.showTabs = true;
+			}
+
+			if( this.$[this.page] ) {
+				this.$[this.page].style.display = 'block'
+				if( this.$[this.page].onShow  ) this.$[this.page].onShow();
+			}
+		}
+	});
+</script>
+
+<!--<link rel="import" href="../components/core-scaffold/core-scaffold.html">
 <link rel="import" href="../components/core-toolbar/core-toolbar.html">
 <link rel="import" href="../components/core-menu/core-menu.html">
 <link rel="import" href="../components/core-item/core-item.html">
@@ -164,4 +269,4 @@
 
 		});
 	</script>
-</polymer-element>
+</polymer-element>-->

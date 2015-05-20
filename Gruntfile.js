@@ -191,7 +191,6 @@ module.exports = function (grunt) {
                 basePath: 'dist/',
                 cache: [
                     'bower_components/polymer/polymer.js', 
-                    'elements/ui-widgets/calendario/jquery.calendario.js',
                     'fonts/fontawesome-webfont.svg?v=4.0.3',
                     'fonts/fontawesome-webfont.ttf?v=4.0.3',
                     'fonts/fontawesome-webfont.woff?v=4.0.3'
@@ -216,7 +215,7 @@ module.exports = function (grunt) {
 
 
         shell: {
-            // this should be done prior to running normal dev server, generates the sportwire webcomponets base.css file
+            // this should be done prior to running normal dev server, generates the webcomponets base.css file
             // also handles copying bower_components font-awesome /fonts dir
             'generate-deep-css' : {
                 options: {
