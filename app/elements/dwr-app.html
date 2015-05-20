@@ -112,7 +112,7 @@
 <link rel="import" href="../components/core-pages/core-pages.html">
 <link rel="import" href="../components/core-animated-pages/core-animated-pages.html">
 <link rel="import" href="../components/core-animated-pages/transitions/slide-from-right.html">
-<link rel="import" href="pages/dwr-page-hourly.html">
+<link rel="import" href="pages/dwr-page-weekly.html">
 <link rel="import" href="pages/dwr-page-now.html">
 <link rel="import" href="pages/dwr-page-settings.html">
 <link rel="import" href="pages/dwr-page-map.html">
@@ -158,7 +158,7 @@
             	<core-toolbar>DWR Mobile App</core-toolbar>
             	<core-menu selected="{{selected}}" selectedItem="{{selectedItem}}">
                     <core-item icon="today" label="Now"></core-item>
-                    <core-item icon="view-list" label="Hourly"></core-item>
+                    <core-item icon="view-list" label="Weekly"></core-item>
                     <core-item icon="maps:map" label="Map"></core-item>
                     <core-item icon="settings" label="Settings"></core-item>
                 </core-menu>
@@ -170,7 +170,7 @@
                         <template bind if="{{showTabs && !phoneScreen}}">
                             <paper-tabs selected="{{selected}}" style="margin: -10px 0">
                                 <paper-tab>Now</paper-tab>
-                                <paper-tab>Hourly</paper-tab>
+                                <paper-tab>Weekly</paper-tab>
                             </paper-tabs>
                         </template>
 
@@ -190,7 +190,7 @@
                         <template bind if="{{phoneScreen && showTabs}}">
                             <paper-tabs selected="{{selected}}">
                                 <paper-tab>Now</paper-tab>
-                                <paper-tab>Hourly</paper-tab>
+                                <paper-tab>Weekly</paper-tab>
                             </paper-tabs>
                         </template>
                     </div>
@@ -198,7 +198,7 @@
 
                         <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right" class="full-height">
                             <dwr-page-now id="now"></dwr-page-now>
-                            <dwr-page-hourly id="hourly"></dwr-page-hourly>
+                            <dwr-page-weekly id="weekly"></dwr-page-weekly>
                             <dwr-page-map id="map" map="{{gmap}}" location="{{location}}"></dwr-page-map>
                             <dwr-page-settings id="settings"></dwr-page-settings>
                         </core-animated-pages>
@@ -269,4 +269,5 @@
 
 		});
 	</script>
+
 </polymer-element>-->
