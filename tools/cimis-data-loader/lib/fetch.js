@@ -17,7 +17,7 @@ module.exports.getDate = function(date, callback) {
   async.eachSeries(
     params,
     function(param, next){
-      console.log(param);
+      console.log('  '+param);
 
       var url = rootUrl+'/'+pathDate+'/'+param+'.asc.gz';
       var readable = request(url).pipe(zlib.createGunzip());
@@ -84,8 +84,11 @@ function parse(parm, readable, callback) {
         var pixel = vals[col];
 
         if (pixel != layer.NODATA_value) {
-          layer.data[row+'-'+col] = parseFloat(pixel);
-          layer.pixels++;
+          pixel = parseFloat(pixel);
+          if( !isNaN(pixel) ) {
+            layer.data[row+'-'+col] = pixel;
+            layer.pixels++;
+          }
         }
       }
     }
