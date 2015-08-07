@@ -12,17 +12,7 @@
     }
 
     .toggleButton {
-      color: white;
-      display: none;
-      margin-left: 10px;
-    }
-    .toggleButton:hover {
-      color: white;
-    }
-    @media(max-width: 640px) {
-      .toggleButton {
-        display: inline-block;
-      }
+      font-size: 22px;
     }
 
     .fullbleed {
@@ -38,7 +28,7 @@
 
     <paper-drawer-panel id="drawer">
 
-      <paper-header-panel drawer style="background-color: white; height: 100%" responsiveWidth="768px">
+      <paper-header-panel drawer style="background-color: white; height: 100%">
         <paper-toolbar>
           <div class="hidden-xs">DWR Mobile App</div>
         </paper-toolbar>
@@ -53,10 +43,13 @@
 
       <paper-header-panel main style="height:100%">
         <paper-toolbar>
-          <a class="btn btn-link toggleButton" on-click="toggle"><i class="fa fa-bars" ></i></a>
+          <a class="btn btn-link toggleButton visible-xs-inline-block" on-click="toggle"><i class="fa fa-bars" ></i></a>
 
           <div class="visible-xs-inline-block">DWR Mobile App</div>
-					<a class="btn btn-default pull-right" id="locationBtn" on-click="selectLocation">Select Location</a>
+
+          <div class="flex">
+            <a class="btn btn-default pull-right" id="locationBtn" on-click="selectLocation">Select Location</a>
+          </div>
         </paper-toolbar>
 
         <div class="fullbleed" id="pages">
@@ -66,7 +59,7 @@
           <dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>
         </div>
 
-				<dwr-select-location id="selectLocation"></dwr-select-location>
+        <dwr-select-location id="selectLocation"></dwr-select-location>
 
       </paper-header-panel>
     </paper-drawer-panel>
@@ -84,13 +77,15 @@
       this.$.mapBtn.setAttribute('href', '#map');
       this.$.settingBtn.setAttribute('href', '#settings');
 
+			this.$.drawer.responsiveWidth = "768px";
+
       this.updatePage();
       $(window).on('hashchange', this.updatePage.bind(this));
     },
 
-		attached : function() {
-			this.$.selectLocation.init(this.$.map.map);
-		},
+    attached : function() {
+      this.$.selectLocation.init(this.$.map.map);
+    },
 
     toggle : function() {
       this.$.drawer.togglePanel();
@@ -108,17 +103,17 @@
 
       if( !this.$[this.page] ) this.page = 'map';
 
-			$(this.$.pages).children().hide();
+      $(this.$.pages).children().hide();
 
       this.$[this.page].style.display = 'block'
       if( this.$[this.page].onShow  ) this.$[this.page].onShow();
 
-			this.$.drawer.closeDrawer();
-		},
+      this.$.drawer.closeDrawer();
+    },
 
-		selectLocation : function() {
-			$(this.$.selectLocation).modal('show');
-		}
+    selectLocation : function() {
+      $(this.$.selectLocation).modal('show');
+    }
   });
 </script>
 

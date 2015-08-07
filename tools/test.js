@@ -23,7 +23,7 @@ function readAscParm(kvp,parm,readable,callback) {
   assert.equal(typeof(readable),'object',"argument 'readable' must be an object");
   assert.equal(typeof (callback), 'function',"argument 'callback' must be a function");
 
-  var err=new Error(); 
+  var err=new Error();
   var i=0;
   var buffer='';
   var layer={"header":false};
@@ -33,7 +33,7 @@ function readAscParm(kvp,parm,readable,callback) {
     var lines = buffer.concat(chunk.toString()).split("\n");
     var cnt = 0;
     for (var l = 0; l < lines.length - 1; l++) {
-      var vals = lines[l].split(' ');
+      var vals = lines[l].trim().split(' ');
       if (vals.length == 2) {
         layer[vals[0]] = Number(vals[1]);
       }
@@ -52,13 +52,18 @@ function readAscParm(kvp,parm,readable,callback) {
           layer.header = true;
         }
         var northing = layer.yllcorner + (layer.nrows - row) * layer.cellsize;
+
+
         for (var col = 0; col < vals.length; col++) {
           var pixel = vals[col];
+
+
           if (pixel != layer.NODATA_value) {
             var easting = layer.xllcorner + col * layer.cellsize;
             var key = easting / 1000 + ':' + northing / 1000;
             var kv = redis[key] || {};
-            kv[parm] = pixel.toFixed(2);
+
+            kv[parm] = parseFloat(pixel).toFixed(2);
             layer.pixels++;
             console.log(col+":"+row+'or'+key+'['+parm+']='+kv[parm]);
           }
@@ -69,7 +74,7 @@ function readAscParm(kvp,parm,readable,callback) {
   buffer = buffer.concat(lines[lines.length - 1]);
   console.log('%d got %d bytes of data in %d lines, %d values', i++, chunk.length, lines.length, cnt);
   });
-  
+
   readable.on('end', function() {
     console.log("Total Length : %d", buffer.length);
     console.log(layer);
