@@ -9,7 +9,9 @@ var BUFFER_SIZE = 14; // keep 14 days
 var msPerDay = 86400000;
 var lookupArrayNs = 'dates';
 
-module.exports.BUFFER_SIZE = BUFFER_SIZE;
+module.exports.getBufferSize = function(){
+  return BUFFER_SIZE;
+};
 
 // day should be number 1 - 31;
 function getIndex(date) {
@@ -30,10 +32,20 @@ module.exports.write = function(options, callback) {
     console.log('Writing '+keys.length+' cells to index '+index+' in ring buffer for '+options.date.toDateString());
     var count = 0;
 
-    async.eachSeries(
+    /*db.update(options.data, function(err, resp){
+      console.log('done with firebase update');
+      db.write(lookupArrayNs, index, dateUtil.nice(options.date).join('-'), function(err, resp){
+        console.log('done with firebase date update');
+        callback(err);
+      });
+    });*/
+
+    async.eachLimit(
       keys,
+      25,
       function(id, next) {
         db.write(id, index, options.data[id], function(err, resp){
+          count++;
           display(count, keys.length);
           next();
         });
@@ -60,7 +72,6 @@ function exists(date, callback) {
 module.exports.exists = exists;
 
 function display(count, len) {
-  count++;
   if( count % 10000 === 0 ) {
     console.log('  '+((count/len)*100).toFixed(2)+'%');
   }

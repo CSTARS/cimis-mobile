@@ -4,13 +4,12 @@ var munge = require('./lib/munge');
 var dateUtil = require('./lib/date');
 var async = require('async');
 
-var date = new Date(new Date().getTime()-(86400000*2));
 var force = false;
 
 module.exports.info = function() {
   return {
-    size : ringBuffer.size,
-    url : fetch.url
+    size : ringBuffer.getBufferSize(),
+    url : fetch.getRootUrl()
   };
 };
 
@@ -23,11 +22,11 @@ module.exports.load = function(date, callback) {
 
     fetch.getDate(date, function(err, data){
       var options = {
-        data : munge(data),
+        data : munge(data, ringBuffer.getIndex(date)),
         date : date
       };
 
       ringBuffer.write(options, callback);
     });
   });
-}
+};

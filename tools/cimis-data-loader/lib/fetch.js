@@ -7,7 +7,9 @@ var dateUtil = require('./date');
 
 var params=['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2'];
 var rootUrl = 'http://cimis.casil.ucdavis.edu/cimis';
-module.exports.ROOT_URL = rootUrl;
+module.exports.getRootUrl = function(){
+  return rootUrl;
+}
 
 module.exports.getDate = function(date, callback) {
   console.log('loading data for '+date.toDateString()+' from '+rootUrl+' ...');

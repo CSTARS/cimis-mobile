@@ -5,8 +5,8 @@ var info = importer.info();
 console.log('Importing last '+info.size+' days of CIMIS data from '+info.url);
 
 var days = [];
-for( var i = 0; i < ringBuffer.size; i++ ) {
-  days.push(new Date(new Date().getTime()-(86400000*i)));
+for( var i = 0; i < info.size; i++ ) {
+  days.push(new Date(new Date().getTime()-(86400000*(i+1))));
 }
 
 async.eachSeries(
