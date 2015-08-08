@@ -9,6 +9,8 @@ var BUFFER_SIZE = 14; // keep 14 days
 var msPerDay = 86400000;
 var lookupArrayNs = 'dates';
 
+module.exports.BUFFER_SIZE = BUFFER_SIZE;
+
 // day should be number 1 - 31;
 function getIndex(date) {
   return Math.ceil(date.getTime() / msPerDay) % BUFFER_SIZE;
