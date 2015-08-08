@@ -1,15 +1,16 @@
 var Firebase = require('firebase');
 var rootRef = new Firebase('https://cimis-mobile.firebaseio.com/');
 
-
-module.exports.write = function(id, index, value, callback) {
-  rootRef.child(id+'/'+index).set(value, function(err, resp){
+/*  Make sure you really want to use this!!!
+module.exports.destroy = function(callback) {
+  rootRef.set({}, function(err, resp){
     callback(err, resp);
   });
 };
+*/
 
-module.exports.update = function(value, callback) {
-  rootRef.update(value, function(err, resp){
+module.exports.write = function(id, index, value, callback) {
+  rootRef.child(id+'/'+index).set(value, function(err, resp){
     callback(err, resp);
   });
 };

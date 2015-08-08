@@ -26,34 +26,30 @@
 
   <template>
 
-    <paper-drawer-panel id="drawer">
+    <paper-drawer-panel id="drawer" responsive-width="768px">
 
-      <paper-header-panel drawer style="background-color: white; height: 100%">
-        <paper-toolbar>
-          <div class="hidden-xs">DWR Mobile App</div>
+      <paper-header-panel drawer class="drawer">
+        <paper-toolbar style="background-color: #2196f3">
+          <div class="hidden-xs">Spatial CIMIS</div>
         </paper-toolbar>
 
         <div class="menu">
-          <a class="btn btn-link" id="nowBtn">Now</a>
-          <a class="btn btn-link" id="weeklyBtn">Weekly</a>
-          <a class="btn btn-link" id="mapBtn">Map</a>
-          <a class="btn btn-link" id="settingBtn">Setting</a>
+          <a class="btn btn-link" id="nowBtn">Data</a>
+          <!--<a class="btn btn-link" id="weeklyBtn">Weekly</a>-->
+          <a class="btn btn-link" id="mapBtn">Location</a>
+          <!--<a class="btn btn-link" id="settingBtn">Setting</a>-->
         </div>
       </paper-header-panel>
 
-      <paper-header-panel main style="height:100%">
-        <paper-toolbar>
-          <a class="btn btn-link toggleButton visible-xs-inline-block" on-click="toggle"><i class="fa fa-bars" ></i></a>
+      <paper-header-panel main>
+        <paper-toolbar style="background-color: #2196f3">
+          <a class="btn btn-link" paper-drawer-toggle style="color:white"><i class="fa fa-bars" paper-drawer-toggle></i></a>
 
-          <div class="visible-xs-inline-block">DWR Mobile App</div>
-
-          <div class="flex">
-            <a class="btn btn-default pull-right" id="locationBtn" on-click="selectLocation">Select Location</a>
-          </div>
+          <div class="visible-xs-inline-block">Spatial CIMIS</div>
         </paper-toolbar>
 
         <div class="fullbleed" id="pages">
-          <dwr-page-map id="map" class="animated fadeInRight"></dwr-page-map>
+          <dwr-page-map id="map" class="animated fadeInRight" on-location-update="setLocation"></dwr-page-map>
           <dwr-page-now id="now" class="animated fadeInRight"></dwr-page-now>
           <dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>
           <dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>
@@ -73,14 +69,16 @@
 
     ready : function() {
       this.$.nowBtn.setAttribute('href', '#now');
-      this.$.weeklyBtn.setAttribute('href', '#weekly');
+      //this.$.weeklyBtn.setAttribute('href', '#weekly');
       this.$.mapBtn.setAttribute('href', '#map');
-      this.$.settingBtn.setAttribute('href', '#settings');
+      //this.$.settingBtn.setAttribute('href', '#settings');
 
 			this.$.drawer.responsiveWidth = "768px";
 
       this.updatePage();
       $(window).on('hashchange', this.updatePage.bind(this));
+
+      this.loadDates();
     },
 
     attached : function() {
@@ -111,177 +109,45 @@
       this.$.drawer.closeDrawer();
     },
 
+    setLocation : function(e) {
+      // order data by date;
+      var tmp = {};
+      for( var i = 13; i >= 0; i-- ) {
+        var d = this.getDate(i);
+        var index = this.dates.indexOf(d);
+
+        tmp[this.dates[index]] = this.getIndex(e.detail.data, index);
+      }
+
+      this.$.now.render(tmp);
+    },
+
+    getIndex : function(data, index) {
+      if( data.length <= index ) return null;
+      return data[index];
+    },
+
+    getDate : function(index) {
+      var d = new Date(new Date().getTime()-(86400000*(index+1)) );
+
+      var y = d.getYear()+1900;
+      var m = d.getMonth()+1;
+      var d = d.getDate();
+
+      if( m < 10 ) m = '0'+m;
+      if( d < 10 ) d = '0'+d;
+
+      return y+'-'+m+'-'+d;
+    },
+
     selectLocation : function() {
       $(this.$.selectLocation).modal('show');
+    },
+
+    loadDates : function() {
+      $.get('https://cimis-mobile.firebaseio.com/dates/.json', function(resp){
+        this.dates = resp;
+      }.bind(this));
     }
   });
 </script>
-
-<!--<link rel="import" href="../components/core-scaffold/core-scaffold.html">
-<link rel="import" href="../components/core-toolbar/core-toolbar.html">
-<link rel="import" href="../components/core-menu/core-menu.html">
-<link rel="import" href="../components/core-item/core-item.html">
-<link rel="import" href="../components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../components/core-icons/maps-icons.html">
-<link rel="import" href="../components/core-pages/core-pages.html">
-<link rel="import" href="../components/core-animated-pages/core-animated-pages.html">
-<link rel="import" href="../components/core-animated-pages/transitions/slide-from-right.html">
-<link rel="import" href="pages/dwr-page-weekly.html">
-<link rel="import" href="pages/dwr-page-now.html">
-<link rel="import" href="pages/dwr-page-settings.html">
-<link rel="import" href="pages/dwr-page-map.html">
-<link rel="import" href="ui/dwr-select-location.html">
-
-<polymer-element name="dwr-app">
-  <template>
-        <style>
-            :host {
-                display: block;
-                height: 100%;
-            }
-            core-item {
-                color: #888;
-            }
-            core-item.core-selected {
-                color: #333;
-            }
-            core-menu > core-item.core-selected {
-                background-color: #eee;
-                border-radius: 4px;
-            }
-            .full-height {
-                width: 100%;
-                height: 100%;
-                display: block;
-                position: absolute;
-                top: 0px;
-                left: 0px;
-            }
-            @media( max-width: 640px ) {
-                paper-tab.core-selected {
-                    background-color: transparent !important;
-                }
-                core-pages {
-                    margin-top: 65px;
-                }
-            }
-        </style>
-
-    <core-scaffold id="scaffold" responsiveWidth="992px">
-          <core-header-panel navigation flex mode="seamed">
-              <core-toolbar>DWR Mobile App</core-toolbar>
-              <core-menu selected="{{selected}}" selectedItem="{{selectedItem}}">
-                    <core-item icon="today" label="Now"></core-item>
-                    <core-item icon="view-list" label="Weekly"></core-item>
-                    <core-item icon="maps:map" label="Map"></core-item>
-                    <core-item icon="settings" label="Settings"></core-item>
-                </core-menu>
-            </core-header-panel>
-
-            <div tool style="width:100%" >
-                <div layout horizontal>
-                    <div flex>
-                        <template bind if="{{showTabs && !phoneScreen}}">
-                            <paper-tabs selected="{{selected}}" style="margin: -10px 0">
-                                <paper-tab>Now</paper-tab>
-                                <paper-tab>Weekly</paper-tab>
-                            </paper-tabs>
-                        </template>
-
-                        <dwr-map-search hidden?="{{page != 'map'}}" phone="{{phoneScreen}}" on-search="{{_searchMap}}"></dwr-map-search>
-                    </div>
-                    <div>
-                        <dwr-select-location map="{{gmap}}" location="{{location}}"></dwr-select-location>
-                    </div>
-                </div>
-            </div>
-
-            <core-media-query query="max-width: 640px" queryMatches="{{phoneScreen}}"></core-media-query>
-
-            <div class="full-height">
-                <div vertical layout style="height:100%">
-                    <div>
-                        <template bind if="{{phoneScreen && showTabs}}">
-                            <paper-tabs selected="{{selected}}">
-                                <paper-tab>Now</paper-tab>
-                                <paper-tab>Weekly</paper-tab>
-                            </paper-tabs>
-                        </template>
-                    </div>
-                    <div flex style="position:relative">
-
-                        <core-animated-pages id="pages" selected="{{selected}}" transitions="slide-from-right" class="full-height">
-                            <dwr-page-now id="now"></dwr-page-now>
-                            <dwr-page-weekly id="weekly"></dwr-page-weekly>
-                            <dwr-page-map id="map" map="{{gmap}}" location="{{location}}"></dwr-page-map>
-                            <dwr-page-settings id="settings"></dwr-page-settings>
-                        </core-animated-pages>
-                    </div>
-                </div>
-            </div>
-
-        </core-scaffold>
-  </template>
-  <script>
-    Polymer('dwr-app', {
-            selected : 0,
-            selectedItem : {},
-
-            // current page we are on
-            page : '',
-
-            // google map object
-            gmap : null,
-            // current location
-            location: null,
-
-            phoneScreen : false,
-
-            // show tabs
-            showTabs : true,
-
-            observe : {
-                selected : '_updatePage'
-            },
-
-            ready : function() {
-                var hash = window.location.hash || '';
-                hash = hash.replace(/#/,'');
-                if( hash == '' ) return;
-
-                for( var i = 0; i < this.$.pages.children.length; i++ ) {
-                    if( this.$.pages.children[i].id == hash ) {
-                        this.selected = i;
-                        break;
-                    }
-                }
-            },
-
-            _updatePage : function() {
-                this.async(function(){
-                    this.page = this.selectedItem.label.toLowerCase();
-
-                    if( this.page == 'settings' || this.page == 'map' ) {
-                        this.showTabs = false;
-                    } else {
-                        this.showTabs = true;
-                    }
-
-                    if( this.$[this.page] && this.$[this.page].onShow ) {
-                        this.$[this.page].onShow();
-                    }
-
-                    window.location.hash = this.page;
-                    this.$.scaffold.closeDrawer();
-                });
-            },
-
-            // wire up header text map with map page
-            _searchMap : function(e) {
-                this.$.map.search(e.detail);
-            }
-
-    });
-  </script>
-
-</polymer-element>-->

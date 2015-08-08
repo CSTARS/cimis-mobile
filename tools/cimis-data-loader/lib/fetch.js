@@ -9,7 +9,7 @@ var params=['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2'];
 var rootUrl = 'http://cimis.casil.ucdavis.edu/cimis';
 module.exports.getRootUrl = function(){
   return rootUrl;
-}
+};
 
 module.exports.getDate = function(date, callback) {
   console.log('loading data for '+date.toDateString()+' from '+rootUrl+' ...');
@@ -52,6 +52,7 @@ function parse(parm, readable, callback) {
     data : {}
   };
   var row = 0;
+  var cols = 0;
 
   readable.on('data', function(chunk) {
     var lines = buffer.concat(chunk.toString()).split('\n');
@@ -94,11 +95,14 @@ function parse(parm, readable, callback) {
           }
         }
       }
+
+      row++;
+      if( vals.length > cols ) cols = vals.length;
     }
-    row++;
   });
 
   readable.on('end', function() {
+    console.log('  --Parsed (row/col): '+row+'-'+cols);
     callback(null, layer);
   });
 }

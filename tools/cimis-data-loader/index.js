@@ -23,7 +23,8 @@ module.exports.load = function(date, callback) {
     fetch.getDate(date, function(err, data){
       var options = {
         data : munge(data, ringBuffer.getIndex(date)),
-        date : date
+        date : date,
+        force : force
       };
 
       ringBuffer.write(options, callback);

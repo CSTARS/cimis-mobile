@@ -1,43 +1,76 @@
 <dom-module name="dwr-page-now">
   <template>
-    <p id="p" class=".later">Davis, CA</p>
-    <table cellpadding="0" cellspacing="0" class="c0">
-      <tbody>
-        <tr class="header">
-          <td id="td1">ETo [mm]</td>
-          <td id="td">Date</td>
-        </tr>
-        <tr class="today">
-          <td>8.14</td>
-          <td id="td2">2014/10/13</td>
-        </tr>
-        <tr class="later">
-          <td>7.80</td>
-          <td>2014/10/12</td>
-        </tr>
-        <tr class="later">
-          <td>7.35</td>
-          <td>2014/10/11</td>
-        </tr>
-        <tr class="later">
-          <td>7.20</td>
-          <td>2014/10/10</td>
-        </tr>
-        <tr class="later">
-          <td>8.15</td>
-          <td>2014/10/09</td>
-        </tr>
-        <tr class="later">
-          <td>7.99</td>
-          <td>2014/10/08</td>
-        </tr>
-      </tbody>
-    </table>
+    <div id="root" style="padding: 10px"><div class="alert alert-danger">Please select a location first</div></div>
   </template>
 </dom-module>
 
 <script>
   Polymer({
-    is : 'dwr-page-now'
+    is : 'dwr-page-now',
+
+    ready : function() {
+      this.params = ['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2'];
+
+      $(window).on('resize', this.onShow.bind(this));
+    },
+
+    render : function(data) {
+      this.charts = [];
+      var html = '';
+
+      this.params.forEach(function(param){
+        html += this.renderParam(param, data);
+      }.bind(this));
+
+      this.$.root.innerHTML = html;
+
+      for( var i = 0; i < this.params.length; i++ ) {
+        var param = this.params[i];
+
+        var chart = new google.visualization.LineChart(this.querySelector('#'+param+'-chart'));
+        var dt = google.visualization.arrayToDataTable(this.paramToArray(param, data));
+        var options = {
+            legend : {
+                position : 'none'
+            },
+            interpolateNulls : true
+        };
+        chart.draw(dt, options);
+        this.charts.push({
+          chart : chart,
+          options : options,
+          dt : dt
+        });
+      }
+    },
+
+    onShow : function() {
+      if( !this.charts ) return;
+      this.charts.forEach(function(item){
+        item.chart.draw(item.dt, item.options);
+      });
+    },
+
+    renderParam : function(param, data) {
+      var html = '<h4 class="page-header">'+param+'</h4>';
+      html += '<div class="row"><div class="col-md-6"><table class="table">';
+
+      for( var date in data  ) {
+        html += '<tr><td>'+date+'</td><td>'+(data[date][param] !== undefined ? data[date][param] : 'N/A')+'</td></tr>';
+      }
+      html += '</table></div><div class="col-md-6"><div id="'+param+'-chart" style="height: 500px"></div></div></div>';
+      return html;
+    },
+
+    paramToArray : function(param, data) {
+      var array = [['Date', param]];
+
+      for( var date in data  ) {
+        array.push([date, data[date][param]]);
+      }
+
+      return array;
+    },
+
   })
 </script>
