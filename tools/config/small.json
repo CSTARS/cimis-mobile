@@ -1,0 +1,13 @@
+{
+  "ringBuffer" : {
+    "NO_max_keys":10,
+    "force":true
+  },
+  "cimis" : {
+    "verbose":true,
+    "params":["ETo"]
+  },
+  "redis" : {
+    "password":"sU1vWkDQrBxV"
+  }
+}

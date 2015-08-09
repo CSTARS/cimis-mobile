@@ -2,6 +2,8 @@
 var config=require('config')
   , rdb=require('./lib/redis')
   , async = require('async')
+  , ringBuffer = require('./lib/ringBuffer')(config)
+  , dateUtil = require('./lib/date')
   , client
   ;
 
@@ -28,23 +30,57 @@ function rpush(callback) {
 
 function init_bar(callback) {
   rdb.initialize('bar',function(reply) {
-    console.log(reply);
     rdb.valueAt('bar',2,function(reply) {
-      console.log("ID",'bar',"VAL",reply);
-      callback();
+      rdb.read('bar',function(reply) {
+        console.log('New Bar',reply);
+        callback();
+      });
     });
   });
 }
 
-function read_bar(callback) {
-  rdb.read('bar',function(reply) {
-    console.log('bar',reply);
-    callback();
+// This should make a new key without complaint
+function write_to_empty(callback) {
+  var client = rdb.client();
+  client.del('baz',function(err,reply) {
+    rdb.write('baz',4,'{"item":4,"text":"test"}',function(reply) {
+      rdb.read('baz',function(reply) {
+        console.log('Writing empty baz',reply);
+        callback();
+      });
+    });
   });
 }
 
+function pretend_to_add_dates(callback) {
+  var days=[];
+  for( var i = 0; i < config.get('buffer'); i++ ) {
+    days.push(new Date(new Date().getTime()-(86400000*(i+1))));
+  }
+  async.eachSeries(
+    days,
+    function(date, next) {
+      ringBuffer.exists(date, function(dateIsWritten, index) {
+        if( dateIsWritten ) {
+          console.log(dateUtil.nice(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
+          next();
+        } else {
+          rdb.write('dates', ringBuffer.getIndex(date), dateUtil.nice(date).join('-'), function(err, resp){
+            next();});
+          }
+        });
+      },
+      function(err) {
+        rdb.read('dates',function(reply) {
+          console.log('Pretend',reply)
+          callback();
+        });
+      }
+    );
+}
+
 async.eachSeries(
-  [init,rpush,init_bar,read_bar],
+  [init,rpush,init_bar,write_to_empty,pretend_to_add_dates],
   function (f,next) {
     f(next);
   },

@@ -1,25 +1,35 @@
 "use strict";
 var async = require('async')
-    , dateUtil = require('./date')
-    , db
-    , BUFFER_SIZE
-    , msPerDay = 86400000
-    , lookupArrayNs = 'dates'
-    ;
+, config = require('config').get("ringBuffer")
+, dateUtil = require('./date')
+, db
+, msPerDay = 86400000
+;
+
+if (config.db === 'redis') {
+  db = require('./redis');
+} else {
+  db = require('./firebase');
+}
 
 // day should be number 1 - 31;
 function getIndex(date) {
-  return Math.floor(date.getTime() / msPerDay) % BUFFER_SIZE;
+  return Math.floor(date.getTime() / msPerDay) % config.buffer;
 }
 
 function write (options, callback) {
   var index = getIndex(options.date);
   var keys = Object.keys(options.data);
+  if (config.max_keys) {
+    keys = keys.slice(0,config.max_keys);
+    console.log('max_keys:',config.max_keys,keys);
+  }
 
   exists(options.date, function(dateIsWritten) {
-    if( dateIsWritten && !options.force ) {
+    console.log("dateIsWritten",dateIsWritten);
+    if( dateIsWritten && !config.force ) {
       console.log(dateUtil.nice(options.date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
-      return callback();
+      callback();
     }
 
     console.log('Writing '+keys.length+' cells to index '+index+' in ring buffer for '+options.date.toDateString());
@@ -36,7 +46,7 @@ function write (options, callback) {
         });
       },
       function(err) {
-        db.write(lookupArrayNs, index, dateUtil.nice(options.date).join('-'), function(err, resp){
+        db.write(config.date_key, index, dateUtil.nice(options.date).join('-'), function(err, resp){
           callback(err);
         });
       }
@@ -49,7 +59,7 @@ function exists(date, callback) {
   var index = getIndex(date);
   date = dateUtil.nice(date).join('-');
 
-  db.valueAt(lookupArrayNs, index, function(val){
+  db.valueAt(config.date_key, index, function(val){
     if( val === date ) callback(true, index);
     else callback(false, index);
   });
@@ -61,20 +71,8 @@ function display(count, len) {
   }
 }
 
-module.exports = function(config) {
-  // db should implement are write function taking id, index, value and callback parameters
-  // see use below
-  BUFFER_SIZE = config.buffer;
-
-  if (config.db === 'redis') {
-    db = require('./redis');
-  } else {
-    db = require('./firebase');
-  }
-
-  return {
-    exists:exists,
-    write:write,
-    getIndex:getIndex,
-  }
-}
+module.exports = {
+  exists:exists,
+  write:write,
+  getIndex:getIndex,
+};
