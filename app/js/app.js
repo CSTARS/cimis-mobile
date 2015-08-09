@@ -4,8 +4,8 @@ var CIMIS = (function(){
     var ncols = 510
       , nrows = 560
       , xllcorner = -410000
-      , yllcorner : -660000
-      , cellsize :2000
+      , yllcorner = -660000
+      , cellsize = 2000
       ;
 
 
@@ -36,8 +36,8 @@ var CIMIS = (function(){
       col : Math.floor((result[0] - xllcorner) / cellsize),
     };
 
-    var x = xllcorner + ((nrows-result.row) * cellsize);
-    var y = yllcorner + (result.col * cellsize) ;
+    var y = yllcorner + ((nrows-result.row) * cellsize);
+    var x = xllcorner + (result.col * cellsize) ;
 
     result.topRight = proj4(proj_cimis, proj_gmaps,[x+cellsize, y+cellsize]);
     result.bottomLeft = proj4(proj_cimis, proj_gmaps,[x, y]);
