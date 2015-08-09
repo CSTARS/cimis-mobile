@@ -1,25 +1,18 @@
-var async = require('async');
-var dateUtil = require('./date');
-
-// db should implement are write function taking id, index, value and callback parameters
-// see use below
-var db = require('./firebase');
-
-var BUFFER_SIZE = 14; // keep 14 days
-var msPerDay = 86400000;
-var lookupArrayNs = 'dates';
-
-module.exports.getBufferSize = function(){
-  return BUFFER_SIZE;
-};
+"use strict";
+var async = require('async')
+    , dateUtil = require('./date')
+    , db
+    , BUFFER_SIZE
+    , msPerDay = 86400000
+    , lookupArrayNs = 'dates'
+    ;
 
 // day should be number 1 - 31;
 function getIndex(date) {
   return Math.floor(date.getTime() / msPerDay) % BUFFER_SIZE;
 }
-module.exports.getIndex = getIndex;
 
-module.exports.write = function(options, callback) {
+function write (options, callback) {
   var index = getIndex(options.date);
   var keys = Object.keys(options.data);
 
@@ -61,10 +54,27 @@ function exists(date, callback) {
     else callback(false, index);
   });
 }
-module.exports.exists = exists;
 
 function display(count, len) {
   if( count % 10000 === 0 ) {
     console.log('  '+((count/len)*100).toFixed(2)+'%');
+  }
+}
+
+module.exports = function(config) {
+  // db should implement are write function taking id, index, value and callback parameters
+  // see use below
+  BUFFER_SIZE = config.buffer;
+
+  if (config.db === 'redis') {
+    db = require('./redis');
+  } else {
+    db = require('./firebase');
+  }
+
+  return {
+    exists:exists,
+    write:write,
+    getIndex:getIndex,
   }
 }

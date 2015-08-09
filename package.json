@@ -30,8 +30,10 @@
   },
   "dependencies": {
     "async": "^1.4.1",
+    "config": "^1.15.0",
     "express": "^4.8.3",
     "firebase": "^2.2.9",
+    "path": "^0.11.14",
     "redis": "^0.12.1",
     "request": "^2.60.0"
   }

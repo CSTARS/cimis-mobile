@@ -10,7 +10,7 @@ var Zlib = require('zlibjs');
 // Load the configuration
 var args = flatconfig.parseArgs(process.argv.slice(2));
 var config = flatconfig.loadConfig(
-              path.resolve(process.env.HOME, 'cimis.json'), 
+              path.resolve(process.env.HOME, 'cimis.json'),
               path.resolve(process.cwd(), args['config']),
               args);
 
@@ -19,11 +19,11 @@ console.log(config);
 //var tunnel = new Tunnel(config.redis);
 //tunnel.connect(function (error) {
 //    console.log(error);
-    //or start your remote connection here .... 
+    //or start your remote connection here ....
     //mongoose.connect(...);
-    
 
-    //close tunnel to exit script 
+
+    //close tunnel to exit script
 //    tunnel.close();
 //});
 
@@ -48,21 +48,21 @@ async.eachSeries(parms,
         console.log('done');
     }
 );
-    
-    
+
+
 function verify_header(ascii) {
-    // Read 
+    // Read
 }
-    
+
 function addParameter(parm,ascii) {
             // If the data is not there, fail with notice of missing file
             // Otherwise
             var header=verify_header(ascii);
-            
+
             var kvp ={};
             var row,v,value;
             var r,c;
-            
+
             for ( r=0; r<=header.rows; r++) {
                 var values = row.split(' ');
                 for (c=0; c<=header.cols; c++) {
@@ -77,5 +77,5 @@ function addParameter(parm,ascii) {
             }
 }
 
-// Zipcode - Should we make this on our end, or get from server? 
-// I like let's try making it on our own, in that case we don't have to 
+// Zipcode - Should we make this on our end, or get from server?
+// I like let's try making it on our own, in that case we don't have to
