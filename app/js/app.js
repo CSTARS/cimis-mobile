@@ -1,19 +1,21 @@
 var CIMIS = (function(){
 
-  var bottomX = -410000;
-  var bottomY = -660000;
-  var rows = 560;
-  var cols = 510;
-  var cellSize = 2000;
+// match layers for easier checking
+    var ncols = 510
+      , nrows = 560
+      , xllcorner = -410000
+      , yllcorner : -660000
+      , cellsize :2000
+      ;
+
 
   var proj_gmaps = 'EPSG:4326';
   proj4.defs("EPSG:3310","+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
   var proj_cimis = 'EPSG:3310';
 
-
   function bounds() {
-    var bottomLeft = proj4(proj_cimis, proj_gmaps,[bottomX, bottomY]);
-    var topRight = proj4(proj_cimis, proj_gmaps,[bottomX+((cols+1)*cellSize), bottomY+((rows+1)*cellSize)]);
+    var bottomLeft = proj4(proj_cimis, proj_gmaps,[xllcorner, yllcorner]);
+    var topRight = proj4(proj_cimis, proj_gmaps,[xllcorner+ncols*cellsize, yllcorner+nrows*cellsize]);
     var bounds = [bottomLeft, topRight];
     console.log(bounds);
     return bounds;
@@ -27,15 +29,17 @@ var CIMIS = (function(){
 
     var result = proj4(proj_gmaps,proj_cimis,[lng, lat]);
 
+    // Assuming this is the input to the grid....
+    // Cols are X. Rows are Y and counted from the top down
     result = {
-      row : Math.floor((result[0] - bottomX) / cellSize),
-      col : Math.floor((result[1] - bottomY) / cellSize),
+      row : nrows - Math.floor((result[1] - yllcorner) / cellsize),
+      col : Math.floor((result[0] - xllcorner) / cellsize),
     };
 
-    var x = bottomX + (result.row * cellSize);
-    var y = bottomY + (result.col * cellSize);
+    var x = xllcorner + ((nrows-result.row) * cellsize);
+    var y = yllcorner + (result.col * cellsize) ;
 
-    result.topRight = proj4(proj_cimis, proj_gmaps,[x+cellSize, y+cellSize]);
+    result.topRight = proj4(proj_cimis, proj_gmaps,[x+cellsize, y+cellsize]);
     result.bottomLeft = proj4(proj_cimis, proj_gmaps,[x, y]);
 
     return result;
@@ -44,9 +48,9 @@ var CIMIS = (function(){
 
   return {
     llToGrid : llToGrid,
-    bottomX : bottomX,
-    bottomY : bottomY,
-    cellSize : cellSize,
+    xllcorner : xllcorner,
+    yllcorner : yllcorner,
+    cellsize : cellsize,
     bounds : bounds
   };
 })();
