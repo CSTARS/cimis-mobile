@@ -14,9 +14,9 @@ module.exports.info = function() {
 };
 
 module.exports.load = function(date, callback) {
-  ringBuffer.exists(date, function(dateIsWritten) {
+  ringBuffer.exists(date, function(dateIsWritten, index) {
     if( dateIsWritten && !force ) {
-      console.log(dateUtil.nice(date).join('-')+' is already in the buffer and no force flag set.  ignoring.');
+      console.log(dateUtil.nice(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
       return callback();
     }
 

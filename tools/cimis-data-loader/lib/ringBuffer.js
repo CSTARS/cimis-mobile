@@ -15,7 +15,7 @@ module.exports.getBufferSize = function(){
 
 // day should be number 1 - 31;
 function getIndex(date) {
-  return Math.ceil(date.getTime() / msPerDay) % BUFFER_SIZE;
+  return Math.floor(date.getTime() / msPerDay) % BUFFER_SIZE;
 }
 module.exports.getIndex = getIndex;
 
@@ -25,7 +25,7 @@ module.exports.write = function(options, callback) {
 
   exists(options.date, function(dateIsWritten) {
     if( dateIsWritten && !options.force ) {
-      console.log(dateUtil.nice(options.date).join('-')+' is already in the buffer and no force flag set.  ignoring.');
+      console.log(dateUtil.nice(options.date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
       return callback();
     }
 
@@ -57,8 +57,8 @@ function exists(date, callback) {
   date = dateUtil.nice(date).join('-');
 
   db.valueAt(lookupArrayNs, index, function(val){
-    if( val === date ) callback(true);
-    else callback(false);
+    if( val === date ) callback(true, index);
+    else callback(false, index);
   });
 }
 module.exports.exists = exists;
