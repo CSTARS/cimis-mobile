@@ -27,6 +27,15 @@
       this.map = new google.maps.Map(this.$.map, mapOptions);
 
       google.maps.event.addListener(this.map, 'click', this.onMapClick.bind(this));
+
+      var bounds = CIMIS.bounds();
+      bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(bounds[0][1], bounds[0][0]),
+          new google.maps.LatLng(bounds[1][1], bounds[1][0])
+      );
+
+      var rectangle = new google.maps.Rectangle({bounds: bounds});
+      //rectangle.setMap(this.map);
     },
 
     onMapClick : function(e) {

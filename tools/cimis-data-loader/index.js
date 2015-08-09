@@ -4,7 +4,7 @@ var munge = require('./lib/munge');
 var dateUtil = require('./lib/date');
 var async = require('async');
 
-var force = false;
+var force = true;
 
 module.exports.info = function() {
   return {

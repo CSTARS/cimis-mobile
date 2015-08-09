@@ -32,14 +32,6 @@ module.exports.write = function(options, callback) {
     console.log('Writing '+keys.length+' cells to index '+index+' in ring buffer for '+options.date.toDateString());
     var count = 0;
 
-    /*db.update(options.data, function(err, resp){
-      console.log('done with firebase update');
-      db.write(lookupArrayNs, index, dateUtil.nice(options.date).join('-'), function(err, resp){
-        console.log('done with firebase date update');
-        callback(err);
-      });
-    });*/
-
     async.eachLimit(
       keys,
       25,

@@ -2,8 +2,22 @@ var CIMIS = (function(){
 
   var bottomX = -410000;
   var bottomY = -660000;
+  var rows = 560;
+  var cols = 510;
   var cellSize = 2000;
-  var proj_3310 = 'PROJCS["NAD83 / California Albers",GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Albers"],PARAMETER["standard_parallel_1",34],PARAMETER["standard_parallel_2",40.5],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-120],PARAMETER["false_easting",0],PARAMETER["false_northing",-4000000],UNIT["Meter",1]]';
+
+  var proj_gmaps = 'EPSG:4326';
+  proj4.defs("EPSG:3310","+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+  var proj_cimis = 'EPSG:3310';
+
+
+  function bounds() {
+    var bottomLeft = proj4(proj_cimis, proj_gmaps,[bottomX, bottomY]);
+    var topRight = proj4(proj_cimis, proj_gmaps,[bottomX+((cols+1)*cellSize), bottomY+((rows+1)*cellSize)]);
+    var bounds = [bottomLeft, topRight];
+    console.log(bounds);
+    return bounds;
+  }
 
   function llToGrid(lng, lat) {
     if( typeof lng === 'object' ) {
@@ -11,7 +25,7 @@ var CIMIS = (function(){
       lng = lng.lng();
     }
 
-    var result = proj4('EPSG:4326',proj_3310,[lng, lat]);
+    var result = proj4(proj_gmaps,proj_cimis,[lng, lat]);
 
     result = {
       row : Math.floor((result[0] - bottomX) / cellSize),
@@ -21,8 +35,8 @@ var CIMIS = (function(){
     var x = bottomX + (result.row * cellSize);
     var y = bottomY + (result.col * cellSize);
 
-    result.topRight = proj4(proj_3310, 'EPSG:4326',[x+cellSize, y+cellSize]);
-    result.bottomLeft = proj4(proj_3310, 'EPSG:4326',[x, y]);
+    result.topRight = proj4(proj_cimis, proj_gmaps,[x+cellSize, y+cellSize]);
+    result.bottomLeft = proj4(proj_cimis, proj_gmaps,[x, y]);
 
     return result;
   }
@@ -32,6 +46,7 @@ var CIMIS = (function(){
     llToGrid : llToGrid,
     bottomX : bottomX,
     bottomY : bottomY,
-    cellSize : cellSize
+    cellSize : cellSize,
+    bounds : bounds
   };
 })();

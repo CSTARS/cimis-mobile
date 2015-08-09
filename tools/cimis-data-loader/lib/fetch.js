@@ -54,8 +54,16 @@ function parse(parm, readable, callback) {
   var row = 0;
   var cols = 0;
 
+  var good = 0;
+  var noData = 0;
+  var bad = 0;
+
   readable.on('data', function(chunk) {
-    var lines = buffer.concat(chunk.toString()).split('\n');
+    buffer += chunk.toString();
+  });
+
+  readable.on('end', function() {
+    var lines = buffer.split('\n');
     var cnt = 0;
 
     for (var l = 0; l < lines.length - 1; l++) {
@@ -90,19 +98,22 @@ function parse(parm, readable, callback) {
         if (pixel != layer.NODATA_value) {
           pixel = parseFloat(pixel);
           if( !isNaN(pixel) ) {
+            good++;
             layer.data[row+'-'+col] = pixel;
             layer.pixels++;
+          } else {
+            bad++;
           }
+        } else {
+          noData++;
         }
       }
 
       row++;
       if( vals.length > cols ) cols = vals.length;
     }
-  });
 
-  readable.on('end', function() {
-    console.log('  --Parsed (row/col): '+row+'-'+cols);
+    console.log('  --Parsed: '+row+'-'+cols+' '+good+'/'+noData+'/'+bad);
     callback(null, layer);
   });
 }
