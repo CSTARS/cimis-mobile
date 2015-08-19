@@ -72,8 +72,13 @@
           new google.maps.LatLng(31.116463, -125.649703),
           new google.maps.LatLng(42.279745, -113.838212)
       );
+    },
 
-      $(this.$.popup).modal({show: false}); // init modal
+    attached : function() {
+      // stupid hack cause Safari is the new IE. :(
+      var popup = $(this.$.popup).remove();
+      $('body').append(popup);
+      popup.modal({show: false}); // init modal
     },
 
     init : function(map) {

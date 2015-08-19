@@ -10142,7 +10142,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     #zoomTo {
       position: absolute;
       bottom: 30px;
-      left: 5px;
+      right: 5px;
     }
   </style>
 
@@ -10293,10 +10293,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               duration: 700,
               easing: 'out',
             },
-            height: 500,
+            height: 400,
             interpolateNulls : true
         };
       }
+
+      // todo fix height for size
 
       this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
       this.chart.draw(this.dt, this.options);
@@ -10479,8 +10481,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           new google.maps.LatLng(31.116463, -125.649703),
           new google.maps.LatLng(42.279745, -113.838212)
       );
+    },
 
-      $(this.$.popup).modal({show: false}); // init modal
+    attached : function() {
+      // stupid hack cause Safari is the new IE. :(
+      var popup = $(this.$.popup).remove();
+      $('body').append(popup);
+      popup.modal({show: false}); // init modal
     },
 
     init : function(map) {
