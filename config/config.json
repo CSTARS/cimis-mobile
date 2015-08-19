@@ -1,0 +1,39 @@
+{
+
+    "specialization": {
+    },
+
+    "middleware": {
+        "static": {
+            "module": {
+                "arguments": [ "path:./dist" ]
+            }
+        },
+
+        "router": {
+            "module": {
+                "arguments": [{ "directory": "path:./controllers" }]
+            }
+        }
+    },
+
+    "ringBuffer": {
+      "db" : "redis",
+      "force" : false,
+      "buffer" : 14,
+      "date_key" : "dates"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "verbose": true,
+        "disabled": true
+    },
+    "fetch" : {
+      "verbose": true
+    },
+    "cimis": {
+      "base": "http://cimis.casil.ucdavis.edu/cimis/",
+      "params": ["ETo","K","Rnl","Rso","Tdew","Tn","Tx","U2"]
+    }
+}

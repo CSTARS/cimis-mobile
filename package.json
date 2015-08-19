@@ -1,40 +1,35 @@
 {
-  "name": "dwr-mobile",
-  "version": "0.0.0",
-  "description": "DWR mobile app",
-  "main": "Gruntfile.js",
+  "name": "cimis-kraken",
+  "version": "0.1.0",
+  "description": "Spatial CIMIS with kraken/redis backend",
+  "author": "jrmerz@ucdavis.edu",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "jrmerz@gmail.com",
-  "license": "ISC",
-  "devDependencies": {
-    "grunt": "*",
-    "grunt-autoprefixer": "^1.0.0",
-    "grunt-concurrent": "^0.5.0",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-compass": "^0.9.1",
-    "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-cssmin": "^0.10.0",
-    "grunt-contrib-uglify": "^0.9.1",
-    "grunt-copy-to": "0.0.12",
-    "grunt-manifest": "^0.4.0",
-    "grunt-shell": "^0.7.0",
-    "grunt-svgmin": "^0.4.0",
-    "grunt-usemin": "^2.3.0",
-    "grunt-vulcanize": "^1.0.0",
-    "jshint-stylish": "^0.4.0",
-    "load-grunt-tasks": "^0.6.0",
-    "time-grunt": "^0.4.0"
+    "test": "grunt test",
+    "build": "grunt build",
+    "all": "npm run build && npm run test"
   },
   "dependencies": {
-    "async": "^1.4.1",
-    "config": "^1.15.0",
-    "express": "^4.8.3",
-    "firebase": "^2.2.9",
+    "async": "^1.4.2",
+    "confit": "^2.0.3",
+    "construx": "^1.0.0",
+    "construx-copier": "^1.0.0",
+    "express": "^4.12.2",
+    "kraken-js": "^1.0.3",
     "path": "^0.11.14",
     "redis": "^0.12.1",
-    "request": "^2.60.0"
+    "request": "^2.61.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^3.8.0",
+    "grunt-cli": "^0.1.13",
+    "grunt-config-dir": "^0.3.2",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-copy-to": "0.0.10",
+    "grunt-mocha-cli": "^1.14.0",
+    "mocha": "^1.18.0",
+    "supertest": "^0.9.0"
   }
 }

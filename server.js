@@ -1,12 +1,17 @@
-var express = require('express');
-var app = express();
+'use strict';
 
-var dir = '/app';
-if( process.argv.length > 2 && process.argv[2] == '--build' ) {
-    dir = '/dist'
-}
+var app = require('./index');
+var http = require('http');
 
-app.use(express.static(__dirname + dir));
 
-console.log('Server running at localhost:3000');
-app.listen(3000);
+var server;
+
+/*
+ * Create and start HTTP server.
+ */
+
+server = http.createServer(app);
+server.listen(process.env.PORT || 8000);
+server.on('listening', function () {
+    console.log('Server listening on http://localhost:%d', this.address().port);
+});

@@ -1,4 +1,4 @@
-dwr-mobile
-==========
+cimis-kraken
+===========
 
-DWR Sample Mobile App
+Spatial CIMIS with kraken/redis backend

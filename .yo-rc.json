@@ -1,0 +1,13 @@
+{
+  "generator-kraken": {
+    "taskModule": "grunt",
+    "description": "Spatial CIMIS with kraken/redis backend",
+    "author": "jrmerz@ucdavis.edu",
+    "templateModule": false,
+    "i18n": false,
+    "componentPackager": "bower",
+    "cssModule": false,
+    "jsModule": "browserify",
+    "useJson": null
+  }
+}
