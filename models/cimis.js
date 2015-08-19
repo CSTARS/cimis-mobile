@@ -10,9 +10,15 @@ module.exports = function() {
 
   return {
       name: 'cimis',
-      get : get
+      get : get,
+      getByLatLng : getByLatLng
   };
 };
+
+function getByLatLng(lat, lng, callback) {
+  var g = grid.llToGrid(lng, lat);
+  get(g.row, g.col, callback);
+}
 
 function get(row, col, callback) {
   ringBuffer.read(row+'-'+col, function(err, data){
