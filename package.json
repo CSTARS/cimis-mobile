@@ -8,8 +8,8 @@
     "test": "grunt test",
     "build": "grunt build",
     "all": "npm run build && npm run test",
-    "start-dev" : "node server.js --dev",
-    "import" : "node utils/import.js"
+    "start-dev": "node server.js --dev",
+    "import": "node utils/import.js"
   },
   "dependencies": {
     "async": "^1.4.2",
@@ -17,6 +17,13 @@
     "construx": "^1.0.0",
     "construx-copier": "^1.0.0",
     "express": "^4.12.2",
+    "grunt-browserify": "^4.0.0",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-cssmin": "^0.13.0",
+    "grunt-contrib-uglify": "^0.9.1",
+    "grunt-filerev": "^2.3.1",
+    "grunt-usemin": "^3.0.0",
+    "grunt-vulcanize": "^1.0.0",
     "kraken-js": "^1.0.3",
     "path": "^0.11.14",
     "redis": "^0.12.1",

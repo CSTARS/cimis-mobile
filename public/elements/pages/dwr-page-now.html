@@ -26,8 +26,8 @@
       if( data ) {
         this.data = data;
         this.sortedDates = this.sortDates(data.data);
-        this.gridLabel.html('CIMIS Grid: '+data.location.row+', '+data.location.col+' '+
-          '<a class="btn btn-link" href="/cimis/'+data.location.row+'/'+data.location.col+'" target="_blank"><i class="fa fa-link"></i></a>');
+        this.gridLabel.html('<a class="btn btn-link" href="/cimis/'+data.location.row+'/'+data.location.col+
+          '" target="_blank"><i class="fa fa-link"></i> '+data.location.row+', '+data.location.col+'</a>');
       }
 
       if( !this.chart ) {
@@ -52,21 +52,26 @@
     firstRender : function() {
       this.selected = this.params[0];
 
-      /*var html =
+      var html =
         '<div class="form-horizontal">' +
           '<div class="form-group">'+
-            '<label class="col-sm-2 control-label">Param</label>'+
+            '<label class="col-sm-2 control-label">Parameter</label>'+
             '<div class="col-sm-10">'+
               '<select class="form-control">';
-      */
-      var html = '<h4><select class="form-control" style="height: 43px; font-size: 24px">';
 
       for( var i = 0; i < this.params.length; i++ ) {
         html += '<option value="'+this.params[i]+'">'+this.params[i]+'</option>';
       }
-      html += '</select></h4>';
+      html += '</select></div></div>';
 
-      html += '<div id="grid-label"></div><div id="chart-root"></div>';
+      html +=
+      '<div class="form-group">'+
+        '<label class="col-sm-2 control-label">CIMIS Grid</label>'+
+        '<div class="col-sm-10">'+
+          '<div id="grid-label"></div>'+
+        '</div>'+
+      '</div></div>'+
+      '<div id="chart-root"></div>';
       var ele = $(this.$.root).html(html);
 
       ele.find('select').on('change', function(e){

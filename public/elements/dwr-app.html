@@ -58,7 +58,7 @@
           <dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>
         </div>
 
-        <dwr-select-location id="selectLocation"></dwr-select-location>
+        <dwr-select-location id="selectLocation" on-location-select="onLocationSelected"></dwr-select-location>
 
       </paper-header-panel>
     </paper-drawer-panel>
@@ -137,6 +137,10 @@
       if( d < 10 ) d = '0'+d;
 
       return y+'-'+m+'-'+d;
+    },
+
+    onLocationSelected : function(e) {
+      this.$.map.setLocation(e.detail);
     },
 
     selectLocation : function() {

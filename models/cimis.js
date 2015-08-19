@@ -43,8 +43,6 @@ function get(row, col, callback) {
 
 function prepareGet(data, callback) {
   ringBuffer.read(config.get('ringBuffer').date_key, function(err, result){
-    console.log(result);
-
     if( err ) {
       callback(err);
     }
