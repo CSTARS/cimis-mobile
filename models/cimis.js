@@ -25,6 +25,9 @@ function get(row, col, callback) {
         return callback(err);
       }
 
+      row = parseInt(row);
+      col = parseInt(col);
+
       var resp = {
         location : {
           row : row,
@@ -40,6 +43,8 @@ function get(row, col, callback) {
 
 function prepareGet(data, callback) {
   ringBuffer.read(config.get('ringBuffer').date_key, function(err, result){
+    console.log(result);
+
     if( err ) {
       callback(err);
     }

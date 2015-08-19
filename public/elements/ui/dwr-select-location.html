@@ -7,7 +7,7 @@
 
   <template>
 
-
+    <div class="modal fade" id="popup">
       <div class="modal-dialog">
         <div class="modal-content">
 
@@ -25,7 +25,7 @@
                 <div class="form-group">
                     <label for="inputSearch" class="col-sm-2 control-label">Search</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="inputSearch" placeholder="Location name" on-keypress="onKeyPress" />
+                        <input type="text" class="form-control" id="inputSearch" placeholder="Location name" on-keyup="onKeyPress" />
                     </div>
                 </div>
             </div>
@@ -47,7 +47,7 @@
 
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
-
+    </div>
   </template>
 </dom-module>
 
@@ -56,40 +56,66 @@
     is : 'dwr-select-location',
 
     ready : function() {
-      this.className = 'modal fade';
-
+      this.searchTimer = -1;
       this.currentLocations = JSON.parse(window.localStorage.getItem('currentLocations'));
       if( !this.currentLocations ) this.currentLocations = [];
 
-      $(this)
-        .modal({show: false}) // init modal
-        .on('show.bs.modal', this.onShow.bind(this));
+      this.queryBounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(31.116463, -125.649703),
+          new google.maps.LatLng(42.279745, -113.838212)
+      );
+
+      $(this.$.popup).modal({show: false}); // init modal
     },
 
     init : function(map) {
       this.map = map;
       this.places = new google.maps.places.PlacesService(this.map);
+      this.geocoder = new google.maps.Geocoder();
     },
 
-    onShow : function() {
+    show : function() {
       this.renderCurrentLocations();
-
-      $(this).modal('show');
+      $(this.$.popup).modal('show');
     },
 
     onKeyPress : function() {
-      this.query = $(this).val();
-      this.places.textSearch({query: this.query}, this.gotResults.bind(this));
+      this.query = $(this.$.inputSearch).val();
+
+      if( this.searchTimer != -1 ) clearTimeout(this.searchTimer);
+      if( !this.query ) return;
+
+      this.searchTimer = setTimeout(function(){
+        this.query = $(this.$.inputSearch).val();
+        this.searchTimer = -1;
+        this.geocode();
+      }.bind(this), 200);
+
+      //this.places.textSearch({query: this.query, bounds: this.queryBounds}, this.gotResults.bind(this));
+
+
     },
 
-    gotResults: function(results, status) {
+    geocode : function() {
+      console.log(this.queryBounds);
+      this.geocoder.geocode({ 'address': this.query+' California', bounds: this.queryBounds}, this.geocodeResults.bind(this));
+    },
+
+    geocodeResults : function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        this.gotResults(results);
+      } else {
+        alert("Geocode was not successful for the following reason: " + status);
+      }
+    },
+
+    gotResults: function(results) {
       this.results = [];
 
       for( var i = 0; i < results.length; i++ ) {
         this.results.push({
           name : results[i].name,
           address : results[i].formatted_address,
-          icon : results[i].icon,
           latitude: results[i].geometry.location.lat(),
           longitude: results[i].geometry.location.lng(),
         });
@@ -103,7 +129,7 @@
       var list = '<ul style="list-style:none">';
       for( var i = 0; i < this.results.length; i++ ) {
         var result = this.results[i];
-        list += '<li index="'+i+'"><img src="'+result.icon+'" /> <a> '+result.name+' - '+result.address+'</a></li>';
+        list += '<li index="'+i+'"><a>'+result.address+'</a></li>';
       }
       this.$.resultList.innerHTML = list+'</ul>';
     },

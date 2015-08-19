@@ -1,6 +1,8 @@
 <dom-module name="dwr-page-now">
   <template>
-    <div id="root" style="padding: 10px"><div class="alert alert-danger">Please select a location first</div></div>
+    <div id="root" style="padding: 15px">
+      <div class="text text-danger well" style="font-size: 20px"><i class="fa fa-warning"></i> Please select a location first</div>
+    </div>
   </template>
 </dom-module>
 
@@ -10,54 +12,111 @@
 
     ready : function() {
       this.params = ['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2'];
+      this.selected = null;
 
-      $(window).on('resize', this.onShow.bind(this));
+      $(window).on('resize', this.redraw.bind(this));
     },
 
     render : function(data) {
-      this.charts = [];
-      var html = '';
+      if( !this.selected ) {
+        this.firstRender();
+        //this.chartRoot.html(this.renderParam(this.selected, this.data.data));
+      }
 
-      this.params.forEach(function(param){
-        html += this.renderParam(param, data);
-      }.bind(this));
+      if( data ) {
+        this.data = data;
+        this.sortedDates = this.sortDates(data.data);
+        this.gridLabel.html('CIMIS Grid: '+data.location.row+', '+data.location.col+' '+
+          '<a class="btn btn-link" href="/cimis/'+data.location.row+'/'+data.location.col+'" target="_blank"><i class="fa fa-link"></i></a>');
+      }
 
-      this.$.root.innerHTML = html;
-
-      for( var i = 0; i < this.params.length; i++ ) {
-        var param = this.params[i];
-
-        var chart = new google.visualization.LineChart(this.querySelector('#'+param+'-chart'));
-        var dt = google.visualization.arrayToDataTable(this.paramToArray(param, data));
-        var options = {
+      if( !this.chart ) {
+        this.chart = new google.visualization.LineChart(this.chartRoot[0]);
+        this.options = {
             legend : {
                 position : 'none'
             },
+            animation: {
+              duration: 700,
+              easing: 'out',
+            },
+            height: 500,
             interpolateNulls : true
         };
-        chart.draw(dt, options);
-        this.charts.push({
-          chart : chart,
-          options : options,
-          dt : dt
-        });
       }
+
+      this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
+      this.chart.draw(this.dt, this.options);
     },
 
-    onShow : function() {
-      if( !this.charts ) return;
-      this.charts.forEach(function(item){
-        item.chart.draw(item.dt, item.options);
+    firstRender : function() {
+      this.selected = this.params[0];
+
+      /*var html =
+        '<div class="form-horizontal">' +
+          '<div class="form-group">'+
+            '<label class="col-sm-2 control-label">Param</label>'+
+            '<div class="col-sm-10">'+
+              '<select class="form-control">';
+      */
+      var html = '<h4><select class="form-control" style="height: 43px; font-size: 24px">';
+
+      for( var i = 0; i < this.params.length; i++ ) {
+        html += '<option value="'+this.params[i]+'">'+this.params[i]+'</option>';
+      }
+      html += '</select></h4>';
+
+      html += '<div id="grid-label"></div><div id="chart-root"></div>';
+      var ele = $(this.$.root).html(html);
+
+      ele.find('select').on('change', function(e){
+        this.selected = $(e.currentTarget).val();
+        this.render();
+      }.bind(this));
+
+      this.chartRoot = ele.find('#chart-root');
+      this.gridLabel = ele.find('#grid-label');
+    },
+
+    sortDates : function(data) {
+      var arr = [];
+      for( var date in data ) {
+        arr.push({
+          str : date,
+          time : new Date(date).getTime()
+        });
+      }
+
+      arr.sort(function(a, b){
+        if( a.time > b.time ) return 1;
+        if( b.time < a.time ) return -1;
+        return 0;
       });
+
+      var tmp = [];
+      arr.forEach(function(item){
+        tmp.push(item.str);
+      });
+
+      return tmp;
+    },
+
+    onShow : function(){
+      this.redraw();
+    },
+
+    redraw : function() {
+      if( !this.chart ) return;
+      this.chart.draw(this.dt, this.options);
     },
 
     renderParam : function(param, data) {
       var html = '<h4 class="page-header">'+param+'</h4>';
       html += '<div class="row"><div class="col-md-6"><table class="table">';
 
-      for( var date in data  ) {
+      this.sortedDates.forEach(function(date){
         html += '<tr><td>'+date+'</td><td>'+(data[date][param] !== undefined ? data[date][param] : 'N/A')+'</td></tr>';
-      }
+      });
       html += '</table></div><div class="col-md-6"><div id="'+param+'-chart" style="height: 500px"></div></div></div>';
       return html;
     },
@@ -65,9 +124,12 @@
     paramToArray : function(param, data) {
       var array = [['Date', param]];
 
-      for( var date in data  ) {
+      this.sortedDates.forEach(function(date){
         array.push([date, data[date][param]]);
-      }
+      });
+
+      console.log(data);
+      console.log(array);
 
       return array;
     },

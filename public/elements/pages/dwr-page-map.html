@@ -56,19 +56,15 @@
       if( this.cache[this.cid] ) {
         this.fireLocationUpdate();
       } else {
-        $.get('https://cimis-mobile.firebaseio.com/'+this.cid+'/.json', function(resp){
+        $.get('/cimis/'+this.grid.row+'/'+this.grid.col, function(resp){
           this.cache[this.cid] = resp;
           this.fireLocationUpdate();
         }.bind(this));
       }
-
     },
 
     fireLocationUpdate : function() {
-      this.fire('location-update', {
-        data: this.cache[this.cid],
-        grid : this.grid
-      });
+      this.fire('location-update', this.cache[this.cid]);
     },
 
     onShow : function() {
