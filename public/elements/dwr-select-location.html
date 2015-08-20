@@ -152,6 +152,8 @@
           this.$.inputSearch.value = '';
           this.$.resultList.innerHTML = '';
 
+          this.ga('data', 'location', 'select-searched');
+
           this.currentLocations.push(this.results[index]);
           this.fire('location-select', this.results[index]);
           $(this.$.popup).modal('hide');
@@ -196,6 +198,8 @@
       ele
         .find('a[trash]')
         .on('click', function(e){
+          this.ga('data', 'location', 'remove-saved');
+
           var index = parseInt(e.currentTarget.getAttribute('index'));
           this.currentLocations.splice(index, 1);
           this.renderCurrentLocations();
@@ -205,6 +209,8 @@
       ele
         .find('a[goto]')
         .on('click', function(e){
+          this.ga('data', 'location', 'select-saved');
+
           var index = parseInt(e.currentTarget.getAttribute('index'));
           this.fire('location-select', this.currentLocations[index]);
           $(this.$.popup).modal('hide');
@@ -225,6 +231,7 @@
     },
 
     onGeolocate : function(position) {
+      this.ga('data', 'location', 'geolocate');
       this.fire('location-select', position.coords);
       this.setLocating(false);
       $(this.$.popup).modal('hide');
@@ -239,6 +246,11 @@
         this.$.geolocate.removeAttribute('disabled');
         this.$.geolocate.innerHTML = '<i class="fa fa-crosshairs"></i> Geolocate';
       }
+    },
+
+    ga : function(name, type, value) {
+      if( !window.ga ) return;
+      ga('send', 'event', name, type, value, 1);
     }
 
   })

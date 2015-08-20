@@ -102,9 +102,7 @@
       var yesterday = this.getYesterday();
       var data = this.cache[this.cid];
 
-      if( window.ga ) {
-        ga('send', 'event', 'data', 'grid-view', this.cid, 1);
-      }
+      this.ga('data', 'grid-view', this.cid);
 
       var html;
       if( data.data[yesterday] && data.data[yesterday].ETo !== undefined ) {
@@ -129,6 +127,11 @@
     onShow : function() {
         if( !window.google ) return;
         google.maps.event.trigger(this.$.map, 'resize');
+    },
+
+    ga : function(name, type, value) {
+      if( !window.ga ) return;
+      ga('send', 'event', name, type, value, 1);
     }
   });
 </script>
