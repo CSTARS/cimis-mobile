@@ -103,7 +103,7 @@
       var data = this.cache[this.cid];
 
       var eto = data.data[yesterday] ? data.data[yesterday].ETo : '';
-      this.overlay.setValue(eto.toFixed(4));
+      this.overlay.setValue('<div>'+eto.toFixed(1)+'</div><div>mm</div>');
 
       this.fire('location-update', data);
     },

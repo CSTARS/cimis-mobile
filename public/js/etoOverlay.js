@@ -25,6 +25,8 @@
 
    var span = document.createElement('span');
    span.style.verticalAlign = 'middle';
+   span.style.display = 'inline-block';
+   span.style.paddingTop = '5px';
    div.appendChild(span);
    this.span_ = span;
 
@@ -54,11 +56,12 @@
    var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
    var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
 
-   var fontSize = Math.floor((ne.x - sw.x) * .25);
+   var fontSize = Math.floor((ne.x - sw.x) * .4);
 
    // Resize the image's div to fit the indicated dimensions.
    var div = this.div_;
    div.style.fontSize = fontSize+'px';
+   div.style.lineHeight = (fontSize)+'px';
    div.style.left = sw.x + 'px';
    div.style.top = ne.y + 'px';
    div.style.width = (ne.x - sw.x) + 'px';
