@@ -11,22 +11,24 @@
         <link rel="stylesheet" href="bower_components/animate-css/animate.css" />
         <!-- endbuild -->
 
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+            google.load('visualization', '1', {packages: ['corechart']});
+        </script>
+
         <!-- build:js scripts/app.js -->
         <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
         <script src="bower_components/jquery/dist/jquery.js"></script>
         <script src="bower_components/bootswatch-dist/js/bootstrap.js"></script>
         <script src="bower_components/proj4/dist/proj4.js"></script>
-
+        <script src="js/etoOverlay.js"></script>
         <script src="js/app.js"></script>
         <!-- endbuild -->
 
         <link rel="import" href="require.html">
 
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-        <script type="text/javascript">
-            google.load('visualization', '1', {packages: ['corechart']});
-        </script>
+
 
     </head>
 

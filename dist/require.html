@@ -10174,15 +10174,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.map = new google.maps.Map(this.$.map, mapOptions);
 
       google.maps.event.addListener(this.map, 'click', this.onMapClick.bind(this));
-
-      var bounds = CIMIS.bounds();
-      bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(bounds[0][1], bounds[0][0]),
-          new google.maps.LatLng(bounds[1][1], bounds[1][0])
-      );
-
-      var rectangle = new google.maps.Rectangle({bounds: bounds});
-      //rectangle.setMap(this.map);
     },
 
     onMapClick : function(e) {
@@ -10204,7 +10195,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     getData : function() {
       this.$.zoomTo.style.display = 'block';
 
-      this.grid = CIMIS.llToGrid(this.latLng);
+      this.grid = CIMIS.grid.llToGrid(this.latLng);
       this.cid = this.grid.row+'-'+this.grid.col;
 
       this.bounds = new google.maps.LatLngBounds(
@@ -10212,9 +10203,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           new google.maps.LatLng(this.grid.topRight[1], this.grid.topRight[0])
       );
 
+      var polygon = [
+        {lat: this.grid.bottomLeft[1], lng: this.grid.bottomLeft[0]},
+        {lat: this.grid.topRight[1], lng: this.grid.bottomLeft[0]},
+        {lat: this.grid.topRight[1], lng: this.grid.topRight[0]},
+        {lat: this.grid.bottomLeft[1], lng: this.grid.topRight[0]},
+        {lat: this.grid.bottomLeft[1], lng: this.grid.bottomLeft[0]}
+      ]
+
       if( this.rectangle ) this.rectangle.setMap(null);
-      this.rectangle = new google.maps.Rectangle({bounds: this.bounds});
+      this.rectangle = new google.maps.Polygon({paths: polygon});
       this.rectangle.setMap(this.map);
+
+      if( this.overlay ) this.overlay.setMap(null);
+      this.overlay = new EtoOverlay(this.bounds, this.map);
 
       google.maps.event.addListener(this.rectangle, 'click', function(){
         window.location = '#now';
@@ -10223,6 +10225,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if( this.cache[this.cid] ) {
         this.fireLocationUpdate();
       } else {
+        this.overlay.setValue('<i class="fa fa-spinner fa-spin"></i>');
         $.get('/cimis/'+this.grid.row+'/'+this.grid.col, function(resp){
           this.cache[this.cid] = resp;
           this.fireLocationUpdate();
@@ -10231,7 +10234,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     fireLocationUpdate : function() {
-      this.fire('location-update', this.cache[this.cid]);
+      var yesterday = this.getYesterday();
+      var data = this.cache[this.cid];
+
+      var eto = data.data[yesterday] ? data.data[yesterday].ETo : '';
+      this.overlay.setValue(eto.toFixed(4));
+
+      this.fire('location-update', data);
+    },
+
+    getYesterday : function() {
+      var date = new Date(new Date().getTime()-86400000);
+      var m = date.getMonth()+1;
+      var d = date.getDate();
+      if( m < 10 ) m = '0'+m;
+      if( d < 10 ) d = '0'+d;
+      return (date.getYear()+1900)+'-'+m+'-'+d;
     },
 
     onShow : function() {
@@ -10407,7 +10425,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is : 'dwr-page-settings'
   })
 </script>
-<dom-module id="dwr-select-location" assetpath="/public/elements/ui/">
+<dom-module id="dwr-select-location" assetpath="/public/elements/">
   <style>
     :host {
       display: block;
@@ -10492,7 +10510,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     init : function(map) {
       this.map = map;
-      this.places = new google.maps.places.PlacesService(this.map);
+      //this.places = new google.maps.places.PlacesService(this.map);
       this.geocoder = new google.maps.Geocoder();
     },
 
