@@ -3,3 +3,4 @@
 node_modules
 app/bower_components
 public/bower_components
+npm-debug.log
