@@ -10239,6 +10239,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var yesterday = this.getYesterday();
       var data = this.cache[this.cid];
 
+      if( window.ga ) {
+        ga('send', 'event', 'data', 'grid-view', this.cid, 1);
+      }
+
       var html;
       if( data.data[yesterday] && data.data[yesterday].ETo !== undefined ) {
         html = '<div>'+data.data[yesterday].ETo.toFixed(1)+'</div><div>mm</div>';
