@@ -39,6 +39,8 @@
       this.map = new google.maps.Map(this.$.map, mapOptions);
 
       google.maps.event.addListener(this.map, 'click', this.onMapClick.bind(this));
+
+      $.get('/cimis/dates', this.onDatesLoad.bind(this));
     },
 
     onMapClick : function(e) {
@@ -99,14 +101,13 @@
     },
 
     fireLocationUpdate : function() {
-      var yesterday = this.getYesterday();
       var data = this.cache[this.cid];
 
       this.ga('data', 'grid-view', this.cid);
 
       var html;
-      if( data.data[yesterday] && data.data[yesterday].ETo !== undefined ) {
-        html = '<div>'+data.data[yesterday].ETo.toFixed(1)+'</div><div>mm</div>';
+      if( data.data[this.yesterday] && data.data[this.yesterday].ETo !== undefined ) {
+        html = '<div>'+data.data[this.yesterday].ETo.toFixed(1)+'</div><div>mm</div>';
       } else {
         html = '<i class="fa fa-ban" style="color:red"></i>';
       }
@@ -115,13 +116,10 @@
       this.fire('location-update', data);
     },
 
-    getYesterday : function() {
-      var date = new Date(new Date().getTime()-86400000);
-      var m = date.getMonth()+1;
-      var d = date.getDate();
-      if( m < 10 ) m = '0'+m;
-      if( d < 10 ) d = '0'+d;
-      return (date.getYear()+1900)+'-'+m+'-'+d;
+    // get the latest date
+    onDatesLoad : function(dates) {
+      dates = CIMIS.utils.sortDates(dates);
+      this.yesterday = dates[dates.length-1];
     },
 
     onShow : function() {

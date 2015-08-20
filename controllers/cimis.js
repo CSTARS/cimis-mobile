@@ -41,4 +41,13 @@ module.exports = function (router) {
       });
     });
 
+    router.get('/dates', function(req, res) {
+      model.getDates(function(err, data){
+        if( err ) {
+          return res.send({error: true, message: err});
+        }
+        res.send(data);
+      });
+    });
+
 };

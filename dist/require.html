@@ -10176,6 +10176,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.map = new google.maps.Map(this.$.map, mapOptions);
 
       google.maps.event.addListener(this.map, 'click', this.onMapClick.bind(this));
+
+      $.get('/cimis/dates', this.onDatesLoad.bind(this));
     },
 
     onMapClick : function(e) {
@@ -10236,14 +10238,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     fireLocationUpdate : function() {
-      var yesterday = this.getYesterday();
       var data = this.cache[this.cid];
 
       this.ga('data', 'grid-view', this.cid);
 
       var html;
-      if( data.data[yesterday] && data.data[yesterday].ETo !== undefined ) {
-        html = '<div>'+data.data[yesterday].ETo.toFixed(1)+'</div><div>mm</div>';
+      if( data.data[this.yesterday] && data.data[this.yesterday].ETo !== undefined ) {
+        html = '<div>'+data.data[this.yesterday].ETo.toFixed(1)+'</div><div>mm</div>';
       } else {
         html = '<i class="fa fa-ban" style="color:red"></i>';
       }
@@ -10252,13 +10253,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.fire('location-update', data);
     },
 
-    getYesterday : function() {
-      var date = new Date(new Date().getTime()-86400000);
-      var m = date.getMonth()+1;
-      var d = date.getDate();
-      if( m < 10 ) m = '0'+m;
-      if( d < 10 ) d = '0'+d;
-      return (date.getYear()+1900)+'-'+m+'-'+d;
+    // get the latest date
+    onDatesLoad : function(dates) {
+      dates = CIMIS.utils.sortDates(dates);
+      this.yesterday = dates[dates.length-1];
     },
 
     onShow : function() {
@@ -10310,7 +10308,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       if( data ) {
         this.data = data;
-        this.sortedDates = this.sortDates(data.data);
+        this.sortedDates = CIMIS.utils.sortDates(data.data);
         this.gridLabel.html('<a class="btn btn-link" href="/cimis/'+data.location.row+'/'+data.location.col+
           '" target="_blank"><i class="fa fa-link"></i> '+data.location.row+', '+data.location.col+'</a>');
       }
@@ -10371,29 +10369,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.gridLabel = ele.find('#grid-label');
     },
 
-    sortDates : function(data) {
-      var arr = [];
-      for( var date in data ) {
-        arr.push({
-          str : date,
-          time : new Date(date).getTime()
-        });
-      }
-
-      arr.sort(function(a, b){
-        if( a.time > b.time ) return 1;
-        if( b.time < a.time ) return -1;
-        return 0;
-      });
-
-      var tmp = [];
-      arr.forEach(function(item){
-        tmp.push(item.str);
-      });
-
-      return tmp;
-    },
-
     onShow : function(){
       this.redraw();
     },
@@ -10425,9 +10400,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.sortedDates.forEach(function(date){
         array.push([date, data[date][param]]);
       });
-
-      console.log(data);
-      console.log(array);
 
       return array;
     },
@@ -10483,17 +10455,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <h4 class="page-header">API</h4>
     <div class="padding">
-      <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls</div>
+      <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls.  All
+        API responses are <a href="http://www.json.org/" target="_blanl">JSON</a> formatted.</div>
 
-      <h5>By CIMIS Row/Column</h5>
+      <h5>By CIMIS Row/Column Id</h5>
 
-      <p><span class="host"></span>/cimis/[ROW]/[COLUMN]</p>
+      <p><span class="host"></span>/cimis/[ROW ID]/[COLUMN ID]</p>
       <p>Example: <a href="/cimis/190/131" target="_blank"><span class="host"></span>/cimis/190/131</a></p>
 
       <h5>By Latitude/Longitude</h5>
 
       <p><span class="host"></span>/cimis/ll/[LONGITUDE]/[LATITUDE]</p>
       <p>Example: <a href="/cimis/ll/-121.704/38.7240" target="_blank"><span class="host"></span>/cimis/ll/-121.704/38.7240</a></p>
+
+      <h5>Get Current Dates</h5>
+      <p>Get a list of available dates.</p>
+      <p><a href="/cimis/dates" target="_blank"><span class="host"></span>/cimis/dates</a></p>
     </div>
 
     <h4 class="page-header">Install on Mobile</h4>
@@ -10513,8 +10490,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div><a href="http://epsg.io/3310" target="_blank">EPSG:3310</a></div>
       <div><b>Number of Columns:</b> 510</div>
       <div><b>Number of Rows:</b> 560</div>
-      <div><b>Bottom X Corner:</b> -410000</div>
-      <div><b>Left Y Corner:</b> -660000</div>
+      <div><b>Left X Corner:</b> -410000</div>
+      <div><b>Bottom Y Corner:</b> -660000</div>
       <div><b>Cell Size:</b> 2000</div>
     </div>
   </template>

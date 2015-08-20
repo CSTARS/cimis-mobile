@@ -11,7 +11,8 @@ module.exports = function() {
   return {
       name: 'cimis',
       get : get,
-      getByLatLng : getByLatLng
+      getByLatLng : getByLatLng,
+      getDates : getDates
   };
 };
 
@@ -47,8 +48,12 @@ function get(row, col, callback) {
   });
 }
 
+function getDates(callback) {
+  ringBuffer.read(config.get('ringBuffer').date_key, callback);
+}
+
 function prepareGet(data, callback) {
-  ringBuffer.read(config.get('ringBuffer').date_key, function(err, result){
+  getDates(function(err, result){
     if( err ) {
       callback(err);
     }

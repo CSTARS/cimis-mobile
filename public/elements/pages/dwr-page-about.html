@@ -36,17 +36,22 @@
 
     <h4 class="page-header">API</h4>
     <div class="padding">
-      <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls</div>
+      <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls.  All
+        API responses are <a href="http://www.json.org/" target="_blanl">JSON</a> formatted.</div>
 
-      <h5>By CIMIS Row/Column</h5>
+      <h5>By CIMIS Row/Column Id</h5>
 
-      <p><span class="host"></span>/cimis/[ROW]/[COLUMN]</p>
+      <p><span class="host"></span>/cimis/[ROW ID]/[COLUMN ID]</p>
       <p>Example: <a href="/cimis/190/131" target="_blank"><span class="host"></span>/cimis/190/131</a></p>
 
       <h5>By Latitude/Longitude</h5>
 
       <p><span class="host"></span>/cimis/ll/[LONGITUDE]/[LATITUDE]</p>
       <p>Example: <a href="/cimis/ll/-121.704/38.7240" target="_blank"><span class="host"></span>/cimis/ll/-121.704/38.7240</a></p>
+
+      <h5>Get Current Dates</h5>
+      <p>Get a list of available dates.</p>
+      <p><a href="/cimis/dates" target="_blank"><span class="host"></span>/cimis/dates</a></p>
     </div>
 
     <h4 class="page-header">Install on Mobile</h4>
@@ -66,8 +71,8 @@
       <div><a href="http://epsg.io/3310" target="_blank">EPSG:3310</a></div>
       <div><b>Number of Columns:</b> 510</div>
       <div><b>Number of Rows:</b> 560</div>
-      <div><b>Bottom X Corner:</b> -410000</div>
-      <div><b>Left Y Corner:</b> -660000</div>
+      <div><b>Left X Corner:</b> -410000</div>
+      <div><b>Bottom Y Corner:</b> -660000</div>
       <div><b>Cell Size:</b> 2000</div>
     </div>
   </template>
