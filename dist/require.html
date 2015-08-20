@@ -10016,6 +10016,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a class="btn btn-link btn-lg" href="#now"><i class="fa fa-area-chart"></i> Data</a>
           <!--<a class="btn btn-link" id="weeklyBtn">Weekly</a>-->
           <a class="btn btn-link btn-lg" href="#map"><i class="fa fa-map-o"></i> Map</a>
+          <a class="btn btn-link btn-lg" href="#about"><i class="fa fa-info-circle"></i> About</a>
           <!--<a class="btn btn-link" id="settingBtn">Setting</a>-->
         </div>
       </paper-header-panel>
@@ -10033,8 +10034,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div class="fullbleed" id="pages">
           <dwr-page-map id="map" class="animated fadeInRight" on-location-update="setLocation"></dwr-page-map>
           <dwr-page-now id="now" class="animated fadeInRight"></dwr-page-now>
-          <dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>
-          <dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>
+          <!--<dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>-->
+          <!--<dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>-->
+          <dwr-page-about id="about" class="animated fadeInRight"></dwr-page-about>
         </div>
 
         <dwr-select-location id="selectLocation" on-location-select="onLocationSelected"></dwr-select-location>
@@ -10423,6 +10425,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script>
   Polymer({
     is : 'dwr-page-settings'
+  })
+</script>
+<dom-module id="dwr-page-about" assetpath="/public/elements/pages/">
+  <style>
+    :host {
+      display: block;
+      padding: 0 5% 30px 5%;
+    }
+    p {
+      padding : 0 15px;
+      display : block;
+    }
+    .padding {
+      padding : 0 15px;
+      display : block;
+    }
+  </style>
+
+  <template>
+    <h4 class="page-header">About</h4>
+    <div class="padding">
+
+      <div>The California Irrigation Management Information System (CIMIS) is designed
+        to help growers develop efficient water budgets and irrigation strategies.
+        CIMIS is a standardized way of accounting for water consumed through
+        evapotranspiration (ET) by the soil and plants. The main purpose of
+        CIMIS is to provide information for irrigation scheduling by matching the
+        amount of water applied to a crop with needs of the plant.</div>
+
+      <h5>Links</h5>
+
+      <ul class="list-group">
+        <li class="list-group-item"><a href="http://www.cimis.water.ca.gov/" target="_blank">CIMIS Home</a></li>
+        <li class="list-group-item"><a href="http://cimis.casil.ucdavis.edu/cimis/" target="_blank">Spatial CIMIS Data Directory</a></li>
+      </ul>
+    </div>
+
+    <h4 class="page-header">API</h4>
+    <div class="padding">
+      <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls</div>
+
+      <h5>By CIMIS Row/Column</h5>
+
+      <p><span class="host"></span>/cimis/[ROW]/[COLUMN]</p>
+      <p>Example: <a href="/cimis/190/131" target="_blank"><span class="host"></span>/cimis/190/131</a></p>
+
+      <h5>By Latitude/Longitude</h5>
+
+      <p><span class="host"></span>/cimis/ll/[LONGITUDE]/[LATITUDE]</p>
+      <p>Example: <a href="/cimis/ll/-121.704/38.7240" target="_blank"><span class="host"></span>/cimis/ll/-121.704/38.7240</a></p>
+    </div>
+
+    <h4 class="page-header">Install on Mobile</h4>
+    <div class="padding">
+      You can install this Spatial CIMIS app on your phone or tablet.  Once installed you
+      access the Spatial CIMIS from the icon on your home screen.
+
+      <h5>Chrome on Android</h5>
+      <p>Click the <i class="fa fa-ellipsis-v"></i> menu icon, then click 'Add to Home Screen'</p>
+
+      <h5>Safari on iOS</h5>
+      <p>Click the <img src="/icons/bookmark.png"> bookmark icon, then click 'Add to Home Screen'</p>
+
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is : 'dwr-page-about',
+
+    attached : function() {
+      $(this).find('.host').html(window.location.protocol+'//'+window.location.host);
+    }
   })
 </script>
 <dom-module id="dwr-select-location" assetpath="/public/elements/">

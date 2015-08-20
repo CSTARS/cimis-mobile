@@ -29,13 +29,13 @@ module.exports = function (router) {
         return res.send({error: true, message: 'invalid url'});
       }
 
-      model.getByLatLng(parseInt(lat), parseInt(lng), function(err, data){
+      model.getByLatLng(parseFloat(lat), parseFloat(lng), function(err, data){
         if( err ) {
           return res.send({error: true, message: err});
         }
 
-        data.location.latitude = parseInt(lat);
-        data.location.longitude = parseInt(lng);
+        data.location.latitude = parseFloat(lat);
+        data.location.longitude = parseFloat(lng);
 
         res.send(data);
       });
