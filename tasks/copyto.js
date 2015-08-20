@@ -10,12 +10,16 @@ module.exports = function copyto(grunt) {
         build: {
             files: [{
                 cwd: 'public',
-                src: ['index.html'],
+                src: ['index.html','favicon.ico'],
                 dest: 'dist/'
             },
             {
                 cwd: 'public/bower_components/font-awesome',
                 src: ['fonts/**/*'],
+                dest: 'dist/'
+            },{
+                cwd: 'public',
+                src: ['icons/**/*'],
                 dest: 'dist/'
             }],
             options: {
