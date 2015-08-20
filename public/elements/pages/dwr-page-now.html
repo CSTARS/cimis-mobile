@@ -47,6 +47,7 @@
 
       // todo fix height for size
 
+
       this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
       this.chart.draw(this.dt, this.options);
     },
@@ -130,6 +131,11 @@
 
     paramToArray : function(param, data) {
       var array = [['Date', param]];
+
+      if( Object.keys(data).length === 0 ) {
+        array.push(['no data', 0]);
+        return array;
+      }
 
       this.sortedDates.forEach(function(date){
         array.push([date, data[date][param]]);

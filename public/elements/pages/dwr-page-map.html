@@ -102,9 +102,14 @@
       var yesterday = this.getYesterday();
       var data = this.cache[this.cid];
 
-      var eto = data.data[yesterday] ? data.data[yesterday].ETo : '';
-      this.overlay.setValue('<div>'+eto.toFixed(1)+'</div><div>mm</div>');
+      var html;
+      if( data.data[yesterday] && data.data[yesterday].ETo !== undefined ) {
+        html = '<div>'+data.data[yesterday].ETo.toFixed(1)+'</div><div>mm</div>';
+      } else {
+        html = '<i class="fa fa-ban" style="color:red"></i>';
+      }
 
+      this.overlay.setValue(html);
       this.fire('location-update', data);
     },
 

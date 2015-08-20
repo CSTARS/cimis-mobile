@@ -10239,9 +10239,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var yesterday = this.getYesterday();
       var data = this.cache[this.cid];
 
-      var eto = data.data[yesterday] ? data.data[yesterday].ETo : '';
-      this.overlay.setValue('<div>'+eto.toFixed(1)+'</div><div>mm</div>');
+      var html;
+      if( data.data[yesterday] && data.data[yesterday].ETo !== undefined ) {
+        html = '<div>'+data.data[yesterday].ETo.toFixed(1)+'</div><div>mm</div>';
+      } else {
+        html = '<i class="fa fa-ban" style="color:red"></i>';
+      }
 
+      this.overlay.setValue(html);
       this.fire('location-update', data);
     },
 
@@ -10319,6 +10324,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       // todo fix height for size
+
 
       this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
       this.chart.draw(this.dt, this.options);
@@ -10403,6 +10409,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     paramToArray : function(param, data) {
       var array = [['Date', param]];
+
+      if( Object.keys(data).length === 0 ) {
+        array.push(['no data', 0]);
+        return array;
+      }
 
       this.sortedDates.forEach(function(date){
         array.push([date, data[date][param]]);
