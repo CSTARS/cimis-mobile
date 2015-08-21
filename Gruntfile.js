@@ -28,8 +28,8 @@ module.exports = function (grunt) {
       },
       usemin: {
           html: ['dist/index.html'],
-    			options: {
-    				assetsDirs: ['dist']
+          options: {
+            assetsDirs: ['dist']
           }
       }
     });
@@ -50,6 +50,6 @@ module.exports = function (grunt) {
           'usemin',
         // end usemin
       'vulcanize']);
-    grunt.registerTask('test', [ 'jshint', 'mochacli' ]);
+    grunt.registerTask('watch', [ 'browserify:watch' ]);
 
 };

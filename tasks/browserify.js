@@ -2,32 +2,32 @@
 
 
 module.exports = function browserify(grunt) {
-	// Load task
-	grunt.loadNpmTasks('grunt-browserify');
+  // Load task
+  grunt.loadNpmTasks('grunt-browserify');
 
-	var files = {
-		'public/js/app.js': ['lib/shared/index.js']
-	};
-	var browserifyOptions = {
-		debug : true, // include source maps
-		standalone : 'CIMIS'
-	};
+  var files = {
+    'public/js/app.js': ['lib/shared/index.js']
+  };
+  var browserifyOptions = {
+    debug : true, // include source maps
+    standalone : 'CIMIS'
+  };
 
-	// Options
-	return {
-		build: {
-			files: files,
-			options: {
-				browserifyOptions : browserifyOptions
-			}
-		},
-		watch : {
-			files: files,
-			options: {
-				browserifyOptions : browserifyOptions,
-				keepAlive : true,
-				watch : true
-			}
-		}
-	};
+  // Options
+  return {
+    build: {
+      files: files,
+      options: {
+        browserifyOptions : browserifyOptions
+      }
+    },
+    watch : {
+      files: files,
+      options: {
+        browserifyOptions : browserifyOptions,
+        keepAlive : true,
+        watch : true
+      }
+    }
+  };
 };
