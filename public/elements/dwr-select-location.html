@@ -26,6 +26,7 @@
                     <label for="inputSearch" class="col-sm-3 control-label">My Location</label>
                     <div class="col-sm-9">
                         <a class="btn btn-primary" on-click="geolocate" id="geolocate"><i class="fa fa-crosshairs"></i> Geolocate</a>
+                        <div id="geolocateMsg"></div>
                     </div>
                 </div>
             </div>
@@ -223,10 +224,10 @@
       this.setLocating(true);
 
       if ( navigator.geolocation ) {
-        navigator.geolocation.getCurrentPosition(this.onGeolocate.bind(this));
+        navigator.geolocation.getCurrentPosition(this.onGeolocate.bind(this), this.onGeolocatError.bind(this));
       } else {
         this.setLocating(false);
-        alert("Geolocation is not supported by this browser.  Sorry :(");
+        this.$.geolocateMsg.innerHTML = '<div class="text text-danger">Geolocation is not supported by this browser.  Sorry :(</div>';
       }
     },
 
@@ -237,9 +238,16 @@
       $(this.$.popup).modal('hide');
     },
 
+    onGeolocatError : function(err) {
+      this.ga('data', 'location', 'geolocate-error');
+      this.$.geolocateMsg.innerHTML = '<div class="text text-danger">Geolocation Error. '+(err.message ? err.message : JSON.stringify(err))+'</div>';
+      this.setLocating(false);
+    },
+
     setLocating : function(locating) {
       this.geolocating = locating;
       if( locating ) {
+        this.$.geolocateMsg.innerHTML = '';
         this.$.geolocate.setAttribute('disabled', '');
         this.$.geolocate.innerHTML = '<i class="fa fa-crosshairs fa-spin"></i> Geolocating...';
       } else {
