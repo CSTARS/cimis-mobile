@@ -87,13 +87,15 @@
       this.geocoder = new google.maps.Geocoder();
 
       setTimeout(function(){
-        if( window.localStorage ) {
-          var lastLocation = window.localStorage.getItem('cimis-location');
-          if( lastLocation ) {
-            try {
-              this.fire('location-select', JSON.parse(lastLocation));
-            } catch(e) {}
-          }
+        if( !window.localStorage ) return;
+
+        var lastLocation = window.localStorage.getItem('cimis-location');
+        if( lastLocation ) {
+          try {
+            var lastLocation = JSON.parse(lastLocation);
+            if( lastLocation.latitude === undefined ) return;
+            this.fire('location-select', lastLocation);
+          } catch(e) {}
         }
       }.bind(this), 200);
     },

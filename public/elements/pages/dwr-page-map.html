@@ -56,7 +56,10 @@
 
     setLocation : function(e){
       if( window.localStorage ) {
-        window.localStorage.setItem('cimis-location', JSON.stringify(e));
+        window.localStorage.setItem('cimis-location', JSON.stringify({
+          latitude : e.latitude,
+          longitude : e.longitude
+        }));
       }
 
       this.latLng = new google.maps.LatLng(e.latitude, e.longitude);
@@ -132,9 +135,9 @@
         google.maps.event.trigger(this.$.map, 'resize');
 
         if( this.first && this.latLng ) {
+          this.first = false;
           this.zoomToGrid();
         }
-        this.first = false;
     },
 
     ga : function(name, type, value) {

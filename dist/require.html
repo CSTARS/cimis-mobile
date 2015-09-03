@@ -10193,7 +10193,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     setLocation : function(e){
       if( window.localStorage ) {
-        window.localStorage.setItem('cimis-location', JSON.stringify(e));
+        window.localStorage.setItem('cimis-location', JSON.stringify({
+          latitude : e.latitude,
+          longitude : e.longitude
+        }));
       }
 
       this.latLng = new google.maps.LatLng(e.latitude, e.longitude);
@@ -10269,9 +10272,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         google.maps.event.trigger(this.$.map, 'resize');
 
         if( this.first && this.latLng ) {
+          this.first = false;
           this.zoomToGrid();
         }
-        this.first = false;
     },
 
     ga : function(name, type, value) {
@@ -10679,13 +10682,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.geocoder = new google.maps.Geocoder();
 
       setTimeout(function(){
-        if( window.localStorage ) {
-          var lastLocation = window.localStorage.getItem('cimis-location');
-          if( lastLocation ) {
-            try {
-              this.fire('location-select', JSON.parse(lastLocation));
-            } catch(e) {}
-          }
+        if( !window.localStorage ) return;
+
+        var lastLocation = window.localStorage.getItem('cimis-location');
+        if( lastLocation ) {
+          try {
+            var lastLocation = JSON.parse(lastLocation);
+            if( lastLocation.latitude === undefined ) return;
+            this.fire('location-select', lastLocation);
+          } catch(e) {}
         }
       }.bind(this), 200);
     },
