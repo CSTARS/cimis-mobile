@@ -1,8 +1,11 @@
 <dom-module name="dwr-page-now">
   <template>
-    <div id="root" style="padding: 15px">
+    <div id="warning" style="padding: 15px">
       <div class="text text-danger well" style="font-size: 20px"><i class="fa fa-warning"></i> Please select a location first</div>
     </div>
+
+    <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
+    <div id="chartRoot"></div>
   </template>
 </dom-module>
 
@@ -11,28 +14,81 @@
     is : 'dwr-page-now',
 
     ready : function() {
-      this.params = ['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2'];
-      this.selected = null;
+      this.params = ['Rnl','Rso','U2', 'ETo', 'Tdew','Tn','Tx',];
+      this.data = null;
+
+      this.chartOptions = {
+          title : '',
+          height : 600,
+          vAxes: [{
+                  title: "Radiation Short/Long (MW/h); Wind Speed (m/s); Temperature Min/Max/Dew (^C);",
+                  minValue : -5,
+                  maxValue : 35
+                },{
+                  title: "ETo (mm)",
+                  minValue : 0,
+                  maxValue : 10
+                }],
+          hAxis: {title: "Date"},
+          seriesType: "bars",
+          series: {
+              0: {type: "line", targetAxisIndex:0},
+              1: {type: "line", targetAxisIndex:0},
+              2: {type: "line", targetAxisIndex:0},
+              3: {type: "area", targetAxisIndex:1}
+
+          },
+          legend : {
+            maxLines : 3
+          }
+      }
 
       $(window).on('resize', this.redraw.bind(this));
     },
 
+    createDataTable : function() {
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'Date');
+
+        for( var i = 0; i < this.params.length; i++ ) {
+          var key = this.params[i];
+          dt.addColumn('number', key+' ('+CIMIS.definitions[key].label+' '+CIMIS.definitions[key].units+')');
+        }
+
+        this.sortedDates.forEach(function(date){
+          var d = this.data.data[date];
+
+          var arr = [date];
+          for( var i = 0; i < this.params.length; i++ ) {
+            arr.push(d[this.params[i]] || 0);
+          }
+
+          dt.addRow(arr);
+        }.bind(this));
+
+        return dt;
+    },
+
     render : function(data) {
-      if( !this.selected ) {
-        this.firstRender();
-        //this.chartRoot.html(this.renderParam(this.selected, this.data.data));
+      if( this.data == null ) {
+        this.$.warning.innerHTML = '';
+        this.$.gridLabel.style.display = 'block';
       }
+      //if( !this.selected ) {
+      //  this.firstRender();
+      //}
 
       if( data ) {
         this.data = data;
         this.sortedDates = CIMIS.utils.sortDates(data.data);
-        this.gridLabel.html('<a class="btn btn-link" href="/cimis/'+data.location.row+'/'+data.location.col+
-          '" target="_blank"><i class="fa fa-link"></i> '+data.location.row+', '+data.location.col+'</a>');
+        this.$.gridLabel.innerHTML = 'Cell: '+data.location.row+', '+data.location.col +
+          ' <a class="pull-right" href="/cimis/'+data.location.row+'/'+data.location.col+
+          '" target="_blank">API</a>';
       }
 
       if( !this.chart ) {
-        this.chart = new google.visualization.LineChart(this.chartRoot[0]);
-        this.options = {
+        this.chart = new google.visualization.ComboChart(this.$.chartRoot);
+        /*this.options = {
             legend : {
                 position : 'none'
             },
@@ -42,14 +98,14 @@
             },
             height: 400,
             interpolateNulls : true
-        };
+        };*/
       }
 
-      // todo fix height for size
 
+      //this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
+      this.dt = this.createDataTable();
 
-      this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
-      this.chart.draw(this.dt, this.options);
+      this.chart.draw(this.dt, this.chartOptions);
     },
 
     firstRender : function() {
@@ -92,7 +148,7 @@
 
     redraw : function() {
       if( !this.chart ) return;
-      this.chart.draw(this.dt, this.options);
+      this.chart.draw(this.dt, this.chartOptions);
     },
 
     renderParam : function(param, data) {

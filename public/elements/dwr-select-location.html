@@ -84,8 +84,18 @@
 
     init : function(map) {
       this.map = map;
-      //this.places = new google.maps.places.PlacesService(this.map);
       this.geocoder = new google.maps.Geocoder();
+
+      setTimeout(function(){
+        if( window.localStorage ) {
+          var lastLocation = window.localStorage.getItem('cimis-location');
+          if( lastLocation ) {
+            try {
+              this.fire('location-select', JSON.parse(lastLocation));
+            } catch(e) {}
+          }
+        }
+      }.bind(this), 200);
     },
 
     show : function() {

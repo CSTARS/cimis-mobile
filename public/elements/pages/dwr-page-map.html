@@ -25,6 +25,7 @@
 
     ready : function() {
       this.cache = {};
+      this.first = true;
 
       var mapOptions = {
         center: { lat: 35.033291, lng: -120.961762},
@@ -54,6 +55,10 @@
     },
 
     setLocation : function(e){
+      if( window.localStorage ) {
+        window.localStorage.setItem('cimis-location', JSON.stringify(e));
+      }
+
       this.latLng = new google.maps.LatLng(e.latitude, e.longitude);
       this.getData();
       this.zoomToGrid();
@@ -125,6 +130,11 @@
     onShow : function() {
         if( !window.google ) return;
         google.maps.event.trigger(this.$.map, 'resize');
+
+        if( this.first && this.latLng ) {
+          this.zoomToGrid();
+        }
+        this.first = false;
     },
 
     ga : function(name, type, value) {

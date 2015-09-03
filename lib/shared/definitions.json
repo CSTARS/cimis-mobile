@@ -1,0 +1,34 @@
+{
+  "ETo" : {
+    "label" : "Reference Evapotranspiration",
+    "units" : "mm"
+  },
+  "Tdew" : {
+    "label" : "Dewpoint Temperature",
+    "units" : "C"
+  },
+  "Tx" : {
+    "label" : "Max Temperature",
+    "units" : "C"
+  },
+  "Tn" : {
+    "label" : "Min Temperature",
+    "units" : "C"
+  },
+  "K" : {
+    "label" : "Clear Sky Factor",
+    "units" : ""
+  },
+  "Rnl" : {
+    "label" : "Long Wave Radiation",
+    "units" : "MW/h"
+  },
+  "Rso" : {
+    "label" : "Shortwave Radiation",
+    "units" : "MW/h"
+  },
+  "U2" : {
+    "label" : "Wind Speed",
+    "units" : "m/s"
+  }
+}

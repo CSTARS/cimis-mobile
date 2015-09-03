@@ -10162,6 +10162,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     ready : function() {
       this.cache = {};
+      this.first = true;
 
       var mapOptions = {
         center: { lat: 35.033291, lng: -120.961762},
@@ -10191,6 +10192,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     setLocation : function(e){
+      if( window.localStorage ) {
+        window.localStorage.setItem('cimis-location', JSON.stringify(e));
+      }
+
       this.latLng = new google.maps.LatLng(e.latitude, e.longitude);
       this.getData();
       this.zoomToGrid();
@@ -10262,6 +10267,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     onShow : function() {
         if( !window.google ) return;
         google.maps.event.trigger(this.$.map, 'resize');
+
+        if( this.first && this.latLng ) {
+          this.zoomToGrid();
+        }
+        this.first = false;
     },
 
     ga : function(name, type, value) {
@@ -10283,9 +10293,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </script>
 <dom-module name="dwr-page-now">
   <template>
-    <div id="root" style="padding: 15px">
+    <div id="warning" style="padding: 15px">
       <div class="text text-danger well" style="font-size: 20px"><i class="fa fa-warning"></i> Please select a location first</div>
     </div>
+
+    <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
+    <div id="chartRoot"></div>
   </template>
 </dom-module>
 
@@ -10294,28 +10307,81 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is : 'dwr-page-now',
 
     ready : function() {
-      this.params = ['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2'];
-      this.selected = null;
+      this.params = ['Rnl','Rso','U2', 'ETo', 'Tdew','Tn','Tx',];
+      this.data = null;
+
+      this.chartOptions = {
+          title : '',
+          height : 600,
+          vAxes: [{
+                  title: "Radiation Short/Long (MW/h); Wind Speed (m/s); Temperature Min/Max/Dew (^C);",
+                  minValue : -5,
+                  maxValue : 35
+                },{
+                  title: "ETo (mm)",
+                  minValue : 0,
+                  maxValue : 10
+                }],
+          hAxis: {title: "Date"},
+          seriesType: "bars",
+          series: {
+              0: {type: "line", targetAxisIndex:0},
+              1: {type: "line", targetAxisIndex:0},
+              2: {type: "line", targetAxisIndex:0},
+              3: {type: "area", targetAxisIndex:1}
+
+          },
+          legend : {
+            maxLines : 3
+          }
+      }
 
       $(window).on('resize', this.redraw.bind(this));
     },
 
+    createDataTable : function() {
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'Date');
+
+        for( var i = 0; i < this.params.length; i++ ) {
+          var key = this.params[i];
+          dt.addColumn('number', key+' ('+CIMIS.definitions[key].label+' '+CIMIS.definitions[key].units+')');
+        }
+
+        this.sortedDates.forEach(function(date){
+          var d = this.data.data[date];
+
+          var arr = [date];
+          for( var i = 0; i < this.params.length; i++ ) {
+            arr.push(d[this.params[i]] || 0);
+          }
+
+          dt.addRow(arr);
+        }.bind(this));
+
+        return dt;
+    },
+
     render : function(data) {
-      if( !this.selected ) {
-        this.firstRender();
-        //this.chartRoot.html(this.renderParam(this.selected, this.data.data));
+      if( this.data == null ) {
+        this.$.warning.innerHTML = '';
+        this.$.gridLabel.style.display = 'block';
       }
+      //if( !this.selected ) {
+      //  this.firstRender();
+      //}
 
       if( data ) {
         this.data = data;
         this.sortedDates = CIMIS.utils.sortDates(data.data);
-        this.gridLabel.html('<a class="btn btn-link" href="/cimis/'+data.location.row+'/'+data.location.col+
-          '" target="_blank"><i class="fa fa-link"></i> '+data.location.row+', '+data.location.col+'</a>');
+        this.$.gridLabel.innerHTML = 'Cell: '+data.location.row+', '+data.location.col +
+          ' <a class="pull-right" href="/cimis/'+data.location.row+'/'+data.location.col+
+          '" target="_blank">API</a>';
       }
 
       if( !this.chart ) {
-        this.chart = new google.visualization.LineChart(this.chartRoot[0]);
-        this.options = {
+        this.chart = new google.visualization.ComboChart(this.$.chartRoot);
+        /*this.options = {
             legend : {
                 position : 'none'
             },
@@ -10325,14 +10391,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             height: 400,
             interpolateNulls : true
-        };
+        };*/
       }
 
-      // todo fix height for size
 
+      //this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
+      this.dt = this.createDataTable();
 
-      this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
-      this.chart.draw(this.dt, this.options);
+      this.chart.draw(this.dt, this.chartOptions);
     },
 
     firstRender : function() {
@@ -10375,7 +10441,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     redraw : function() {
       if( !this.chart ) return;
-      this.chart.draw(this.dt, this.options);
+      this.chart.draw(this.dt, this.chartOptions);
     },
 
     renderParam : function(param, data) {
@@ -10485,6 +10551,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <p>Click the <img src="/icons/bookmark.png"> bookmark icon, then click 'Add to Home Screen'</p>
     </div>
 
+    <h4 class="page-header">Spatial CIMIS Parameter</h4>
+    <div class="padding" id="parameters"></div>
+
     <h4 class="page-header">Spatial CIMIS Grid</h4>
     <div class="padding">
       <div><a href="http://epsg.io/3310" target="_blank">EPSG:3310</a></div>
@@ -10503,6 +10572,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     attached : function() {
       $(this).find('.host').html(window.location.protocol+'//'+window.location.host);
+      this.createParamsTable();
+    },
+
+    createParamsTable : function() {
+      var table =
+        '<table class="table">' +
+          '<tr>' +
+            '<th>Parameter</th><th>Name</th><th>Units</th>'+
+          '</tr>';
+
+      for( var param in CIMIS.definitions ) {
+        table += '<tr>'+
+          '<td>'+param+'</td><td>'+CIMIS.definitions[param].label+'</td><td>'+CIMIS.definitions[param].units+'</td></tr>';
+      }
+      this.$.parameters.innerHTML = table+'</table>';
     }
   })
 </script>
@@ -10592,8 +10676,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     init : function(map) {
       this.map = map;
-      //this.places = new google.maps.places.PlacesService(this.map);
       this.geocoder = new google.maps.Geocoder();
+
+      setTimeout(function(){
+        if( window.localStorage ) {
+          var lastLocation = window.localStorage.getItem('cimis-location');
+          if( lastLocation ) {
+            try {
+              this.fire('location-select', JSON.parse(lastLocation));
+            } catch(e) {}
+          }
+        }
+      }.bind(this), 200);
     },
 
     show : function() {
