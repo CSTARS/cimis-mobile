@@ -1,10 +1,26 @@
 <dom-module name="dwr-page-now">
+  <style>
+    .chart:first-child {
+      margin-top: 50px;
+    }
+    .chart {
+      margin: 100px 25px 0 25px;
+    }
+    @media(max-width: 768px) {
+      .chart {
+        margin: 75px 10px 0 10px;
+      }
+    }
+  </style>
+
   <template>
     <div id="warning" style="padding: 15px">
       <div class="text text-danger well" style="font-size: 20px"><i class="fa fa-warning"></i> Please select a location first</div>
     </div>
 
     <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
+
+    <div id="charts" style="padding:15px"></div>
     <div id="chartRoot"></div>
   </template>
 </dom-module>
@@ -43,30 +59,140 @@
           }
       }
 
-      $(window).on('resize', this.redraw.bind(this));
+      this.options = [
+        {
+          chart : {
+            title : 'ETo - Evapotranspiration (mm)'
+          },
+          height : 550,
+          legend : {
+            position : 'none'
+          }
+        },
+        {
+          chart : {
+            title : 'Temperature Min/Max/Dew (^C)'
+          },
+          height : 550,
+          legend : {
+            position : 'none'
+          }
+        },
+        {
+          chart : {
+            title : 'Radiation Short/Long (MW/h)'
+          },
+          height : 550,
+          legend : {
+            position : 'none'
+          }
+        },
+        {
+          chart : {
+            title : 'Wind Speed (m/s)'
+          },
+          height : 550,
+          legend : {
+            position : 'none'
+          }
+        }
+      ];
+
+      this.charts = null;
+      this.datatables = [];
+      this.resize();
+
+      $(window).on('resize', function(){
+        this.resize();
+        this.redraw();
+      }.bind(this));
     },
 
-    createDataTable : function() {
-        var dt = new google.visualization.DataTable();
-        dt.addColumn('string', 'Date');
+    resize : function(){
+      var size = 550;
+      if( $(window).width() < 768 ) {
+        size = 450;
+      }
 
-        for( var i = 0; i < this.params.length; i++ ) {
-          var key = this.params[i];
-          dt.addColumn('number', key+' ('+CIMIS.definitions[key].label+' '+CIMIS.definitions[key].units+')');
-        }
+      for( var i = 0; i < this.options.length; i++ ) {
+        this.options[i].height = size;
+      }
+    },
 
-        this.sortedDates.forEach(function(date){
-          var d = this.data.data[date];
+    createDataTables : function() {
+      this.datatables = [];
+      var d, arr;
 
-          var arr = [date];
-          for( var i = 0; i < this.params.length; i++ ) {
-            arr.push(d[this.params[i]] || 0);
-          }
+      // eto chart
+      dt = new google.visualization.DataTable();
+      dt.addColumn('string', 'Date');
+      dt.addColumn('number', 'ETo');
 
-          dt.addRow(arr);
-        }.bind(this));
+      this.sortedDates.forEach(function(date){
+        d = this.data.data[date];
+        arr = [date];
 
-        return dt;
+        arr.push(d.ETo || 0);
+
+        dt.addRow(arr);
+      }.bind(this));
+
+      this.datatables.push(dt);
+
+      // temp chart
+      dt = new google.visualization.DataTable();
+      dt.addColumn('string', 'Date');
+      dt.addColumn('number', 'Dewpoint Temperature');
+      dt.addColumn('number', 'Max Temperature');
+      dt.addColumn('number', 'Min Temperature');
+
+      this.sortedDates.forEach(function(date){
+        d = this.data.data[date];
+        arr = [date];
+
+        arr.push(d.Tdew || 0);
+        arr.push(d.Tx || 0);
+        arr.push(d.Tn || 0);
+
+        dt.addRow(arr);
+      }.bind(this));
+
+      this.datatables.push(dt);
+
+      // Radiation chart
+      dt = new google.visualization.DataTable();
+      dt.addColumn('string', 'Date');
+      dt.addColumn('number', 'Longwave Radiation');
+      dt.addColumn('number', 'Shortwave Radiation');
+
+      this.sortedDates.forEach(function(date){
+        d = this.data.data[date];
+        arr = [date];
+
+        arr.push(d.Rnl || 0);
+        arr.push(d.Rso || 0);
+
+        dt.addRow(arr);
+      }.bind(this));
+
+      this.datatables.push(dt);
+
+      // wind speed chart
+      dt = new google.visualization.DataTable();
+      dt.addColumn('string', 'Date');
+      dt.addColumn('number', 'Wind Speed');
+
+
+      this.sortedDates.forEach(function(date){
+        d = this.data.data[date];
+        arr = [date];
+
+        arr.push(d.U2 || 0);
+
+        dt.addRow(arr);
+      }.bind(this));
+
+      this.datatables.push(dt);
     },
 
     render : function(data) {
@@ -74,9 +200,7 @@
         this.$.warning.innerHTML = '';
         this.$.gridLabel.style.display = 'block';
       }
-      //if( !this.selected ) {
-      //  this.firstRender();
-      //}
+
 
       if( data ) {
         this.data = data;
@@ -86,60 +210,23 @@
           '" target="_blank">API</a>';
       }
 
-      if( !this.chart ) {
-        this.chart = new google.visualization.ComboChart(this.$.chartRoot);
-        /*this.options = {
-            legend : {
-                position : 'none'
-            },
-            animation: {
-              duration: 700,
-              easing: 'out',
-            },
-            height: 400,
-            interpolateNulls : true
-        };*/
+      this.createDataTables();
+
+      if( !this.charts ) {
+        this.charts = [];
+        this.$.charts.innerHTML = '';
+
+        for( var i = 0; i < this.datatables.length; i++ ) {
+          var root = document.createElement('div');
+          root.className = 'chart style-scope dwr-page-now';
+          this.$.charts.appendChild(root);
+          this.charts.push(new google.charts.Line(root));
+        }
       }
 
-
-      //this.dt = google.visualization.arrayToDataTable(this.paramToArray(this.selected, this.data.data));
-      this.dt = this.createDataTable();
-
-      this.chart.draw(this.dt, this.chartOptions);
-    },
-
-    firstRender : function() {
-      this.selected = this.params[0];
-
-      var html =
-        '<div class="form-horizontal">' +
-          '<div class="form-group">'+
-            '<label class="col-sm-2 control-label">Parameter</label>'+
-            '<div class="col-sm-10">'+
-              '<select class="form-control">';
-
-      for( var i = 0; i < this.params.length; i++ ) {
-        html += '<option value="'+this.params[i]+'">'+this.params[i]+'</option>';
+      for( var i = 0; i < this.datatables.length; i++ ) {
+        this.charts[i].draw(this.datatables[i], this.options[i]);
       }
-      html += '</select></div></div>';
-
-      html +=
-      '<div class="form-group">'+
-        '<label class="col-sm-2 control-label">CIMIS Grid</label>'+
-        '<div class="col-sm-10">'+
-          '<div id="grid-label"></div>'+
-        '</div>'+
-      '</div></div>'+
-      '<div id="chart-root"></div>';
-      var ele = $(this.$.root).html(html);
-
-      ele.find('select').on('change', function(e){
-        this.selected = $(e.currentTarget).val();
-        this.render();
-      }.bind(this));
-
-      this.chartRoot = ele.find('#chart-root');
-      this.gridLabel = ele.find('#grid-label');
     },
 
     onShow : function(){
@@ -147,35 +234,12 @@
     },
 
     redraw : function() {
-      if( !this.chart ) return;
-      this.chart.draw(this.dt, this.chartOptions);
-    },
+      if( !this.charts ) return;
 
-    renderParam : function(param, data) {
-      var html = '<h4 class="page-header">'+param+'</h4>';
-      html += '<div class="row"><div class="col-md-6"><table class="table">';
-
-      this.sortedDates.forEach(function(date){
-        html += '<tr><td>'+date+'</td><td>'+(data[date][param] !== undefined ? data[date][param] : 'N/A')+'</td></tr>';
-      });
-      html += '</table></div><div class="col-md-6"><div id="'+param+'-chart" style="height: 500px"></div></div></div>';
-      return html;
-    },
-
-    paramToArray : function(param, data) {
-      var array = [['Date', param]];
-
-      if( Object.keys(data).length === 0 ) {
-        array.push(['no data', 0]);
-        return array;
+      for( var i = 0; i < this.datatables.length; i++ ) {
+        this.charts[i].draw(this.datatables[i], this.options[i]);
       }
-
-      this.sortedDates.forEach(function(date){
-        array.push([date, data[date][param]]);
-      });
-
-      return array;
-    },
+    }
 
   })
 </script>

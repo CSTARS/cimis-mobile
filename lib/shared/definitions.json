@@ -20,7 +20,7 @@
     "units" : ""
   },
   "Rnl" : {
-    "label" : "Long Wave Radiation",
+    "label" : "Longwave Radiation",
     "units" : "MW/h"
   },
   "Rso" : {
