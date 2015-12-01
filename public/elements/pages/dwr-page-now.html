@@ -20,7 +20,7 @@
 
     <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
 
-    <div id="charts" style="padding:15px"></div>
+    <div id="charts" style="margin: 0 -25px"></div>
     <div id="chartRoot"></div>
   </template>
 </dom-module>
@@ -61,36 +61,36 @@
 
       this.options = [
         {
-          chart : {
-            title : 'ETo - Evapotranspiration (mm)'
-          },
+          //chart : {
+            title : 'ETo - Evapotranspiration (mm)',
+          //},
           height : 550,
           legend : {
             position : 'none'
           }
         },
         {
-          chart : {
-            title : 'Temperature Min/Max/Dew (^C)'
-          },
+          //chart : {
+            title : 'Temperature Min/Max/Dew (^C)',
+          //},
           height : 550,
           legend : {
             position : 'none'
           }
         },
         {
-          chart : {
-            title : 'Radiation Short/Long (MW/h)'
-          },
+          //chart : {
+            title : 'Radiation Short/Long (MW/h)',
+          //},
           height : 550,
           legend : {
             position : 'none'
           }
         },
         {
-          chart : {
-            title : 'Wind Speed (m/s)'
-          },
+          //chart : {
+            title : 'Wind Speed (m/s)',
+          //},
           height : 550,
           legend : {
             position : 'none'
@@ -220,7 +220,8 @@
           var root = document.createElement('div');
           root.className = 'chart style-scope dwr-page-now';
           this.$.charts.appendChild(root);
-          this.charts.push(new google.charts.Line(root));
+          //this.charts.push(new google.charts.Line(root));
+          this.charts.push(new google.visualization.LineChart(root));
         }
       }
 

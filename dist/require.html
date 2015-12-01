@@ -10032,11 +10032,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </paper-toolbar>
 
         <div class="fullbleed" id="pages">
-          <dwr-page-map id="map" class="animated fadeInRight" on-location-update="setLocation"></dwr-page-map>
-          <dwr-page-now id="now" class="animated fadeInRight"></dwr-page-now>
+          <dwr-page-map id="map" class="animated fadeIn" on-location-update="setLocation"></dwr-page-map>
+          <dwr-page-now id="now" class="animated fadeIn"></dwr-page-now>
           <!--<dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>-->
           <!--<dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>-->
-          <dwr-page-about id="about" class="animated fadeInRight"></dwr-page-about>
+          <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
         </div>
 
         <dwr-select-location id="selectLocation" on-location-select="onLocationSelected"></dwr-select-location>
@@ -10316,7 +10316,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
 
-    <div id="charts" style="padding:15px"></div>
+    <div id="charts" style="margin: 0 -25px"></div>
     <div id="chartRoot"></div>
   </template>
 </dom-module>
@@ -10357,36 +10357,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       this.options = [
         {
-          chart : {
-            title : 'ETo - Evapotranspiration (mm)'
-          },
+          //chart : {
+            title : 'ETo - Evapotranspiration (mm)',
+          //},
           height : 550,
           legend : {
             position : 'none'
           }
         },
         {
-          chart : {
-            title : 'Temperature Min/Max/Dew (^C)'
-          },
+          //chart : {
+            title : 'Temperature Min/Max/Dew (^C)',
+          //},
           height : 550,
           legend : {
             position : 'none'
           }
         },
         {
-          chart : {
-            title : 'Radiation Short/Long (MW/h)'
-          },
+          //chart : {
+            title : 'Radiation Short/Long (MW/h)',
+          //},
           height : 550,
           legend : {
             position : 'none'
           }
         },
         {
-          chart : {
-            title : 'Wind Speed (m/s)'
-          },
+          //chart : {
+            title : 'Wind Speed (m/s)',
+          //},
           height : 550,
           legend : {
             position : 'none'
@@ -10516,7 +10516,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var root = document.createElement('div');
           root.className = 'chart style-scope dwr-page-now';
           this.$.charts.appendChild(root);
-          this.charts.push(new google.charts.Line(root));
+          //this.charts.push(new google.charts.Line(root));
+          this.charts.push(new google.visualization.LineChart(root));
         }
       }
 
@@ -10618,7 +10619,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <p>Click the <img src="/icons/bookmark.png"> bookmark icon, then click 'Add to Home Screen'</p>
     </div>
 
-    <h4 class="page-header">Spatial CIMIS Parameter</h4>
+    <h4 class="page-header">Spatial CIMIS Parameters</h4>
     <div class="padding" id="parameters"></div>
 
     <h4 class="page-header">Spatial CIMIS Grid</h4>

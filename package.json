@@ -8,9 +8,9 @@
     "test": "grunt test",
     "build": "grunt build",
     "all": "npm run build && npm run test",
-    "start-dev": "node server.js --dev",
+    "dev": "node server.js --dev",
     "import": "node utils/import.js",
-    "watch-dev": "grunt watch"
+    "watch": "grunt watch"
   },
   "dependencies": {
     "async": "^1.4.2",
