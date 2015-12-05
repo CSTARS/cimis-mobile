@@ -58,11 +58,14 @@
 
             ga('create', 'UA-66570631-1', 'auto');
             ga('send', 'pageview',{userId: window.userType || 'unknown'});
+            ga('send', 'event', 'pageview', window.userType || 'unknown', location.pathname + location.search + location.hash, 1);
+
             $(window).on('hashchange',function(){
               ga('send','pageview',{
                 page: location.pathname + location.search + location.hash,
                 userId: window.userType || 'unknown'
               });
+              ga('send', 'event', 'pageview', window.userType || 'unknown', location.pathname + location.search + location.hash, 1);
             });
           }
         </script>
