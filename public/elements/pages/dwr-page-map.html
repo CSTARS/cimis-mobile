@@ -111,7 +111,7 @@
     fireLocationUpdate : function() {
       var data = this.cache[this.cid];
 
-      this.ga('data', 'grid-view', this.cid);
+      this.ga('grid-view', this.cid, window.userType || 'unknown');
 
       var html;
       if( data.data[this.yesterday] && data.data[this.yesterday].ETo !== undefined ) {
