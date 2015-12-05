@@ -34,6 +34,23 @@
       </ul>
     </div>
 
+    <h4 class="page-header">Survey</h4>
+    <div class="help-block">Please help us understand who is using this app by marking the appropriate selection below.</div>
+
+    <div class="padding">
+      <div class="form-horizontal">
+        <div class="form-group">
+          <label for="userTypeInput" class="col-sm-2 control-label">I am:</label>
+          <div class="col-sm-10">
+            <div class="checkbox"> <label> <input type="radio" name="userType" value="farmer" on-click="updateUserType"> A Farmer</label> </div>
+            <div class="checkbox"> <label> <input type="radio" name="userType" value="public" on-click="updateUserType"> General Public</label> </div>
+            <div class="checkbox"> <label> <input type="radio" name="userType" checked value="unknown" on-click="updateUserType"> Prefer not to say</label> </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <h4 class="page-header">API</h4>
     <div class="padding">
       <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls.  All
@@ -88,6 +105,10 @@
     attached : function() {
       $(this).find('.host').html(window.location.protocol+'//'+window.location.host);
       this.createParamsTable();
+
+      if( window.userType ) {
+        this.querySelector('input[value="'+window.userType+'"]').checked = true;
+      }
     },
 
     createParamsTable : function() {
@@ -102,6 +123,13 @@
           '<td>'+param+'</td><td>'+CIMIS.definitions[param].label+'</td><td>'+CIMIS.definitions[param].units+'</td></tr>';
       }
       this.$.parameters.innerHTML = table+'</table>';
+    },
+
+    updateUserType : function(e) {
+      var type = e.currentTarget.value;
+
+      window.localStorage.setItem('userType', type);
+      window.userType = type;
     }
   })
 </script>
