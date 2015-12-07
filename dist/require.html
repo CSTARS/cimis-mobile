@@ -10016,6 +10016,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a class="btn btn-link btn-lg" href="#now"><i class="fa fa-area-chart"></i> Data</a>
           <!--<a class="btn btn-link" id="weeklyBtn">Weekly</a>-->
           <a class="btn btn-link btn-lg" href="#map"><i class="fa fa-map-o"></i> Map</a>
+          <a class="btn btn-link btn-lg" href="#about/install" id="install"><i class="fa fa-mobile"></i> Install on Mobile</a>
+          <a class="btn btn-link btn-lg" href="#about/survey"><i class="fa fa-edit"></i> Survey</a>
           <a class="btn btn-link btn-lg" href="#about"><i class="fa fa-info-circle"></i> About</a>
           <!--<a class="btn btn-link" id="settingBtn">Setting</a>-->
         </div>
@@ -10063,6 +10065,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     attached : function() {
       this.$.selectLocation.init(this.$.map.map);
+      if( window.standaloneMode ) {
+        this.$.install.style.display = 'none';
+      }
     },
 
     toggle : function() {
@@ -10071,7 +10076,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     updatePage : function() {
       var hash = window.location.hash || '';
-      this.page = hash.replace(/#/,'');
+      var parts = hash.replace(/#/,'').split('/');
+      this.page = parts.splice(0, 1)[0];
 
       if( this.page == 'settings' || this.page == 'map' ) {
           this.showTabs = false;
@@ -10084,7 +10090,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       $(this.$.pages).children().hide();
 
       this.$[this.page].style.display = 'block'
-      if( this.$[this.page].onShow  ) this.$[this.page].onShow();
+      if( this.$[this.page].onShow  ) this.$[this.page].onShow(parts);
 
       this.$.drawer.closeDrawer();
     },
@@ -10315,6 +10321,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
     <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
+    <div id="docs" style="margin: 0 10px; display:none; text-align:right"><a href="#about"><i class="fa fa-book"></i> API Documentation</a></div>
 
     <div id="charts" style="margin: 0 -25px"></div>
     <div id="chartRoot"></div>
@@ -10495,13 +10502,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if( this.data == null ) {
         this.$.warning.innerHTML = '';
         this.$.gridLabel.style.display = 'block';
+        this.$.docs.style.display = 'block';
       }
 
 
       if( data ) {
         this.data = data;
         this.sortedDates = CIMIS.utils.sortDates(data.data);
-        this.$.gridLabel.innerHTML = 'Cell: '+data.location.row+', '+data.location.col +
+        this.$.gridLabel.innerHTML = '<i class="fa fa-map-marker"></i> Cell: '+data.location.row+', '+data.location.col +
           ' <a class="pull-right" href="/cimis/'+data.location.row+'/'+data.location.col+
           '" target="_blank">API</a>';
       }
@@ -10569,7 +10577,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 
   <template>
-    <h4 class="page-header">About</h4>
+
+    <div style="padding: 40px 10px 0 10px; text-align:center; font-size: 18px; color: #ccc">
+      <a href="#about">About</a> | <a href="#about/survey">Survey</a> | <a href="#about/api">API</a> |
+      <a href="#about/install">Install</a> | <a href="#about/parameters">Parameters</a> | <a href="#about/grid">Grid</a>
+    </div>
+
+    <h4 class="page-header" id="about-header">About</h4>
     <div class="padding">
 
       <div>The California Irrigation Management Information System (CIMIS) is designed
@@ -10587,7 +10601,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </ul>
     </div>
 
-    <h4 class="page-header">Survey</h4>
+    <h4 class="page-header" id="survey-header">Survey</h4>
     <div class="help-block">Please help us understand who is using this app by marking the appropriate selection below.</div>
 
     <div class="padding">
@@ -10604,7 +10618,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </div>
 
-    <h4 class="page-header">API</h4>
+    <h4 class="page-header" id="api-header">API</h4>
     <div class="padding">
       <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls.  All
         API responses are <a href="http://www.json.org/" target="_blanl">JSON</a> formatted.</div>
@@ -10624,7 +10638,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <p><a href="/cimis/dates" target="_blank"><span class="host"></span>/cimis/dates</a></p>
     </div>
 
-    <h4 class="page-header">Install on Mobile</h4>
+    <h4 class="page-header" id="install-header">Install on Mobile</h4>
     <div class="padding">
       You can install this Spatial CIMIS app on your phone or tablet.  Once installed you
       access the Spatial CIMIS from the icon on your home screen.
@@ -10636,10 +10650,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <p>Click the <img src="/icons/bookmark.png"> bookmark icon, then click 'Add to Home Screen'</p>
     </div>
 
-    <h4 class="page-header">Spatial CIMIS Parameters</h4>
+    <h4 class="page-header" id="parameters-header">Spatial CIMIS Parameters</h4>
     <div class="padding" id="parameters"></div>
 
-    <h4 class="page-header">Spatial CIMIS Grid</h4>
+    <h4 class="page-header" id="grid-header">Spatial CIMIS Grid</h4>
     <div class="padding">
       <div><a href="http://epsg.io/3310" target="_blank">EPSG:3310</a></div>
       <div><b>Number of Columns:</b> 510</div>
@@ -10661,6 +10675,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       if( window.userType ) {
         this.querySelector('input[value="'+window.userType+'"]').checked = true;
+      }
+
+      if( window.location.hash.match(/about/) ) {
+        setTimeout(function(){
+          var parts = window.location.hash.split('/');
+          parts.splice(0, 1);
+          this.onShow(parts);
+        }.bind(this), 400);
+      }
+    },
+
+    onShow : function(params) {
+      if( params.length === 0 ) {
+        $('#mainContainer').animate({ scrollTop: '0px' });
+      } else if( params[0] === '' ) {
+        $('#mainContainer').animate({ scrollTop: '0px' });
+      } else {
+        var top = Math.abs($(this.querySelector('#'+params[0]+'-header')).position().top);
+        $('#mainContainer').animate({ scrollTop: Math.floor(top)+'px' });
       }
     },
 

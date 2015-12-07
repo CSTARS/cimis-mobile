@@ -37,6 +37,8 @@
           <a class="btn btn-link btn-lg" href="#now"><i class="fa fa-area-chart"></i> Data</a>
           <!--<a class="btn btn-link" id="weeklyBtn">Weekly</a>-->
           <a class="btn btn-link btn-lg" href="#map"><i class="fa fa-map-o"></i> Map</a>
+          <a class="btn btn-link btn-lg" href="#about/install" id="install"><i class="fa fa-mobile"></i> Install on Mobile</a>
+          <a class="btn btn-link btn-lg" href="#about/survey"><i class="fa fa-edit"></i> Survey</a>
           <a class="btn btn-link btn-lg" href="#about"><i class="fa fa-info-circle"></i> About</a>
           <!--<a class="btn btn-link" id="settingBtn">Setting</a>-->
         </div>
@@ -84,6 +86,9 @@
 
     attached : function() {
       this.$.selectLocation.init(this.$.map.map);
+      if( window.standaloneMode ) {
+        this.$.install.style.display = 'none';
+      }
     },
 
     toggle : function() {
@@ -92,7 +97,8 @@
 
     updatePage : function() {
       var hash = window.location.hash || '';
-      this.page = hash.replace(/#/,'');
+      var parts = hash.replace(/#/,'').split('/');
+      this.page = parts.splice(0, 1)[0];
 
       if( this.page == 'settings' || this.page == 'map' ) {
           this.showTabs = false;
@@ -105,7 +111,7 @@
       $(this.$.pages).children().hide();
 
       this.$[this.page].style.display = 'block'
-      if( this.$[this.page].onShow  ) this.$[this.page].onShow();
+      if( this.$[this.page].onShow  ) this.$[this.page].onShow(parts);
 
       this.$.drawer.closeDrawer();
     },

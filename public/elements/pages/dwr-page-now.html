@@ -19,6 +19,7 @@
     </div>
 
     <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
+    <div id="docs" style="margin: 0 10px; display:none; text-align:right"><a href="#about"><i class="fa fa-book"></i> API Documentation</a></div>
 
     <div id="charts" style="margin: 0 -25px"></div>
     <div id="chartRoot"></div>
@@ -199,13 +200,14 @@
       if( this.data == null ) {
         this.$.warning.innerHTML = '';
         this.$.gridLabel.style.display = 'block';
+        this.$.docs.style.display = 'block';
       }
 
 
       if( data ) {
         this.data = data;
         this.sortedDates = CIMIS.utils.sortDates(data.data);
-        this.$.gridLabel.innerHTML = 'Cell: '+data.location.row+', '+data.location.col +
+        this.$.gridLabel.innerHTML = '<i class="fa fa-map-marker"></i> Cell: '+data.location.row+', '+data.location.col +
           ' <a class="pull-right" href="/cimis/'+data.location.row+'/'+data.location.col+
           '" target="_blank">API</a>';
       }
