@@ -25,18 +25,29 @@
     <h4 class="page-header" id="about-header">About</h4>
     <div class="padding">
 
-      <div>The California Irrigation Management Information System (CIMIS) is designed
-        to help growers develop efficient water budgets and irrigation strategies.
-        CIMIS is a standardized way of accounting for water consumed through
-        evapotranspiration (ET) by the soil and plants. The main purpose of
-        CIMIS is to provide information for irrigation scheduling by matching the
-        amount of water applied to a crop with needs of the plant.</div>
+      <div class="media">
+        <div class="media-left">
+          <img class="media-object" src="/icons/cimis_icon_96.png" />
+        </div>
+        <div class="media-body">
+          <h4 class="media-heading">CIMIS</h4>
+          <div>The California Irrigation Management Information System (CIMIS) is designed
+            to help growers develop efficient water budgets and irrigation strategies.
+            CIMIS is a standardized way of accounting for water consumed through
+            evapotranspiration (ET) by the soil and plants. The main purpose of
+            CIMIS is to provide information for irrigation scheduling by matching the
+            amount of water applied to a crop with needs of the plant.</div>
+        </div>
+      </div>
+
+
 
       <h5>Links</h5>
 
       <ul class="list-group">
         <li class="list-group-item"><a href="http://www.cimis.water.ca.gov/" target="_blank">CIMIS Home</a></li>
         <li class="list-group-item"><a href="http://cimis.casil.ucdavis.edu/cimis/" target="_blank">Spatial CIMIS Data Directory</a></li>
+        <li class="list-group-item"><a href="http://www.water.ca.gov/" target="_blank">DWR</a></li>
       </ul>
     </div>
 
@@ -118,11 +129,15 @@
 
       if( window.location.hash.match(/about/) ) {
         setTimeout(function(){
-          var parts = window.location.hash.split('/');
-          parts.splice(0, 1);
-          this.onShow(parts);
+          this.forceShow();
         }.bind(this), 400);
       }
+    },
+
+    forceShow : function() {
+      var parts = window.location.hash.split('/');
+      parts.splice(0, 1);
+      this.onShow(parts);
     },
 
     onShow : function(params) {
