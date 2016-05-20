@@ -2,7 +2,7 @@
 
 ### Init
 
-First create a /data directory in the root of this directory
+First create a /data directory in the root of this repo
 
 ```bash
 mkdir data
