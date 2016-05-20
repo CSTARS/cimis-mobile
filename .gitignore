@@ -5,3 +5,4 @@ app/bower_components
 public/bower_components
 npm-debug.log
 dump.rdb
+data

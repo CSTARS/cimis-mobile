@@ -9,6 +9,7 @@
     "build": "grunt build",
     "all": "npm run build && npm run test",
     "dev": "node server.js --dev",
+    "docker-dev": "node server.js --dev --docker",
     "import": "node utils/import.js",
     "watch": "grunt watch"
   },
