@@ -15,7 +15,11 @@
 
   <template>
     <div id="warning" style="padding: 15px">
-      <div class="text text-danger well" style="font-size: 20px"><i class="fa fa-warning"></i> Please select a location first</div>
+      <div class="text text-danger well" style="font-size: 20px"><i class="fa fa-warning"></i> You must select a location first.</div>
+
+      <div style="text-align:center">
+        <a class="btn btn-default btn-lg" on-click="setLocation"><i class="fa fa-crosshairs"></i> Set Location</a>
+      </div>
     </div>
 
     <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
@@ -242,6 +246,10 @@
       for( var i = 0; i < this.datatables.length; i++ ) {
         this.charts[i].draw(this.datatables[i], this.options[i]);
       }
+    },
+
+    setLocation : function() {
+      this.fire('select-location');
     }
 
   })

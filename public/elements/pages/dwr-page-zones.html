@@ -1,0 +1,87 @@
+
+<dom-module id="dwr-page-zones">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        
+        <div class="container">
+            <h4 class="page-header">
+                <small>Eto Zone</small> <span>[[currentZone]]</span>  
+                <a class="btn btn-link pull-right" href="#map">Back to Map</a>
+            </h4>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div style="height:400px" id="zoneMap"></div>
+                </div>
+                <div class="col-md-6">
+
+                </div>
+            </div>
+        </div>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'dwr-page-zones',
+
+            ready : function() {
+                this.currentZone = '';
+
+                this.styles = ["#3366cc","#dc3912","#ff9900","#109618","#990099","#0099c6",
+                    "#dd4477","#66aa00","#b82e2e","#316395","#994499","#22aa99",
+                    "#aaaa11","#6633cc","#e67300","#8b0707","#651067","#329262",
+                    "#5574a6","#3b3eac","#b77322","#16d620","#b91383","#f4359e",
+                    "#9c5935","#a9c413","#2a778d","#668d1c","#bea413","#0c5922","#743411"];
+
+                var mapOptions = {
+                    center: { lat: 38.033291, lng: -119.961762 },
+                    zoom: 5,
+                    mapTypeControl : false,
+                    streetViewControl : false,
+                    panControl : false
+                };
+                this.map = new google.maps.Map(this.$.zoneMap, mapOptions);
+            },
+
+            setZoneData : function(data) {
+                this.map.data.addGeoJson(data);
+            },
+
+            onShow : function(params) {
+                if( params.length === 0 ) return;
+                this.currentZone = params[0];
+
+                this.map.data.setStyle(function(feature) {
+                    var label = this.getRegionNumber(feature);
+                    if( label+'' === this.currentZone ){
+                        return {
+                            fillColor: this.styles[label],
+                            strokeColor: '#fff',
+                            fillOpacity : .8,
+                            strokeWeight: 1
+                        };
+                    } else {
+                        return {
+                            fillColor: '#333',
+                            strokeColor: '#fff',
+                            fillOpacity : .3,
+                            strokeWeight: 1
+                        };
+                    }
+                    
+                }.bind(this));
+
+                if( !window.google ) return;
+                google.maps.event.trigger(this.$.map, 'resize');
+            },
+
+            getRegionNumber : function(feature) {
+                return parseInt(feature.getProperty('Description').replace(/\D/g,''));
+            }
+        });
+    </script>
+</dom-module>

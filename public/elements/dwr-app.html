@@ -4,11 +4,31 @@
         display: block;
         height: 100%;
     }
+
     .menu a {
       display: block;
-      border-bottom: 1px solid #eee;
-      padding: 15px;
       text-align: left;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .menu td.link {
+      border-bottom: #eee;
+      padding: 15px;
+    }
+
+    .menu td.icon {
+      vertical-align: top;
+      padding: 15px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .menu tr.active {
+      background-color: #eee;
+    }
+    .menu tr.active .icon {
+      color: #aaa;
     }
 
     .toggleButton {
@@ -22,6 +42,22 @@
       bottom: 0;
       right: 0;
     }
+
+    paper-header-panel[main] {
+      --paper-header-panel-shadow: {
+          height: 6px;
+          margin-top: -6px;
+          box-shadow: 0 0 5px black;
+      };
+    }
+
+    paper-header-panel[drawer] {
+      --paper-header-panel-shadow: {
+          height: 100%;
+          bottom: 0px;
+          box-shadow: 0 0 5px black;
+      };
+    }
   </style>
 
   <template>
@@ -29,36 +65,61 @@
     <paper-drawer-panel id="drawer" responsive-width="768px">
 
       <paper-header-panel drawer class="drawer">
-        <paper-toolbar style="background-color: #2196f3">
-          <div class="hidden-xs">Spatial CIMIS</div>
+        <paper-toolbar style="background-color: #2196f3; z-index: 100">
+          <h4 class="hidden-xs" style="margin:0; color:white">Spatial CIMIS</h4>
         </paper-toolbar>
 
         <div class="menu">
-          <a class="btn btn-link btn-lg" href="#now"><i class="fa fa-area-chart"></i> Data</a>
-          <!--<a class="btn btn-link" id="weeklyBtn">Weekly</a>-->
-          <a class="btn btn-link btn-lg" href="#map"><i class="fa fa-map-o"></i> Map</a>
-          <a class="btn btn-link btn-lg" href="#about/install" id="install"><i class="fa fa-mobile"></i> Install on Mobile</a>
-          <a class="btn btn-link btn-lg" href="#about/survey"><i class="fa fa-edit"></i> Survey</a>
-          <a class="btn btn-link btn-lg" href="#about"><i class="fa fa-info-circle"></i> About</a>
-          <!--<a class="btn btn-link" id="settingBtn">Setting</a>-->
+          <table style="width:100%" id="linktable">
+            <tr>
+              <td class="icon"><i class="fa fa-map-o"></i></td>
+              <td class="link">
+                <a class="btn btn-link btn-lg" href="#map" style="border-bottom:none">Map</a>
+                <div id="exploreToggle">
+                  <input type="checkbox" on-click="toggleExplore"/> Explore Eto Zones
+                </div>
+              </td>
+            </tr>
+
+            <tr class="active">
+              <td class="icon"><i class="fa fa-area-chart"></i></td>
+              <td class="link"><a class="btn btn-link btn-lg" href="#now">Data</a></td>
+            </tr>
+
+            <tr>
+              <td class="icon"><i class="fa fa-info-circle"></i></td>
+              <td class="link"><a class="btn btn-link btn-lg" href="#about">About</a></td>
+            </tr>
+
+            <tr>
+              <td class="icon"><i class="fa fa-mobile"></i></td>
+              <td class="link"><a class="btn btn-link btn-lg" href="#about/install" id="install">Install on Mobile</a></td>
+            </tr>
+            <tr>
+              <td class="icon"><i class="fa fa-edit"></i></td>
+              <td class="link"><a class="btn btn-link btn-lg" href="#about/survey">Survey</a></td>
+            </tr>
+          </table>
+
         </div>
       </paper-header-panel>
 
       <paper-header-panel main>
-        <paper-toolbar style="background-color: #2196f3">
+        <paper-toolbar style="background-color: #2196f3; z-index: 100">
           <a class="btn btn-link" paper-drawer-toggle style="color:white"><i class="fa fa-bars" paper-drawer-toggle></i></a>
 
           <div class="visible-xs-inline-block">Spatial CIMIS</div>
           <div class="flex">
-            <a class="btn btn-default pull-right" on-click="selectLocation"><i class="fa fa-map-pin"></i> Location</a>
+            <a class="btn btn-primary pull-right" on-click="selectLocation"><i class="fa fa-crosshairs"></i></a>
           </div>
         </paper-toolbar>
 
         <div class="fullbleed" id="pages">
           <dwr-page-map id="map" class="animated fadeIn" on-location-update="setLocation"></dwr-page-map>
-          <dwr-page-now id="now" class="animated fadeIn"></dwr-page-now>
+          <dwr-page-now id="now" class="animated fadeIn" on-select-location="selectLocation"></dwr-page-now>
           <!--<dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>-->
           <!--<dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>-->
+          <dwr-page-zones id="zones" class="animated fadeIn"></dwr-page-zones>
           <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
         </div>
 
@@ -75,13 +136,17 @@
     is : 'dwr-app',
 
     ready : function() {
-
 			this.$.drawer.responsiveWidth = "768px";
 
       this.updatePage();
       $(window).on('hashchange', this.updatePage.bind(this));
 
       this.loadDates();
+
+      $.get('/Eto_Zones_16.json', function(data){
+        this.$.map.setZoneData(data);
+        this.$.zones.setZoneData(data);
+      }.bind(this));
     },
 
     attached : function() {
@@ -100,13 +165,22 @@
       var parts = hash.replace(/#/,'').split('/');
       this.page = parts.splice(0, 1)[0];
 
+      if( !this.$[this.page] ) this.page = 'map';
+
       if( this.page == 'settings' || this.page == 'map' ) {
           this.showTabs = false;
       } else {
           this.showTabs = true;
       }
 
-      if( !this.$[this.page] ) this.page = 'map';
+      //this.$.exploreToggle.style.display = (this.page == 'map') ? 'block' : 'none';
+
+      $(this.$.linktable).find('tr').removeClass('active');
+      $(this.$.linktable)
+        .find('[href="'+hash+'"]')
+        .parent().parent()
+        .addClass('active');
+      
 
       $(this.$.pages).children().hide();
 
@@ -159,6 +233,10 @@
       /*$.get('https://cimis-mobile.firebaseio.com/dates/.json', function(resp){
         this.dates = resp;
       }.bind(this));*/
+    },
+
+    toggleExplore : function(e) {
+      this.$.map.toggleExplore(e.currentTarget.checked);
     }
   });
 </script>
