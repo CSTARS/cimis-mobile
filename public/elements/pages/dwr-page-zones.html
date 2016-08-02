@@ -7,20 +7,15 @@
             }
         </style>
         
-        <div class="container">
+        <div style="padding: 5%">
             <h4 class="page-header">
                 <small>Eto Zone</small> <span>[[currentZone]]</span>  
                 <a class="btn btn-link pull-right" href="#map">Back to Map</a>
             </h4>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div style="height:400px" id="zoneMap"></div>
-                </div>
-                <div class="col-md-6">
+            <div style="height:400px" id="zoneMap"></div>
 
-                </div>
-            </div>
+            <div id="chart"></div>
         </div>
 
     </template>
@@ -45,6 +40,8 @@
                     panControl : false
                 };
                 this.map = new google.maps.Map(this.$.zoneMap, mapOptions);
+
+                $(window).on('resize', this.redraw.bind(this));
             },
 
             setZoneData : function(data) {
@@ -75,8 +72,45 @@
                     
                 }.bind(this));
 
+                $.get('/cimis/region/Z'+this.currentZone, this.onZoneDataLoad.bind(this));
+
                 if( !window.google ) return;
-                google.maps.event.trigger(this.$.map, 'resize');
+                google.maps.event.trigger(this.map, 'resize');
+            },
+
+            onZoneDataLoad : function(resp) {
+                this.sortedDates = CIMIS.utils.sortDates(resp.data);
+
+                // eto chart
+                this.dt = new google.visualization.DataTable();
+                this.dt.addColumn('string', 'Date');
+                this.dt.addColumn('number', 'Avg ETo');
+
+                this.sortedDates.forEach(function(date){
+                    d = resp.data[date];
+                    arr = [date];
+
+                    arr.push(parseFloat(d) || 0);
+
+                    this.dt.addRow(arr);
+                }.bind(this));
+
+                this.chart = new google.visualization.LineChart(this.$.chart);
+                this.options ={
+                    title : 'ETo - Evapotranspiration (mm)',
+                    height : 550,
+                    legend : {
+                        position : 'none'
+                    }
+                }
+
+                this.redraw();
+            },
+
+            redraw : function() {
+                this.debounce('redraw',function(){
+                    this.chart.draw(this.dt, this.options);
+                });
             },
 
             getRegionNumber : function(feature) {
