@@ -55,8 +55,6 @@ function getRegion(name, callback) {
       return callback(err);
     }
 
-    console.log(data);
-
     prepareGet(data, true, function(err, data){
       if( err ) {
         return callback(err);
