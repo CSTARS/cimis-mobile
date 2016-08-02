@@ -35,8 +35,11 @@ node utils/import
 ```
 
 #### Run Dev server
+
+Requires Docker
+
 ```
-npm run start-dev
+npm run dev
 ```
 
 #### Build client

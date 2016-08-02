@@ -8,8 +8,8 @@
     "test": "grunt test",
     "build": "grunt build",
     "all": "npm run build && npm run test",
-    "dev": "node server.js --dev",
     "docker-dev": "node server.js --dev --docker",
+    "dev": "docker-compose -f docker/cimis-mobile/docker-compose.yaml up",
     "import": "node utils/import.js",
     "watch": "grunt watch"
   },

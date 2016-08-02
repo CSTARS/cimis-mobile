@@ -12,7 +12,8 @@ module.exports = function() {
       name: 'cimis',
       get : get,
       getByLatLng : getByLatLng,
-      getDates : getDates
+      getDates : getDates,
+      getRegion : getRegion
   };
 };
 
@@ -27,7 +28,7 @@ function get(row, col, callback) {
       return callback(err);
     }
 
-    prepareGet(data, function(err, data){
+    prepareGet(data, false, function(err, data){
       if( err ) {
         return callback(err);
       }
@@ -48,11 +49,35 @@ function get(row, col, callback) {
   });
 }
 
+function getRegion(name, callback) {
+  ringBuffer.read(name, function(err, data){
+    if( err ) {
+      return callback(err);
+    }
+
+    console.log(data);
+
+    prepareGet(data, true, function(err, data){
+      if( err ) {
+        return callback(err);
+      }
+
+      var resp = {
+        location : {
+          name : name
+        },
+        data : data
+      };
+      callback(null, resp);
+    });
+  });
+}
+
 function getDates(callback) {
   ringBuffer.read(config.get('ringBuffer').date_key, callback);
 }
 
-function prepareGet(data, callback) {
+function prepareGet(data, isRegion, callback) {
   getDates(function(err, result){
     if( err ) {
       callback(err);
@@ -62,7 +87,7 @@ function prepareGet(data, callback) {
 
     try {
       for( var i = 0; i < data.length; i++ ) {
-        resp[result[i]] = JSON.parse(data[i]);
+        resp[result[i]] = isRegion ? data[i] : JSON.parse(data[i]);
       }
     } catch(e) {
       callback(e);

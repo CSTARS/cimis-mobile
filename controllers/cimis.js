@@ -13,13 +13,23 @@ module.exports = function (router) {
         return res.send({error: true, message: 'invalid url'});
       }
 
-      model.get(row, col, function(err, data){
-        if( err ) {
-          return res.send({error: true, message: err});
-        }
-        res.send(data);
-      });
+      if( row === 'region' ) {
+        model.getRegion(col, function(err, data){
+          if( err ) {
+            return res.send({error: true, message: err});
+          }
+          res.send(data);
+        });
+      } else {
+        model.get(row, col, function(err, data){
+          if( err ) {
+            return res.send({error: true, message: err});
+          }
+          res.send(data);
+        });
+      }
     });
+
 
     router.get('/ll/:lng/:lat', function (req, res) {
       var lng = req.params.lng;
