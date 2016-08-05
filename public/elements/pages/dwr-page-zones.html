@@ -40,8 +40,16 @@
                     panControl : false
                 };
                 this.map = new google.maps.Map(this.$.zoneMap, mapOptions);
+                this.map.data.addListener('click', this.onRegionClick.bind(this));
 
                 $(window).on('resize', this.redraw.bind(this));
+            },
+
+            onRegionClick : function(e) {
+                if( !e.feature ) {
+                    return;
+                }
+                window.location.hash = '#zones/'+this.getRegionNumber(e.feature);
             },
 
             setZoneData : function(data) {
@@ -95,12 +103,19 @@
                     this.dt.addRow(arr);
                 }.bind(this));
 
-                this.chart = new google.visualization.LineChart(this.$.chart);
-                this.options ={
-                    title : 'ETo - Evapotranspiration (mm)',
-                    height : 550,
-                    legend : {
-                        position : 'none'
+                if( !this.chart ) {
+                    this.chart = new google.visualization.LineChart(this.$.chart);
+                    this.options = {
+                        title : 'ETo - Evapotranspiration (mm)',
+                        curveType: 'function',
+                        height : 550,
+                        legend : {
+                            position : 'none'
+                        },
+                        animation : {
+                            easing : 'out',
+                            startup : true
+                        }
                     }
                 }
 
