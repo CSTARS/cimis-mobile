@@ -64,8 +64,9 @@
       if( show ) {
         this.map.data.setStyle(function(feature) {
             var label = this.getRegionNumber(feature);
+            console.log(label);
             return {
-              fillColor: CIMIS.zones.getZone(label).color,
+              fillColor: CIMIS.zones.getZone(label).properties.color,
               strokeColor: '#ffffff',
               fillOpacity : .8,
               strokeWeight: 1
@@ -80,13 +81,15 @@
     },
 
     getRegionNumber : function(feature) {
-      return parseInt(feature.getProperty('Description').replace(/\D/g,''));
+      return feature.getProperty('zone');
+      // return parseInt(feature.getProperty('Description').replace(/\D/g,''));
     },
 
     onRegionClick : function(e) {
       if( !e.feature ) {
         return;
       }
+      console.log(this.getRegionNumber(e.feature));
       window.location.hash = '#zones/'+this.getRegionNumber(e.feature);
     },
 

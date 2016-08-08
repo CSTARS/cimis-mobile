@@ -11824,7 +11824,8 @@ be used as the label of the toolbar via `aria-labelledby`.
 
       this.loadDates();
 
-      $.get('/Eto_Zones_16.json', function(data){
+      $.get('/eto_zones.json', function(data){
+        CIMIS.zones.mergeZoneMap(data);
         this.$.map.setZoneData(data);
         this.$.zones.setZoneData(data);
       }.bind(this));
@@ -11987,8 +11988,9 @@ be used as the label of the toolbar via `aria-labelledby`.
       if( show ) {
         this.map.data.setStyle(function(feature) {
             var label = this.getRegionNumber(feature);
+            console.log(label);
             return {
-              fillColor: CIMIS.zones.getZone(label).color,
+              fillColor: CIMIS.zones.getZone(label).properties.color,
               strokeColor: '#ffffff',
               fillOpacity : .8,
               strokeWeight: 1
@@ -12003,13 +12005,15 @@ be used as the label of the toolbar via `aria-labelledby`.
     },
 
     getRegionNumber : function(feature) {
-      return parseInt(feature.getProperty('Description').replace(/\D/g,''));
+      return feature.getProperty('zone');
+      // return parseInt(feature.getProperty('Description').replace(/\D/g,''));
     },
 
     onRegionClick : function(e) {
       if( !e.feature ) {
         return;
       }
+      console.log(this.getRegionNumber(e.feature));
       window.location.hash = '#zones/'+this.getRegionNumber(e.feature);
     },
 
@@ -12611,6 +12615,7 @@ be used as the label of the toolbar via `aria-labelledby`.
             </div>
 
             <div id="chart"></div>
+            <div id="chart2"></div>
         </div>
 
     </template>
@@ -12649,17 +12654,26 @@ be used as the label of the toolbar via `aria-labelledby`.
 
             setZoneData : function(data) {
                 this.map.data.addGeoJson(data);
+                this.zoneDataSet = true;
+                if( this.fireOnShow ) {
+                    this.onShow([this.currentZone]);
+                }
             },
 
             onShow : function(params) {
                 if( params.length === 0 ) return;
                 this.currentZone = params[0];
 
+                if( !this.zoneDataSet ) {
+                    this.fireOnShow = true;
+                    return;
+                }
+
                 this.map.data.setStyle(function(feature) {
                     var label = this.getRegionNumber(feature);
                     if( label+'' === this.currentZone ){
                         return {
-                            fillColor: CIMIS.zones.getZone(label).color,
+                            fillColor: CIMIS.zones.getZone(label).properties.color,
                             strokeColor: '#fff',
                             fillOpacity : .8,
                             strokeWeight: 1
@@ -12683,21 +12697,41 @@ be used as the label of the toolbar via `aria-labelledby`.
 
             onZoneDataLoad : function(resp) {
                 var data = CIMIS.zones.getZone(this.currentZone);
-                this.$.average.innerHTML = data.avg.toFixed(1);
-                this.$.delta.innerHTML = data.delta.toFixed(1);
+                this.$.average.innerHTML = data.properties.avg.toFixed(1);
+                this.$.delta.innerHTML = data.properties.delta.toFixed(1);
 
                 this.sortedDates = CIMIS.utils.sortDates(resp.data);
+
+                var p = [data.properties.p0, data.properties.p1, data.properties.p2]; 
+                var h = [0, data.properties.h1, data.properties.h2];
+                var signature = CIMIS.fft.ifft(p, h, 52);
 
                 // eto chart
                 this.dt = new google.visualization.DataTable();
                 this.dt.addColumn('string', 'Date');
                 this.dt.addColumn('number', 'Avg ETo');
+                this.dt.addColumn('number', 'Expected ETo');
 
-                this.sortedDates.forEach(function(date){
+                var weeks = [this.getWeekOfYear(2), this.getWeekOfYear(1), this.getWeekOfYear(0)];
+
+                var mid = Math.floor(this.sortedDates.length / 2);
+                var end = this.sortedDates.length-1;
+
+                this.sortedDates.forEach(function(date, index){
                     d = resp.data[date];
                     arr = [date];
 
                     arr.push(parseFloat(d) || 0);
+
+                    if( index === 0 ) {
+                        arr.push(signature[weeks[0]]);
+                    } else if( index === mid ) {
+                        arr.push(signature[weeks[1]]);
+                    } else if( index === end ) {
+                        arr.push(signature[weeks[2]]);
+                    } else {
+                        arr.push(null);
+                    }
 
                     this.dt.addRow(arr);
                 }.bind(this));
@@ -12708,12 +12742,62 @@ be used as the label of the toolbar via `aria-labelledby`.
                         title : 'ETo - Evapotranspiration (mm)',
                         curveType: 'function',
                         height : 550,
-                        legend : {
-                            position : 'none'
-                        },
+                        interpolateNulls : true,
                         animation : {
                             easing : 'out',
                             startup : true
+                        },
+                        series: {
+                            1: { 
+                                lineDashStyle: [4, 4] 
+                            }
+                        }
+                    }
+                }
+
+
+
+                this.dt2 = new google.visualization.DataTable();
+                this.dt2.addColumn('string', 'Week');
+                this.dt2.addColumn('number', 'Eto');
+                this.dt2.addColumn('number', 'Two Weeks Ago');
+                this.dt2.addColumn('number', 'This Week');
+
+                for( var i = 0; i < signature.length; i++ ) {
+                    var arr = [(i+1)+'', signature[i]];
+                    
+                    if( i === weeks[0] ) {
+                        arr.push(signature[i]);
+                    } else {
+                        arr.push(null);
+                    }
+                    if( i === weeks[2] ) {
+                        arr.push(signature[i]);
+                    } else {
+                        arr.push(null);
+                    }
+
+                    this.dt2.addRow(arr);
+                }
+
+                if( !this.chart2 ) {
+                    this.chart2 = new google.visualization.ComboChart(this.$.chart2);
+                    this.options2 = {
+                        title : 'Yearly Expected Evapotranspiration (mm)',
+                        curveType: 'function',
+                        height : 550,
+                        legend : {
+                            position : 'none'
+                        },
+                        hAxis : {
+                            title : 'Week'
+                        },
+                        seriesType : 'bars',
+                        series: {
+                            0: { 
+                                type : 'line',
+                                targetAxisIndex : 0
+                            }
                         }
                     }
                 }
@@ -12724,11 +12808,27 @@ be used as the label of the toolbar via `aria-labelledby`.
             redraw : function() {
                 this.debounce('redraw',function(){
                     this.chart.draw(this.dt, this.options);
+                    this.chart2.draw(this.dt2, this.options2);
                 });
             },
 
+            getDayOfYear : function(offset) {
+                var now = new Date();
+                var start = new Date(now.getFullYear(), 0, 0);
+                var diff = now - start;
+                var oneDay = 1000 * 60 * 60 * 24;
+                var day = Math.ceil(diff / oneDay) - (offset || 0);
+                if( day < 1 ) 356 + day;
+                return day;
+            },
+
+            getWeekOfYear : function(offset) {
+                return Math.floor(this.getDayOfYear(7*offset) / 7);
+            },
+
             getRegionNumber : function(feature) {
-                return parseInt(feature.getProperty('Description').replace(/\D/g,''));
+                return feature.getProperty('zone');
+                // return parseInt(feature.getProperty('Description').replace(/\D/g,''));
             }
         });
     </script>
