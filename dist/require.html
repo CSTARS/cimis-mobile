@@ -11757,7 +11757,10 @@ be used as the label of the toolbar via `aria-labelledby`.
               <td class="link">
                 <a class="btn btn-link btn-lg" href="#map" style="border-bottom:none">Map</a>
                 <div id="exploreToggle">
-                  <input type="checkbox" on-click="toggleExplore"> Explore Eto Zones
+                  <input type="checkbox" on-click="toggleExplore" layer="zone"> Explore ETo Zones
+                </div>
+                <div id="exploreToggleDau">
+                  <input type="checkbox" on-click="toggleExplore" layer="dau"> Explore DAU Zones
                 </div>
               </td>
             </tr>
@@ -11801,6 +11804,7 @@ be used as the label of the toolbar via `aria-labelledby`.
           <!--<dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>-->
           <!--<dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>-->
           <dwr-page-zones id="zones" class="animated fadeIn"></dwr-page-zones>
+          <dwr-page-dau id="dau" class="animated fadeIn"></dwr-page-dau>
           <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
         </div>
 
@@ -11829,6 +11833,11 @@ be used as the label of the toolbar via `aria-labelledby`.
         this.$.map.setZoneData(data);
         this.$.zones.setZoneData(data);
       }.bind(this));
+
+      $.get('/dauco.json', function(data){
+        this.$.map.setDauData(data);
+        this.$.dau.setDauData(data);
+      }.bind(this));
     },
 
     attached : function() {
@@ -11854,8 +11863,6 @@ be used as the label of the toolbar via `aria-labelledby`.
       } else {
           this.showTabs = true;
       }
-
-      //this.$.exploreToggle.style.display = (this.page == 'map') ? 'block' : 'none';
 
       $(this.$.linktable).find('tr').removeClass('active');
       $(this.$.linktable)
@@ -11918,7 +11925,12 @@ be used as the label of the toolbar via `aria-labelledby`.
     },
 
     toggleExplore : function(e) {
-      this.$.map.toggleExplore(e.currentTarget.checked);
+      var layer = e.currentTarget.getAttribute('layer');
+
+      if( layer === 'dau' ) this.querySelector('[layer="zone"]').checked = false;
+      else this.querySelector('[layer="dau"]').checked = false;
+
+      this.$.map.toggleExplore(e.currentTarget.checked, layer);
     }
   });
 </script>
@@ -11964,13 +11976,6 @@ be used as the label of the toolbar via `aria-labelledby`.
         }
       };
       this.map = new google.maps.Map(this.$.map, mapOptions);
-      
-
-      // this.styles = ["#3366cc","#dc3912","#ff9900","#109618","#990099","#0099c6",
-      //               "#dd4477","#66aa00","#b82e2e","#316395","#994499","#22aa99",
-      //               "#aaaa11","#6633cc","#e67300","#8b0707","#651067","#329262",
-      //               "#5574a6","#3b3eac","#b77322","#16d620","#b91383","#f4359e",
-      //               "#9c5935","#a9c413","#2a778d","#668d1c","#bea413","#0c5922","#743411"];
 
       this.map.data.setStyle({visible: false});
 
@@ -11981,31 +11986,65 @@ be used as the label of the toolbar via `aria-labelledby`.
     },
 
     setZoneData : function(data) {
-        this.map.data.addGeoJson(data);
+      this.zoneData = data;
     },
 
-    toggleExplore : function(show) {
+    setDauData : function(data) {
+      this.dauData = data;
+    },
+
+    toggleExplore : function(show, type) {
+      this.map.data.forEach(function(feature) {
+        this.map.data.remove(feature);
+      }.bind(this));
+
+      this.regionsEnabled = false;
+      this.map.data.setStyle({visible: false});
+
+      this.debounce('toggleExplore', function(){
+        this._toggleExplore(show, type);
+      }, 50);
+    },
+
+    _toggleExplore : function(show, type) {
+      if( !type ) type = 'zone';
+
       if( show ) {
+        if( type === 'zone' ) this.map.data.addGeoJson(this.zoneData);
+        else this.map.data.addGeoJson(this.dauData);
+
         this.map.data.setStyle(function(feature) {
-            var label = this.getRegionNumber(feature);
-            console.log(label);
+          if( type === 'dau' ) {
             return {
-              fillColor: CIMIS.zones.getZone(label).properties.color,
+              fillColor: '#aaaaaa',
               strokeColor: '#ffffff',
               fillOpacity : .8,
               strokeWeight: 1
             };
+          }
+
+          var label = this.getRegionNumber(feature);
+
+          return {
+            fillColor: CIMIS.zones.getZone(label).properties.color,
+            strokeColor: '#ffffff',
+            fillOpacity : .8,
+            strokeWeight: 1
+          };
         }.bind(this));
+
         this.regionsEnabled = true;
         this.clearCurrentGrid();
       } else {
-        this.regionsEnabled = true;
+        this.regionsEnabled = false;
         this.map.data.setStyle({visible: false});
       }
     },
 
     getRegionNumber : function(feature) {
-      return feature.getProperty('zone');
+      var zone = feature.getProperty('zone');
+      if( zone ) return zone;
+      return feature.getProperty('dau_code');
       // return parseInt(feature.getProperty('Description').replace(/\D/g,''));
     },
 
@@ -12013,8 +12052,11 @@ be used as the label of the toolbar via `aria-labelledby`.
       if( !e.feature ) {
         return;
       }
-      console.log(this.getRegionNumber(e.feature));
-      window.location.hash = '#zones/'+this.getRegionNumber(e.feature);
+      if( e.feature.getProperty('dauco') ) {
+        window.location.hash = '#dau/'+this.getRegionNumber(e.feature);
+      } else{
+        window.location.hash = '#zones/'+this.getRegionNumber(e.feature);
+      }
     },
 
     onMapClick : function(e) {
@@ -12829,6 +12871,142 @@ be used as the label of the toolbar via `aria-labelledby`.
             getRegionNumber : function(feature) {
                 return feature.getProperty('zone');
                 // return parseInt(feature.getProperty('Description').replace(/\D/g,''));
+            }
+        });
+    </script>
+</dom-module>
+<dom-module id="dwr-page-dau" assetpath="/public/elements/pages/">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        
+        <div style="padding: 5%">
+            <h4 class="page-header">
+                <small>DAU Zone</small> <span>[[currentZone]]</span>  
+                <a class="btn btn-link pull-right" href="#map">Back to Map</a>
+            </h4>
+
+            <div style="height:400px" id="zoneMap"></div>
+
+            <div id="chart"></div>
+        </div>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'dwr-page-dau',
+
+            ready : function() {
+                this.currentZone = '';
+
+                var mapOptions = {
+                    center: { lat: 38.033291, lng: -119.961762 },
+                    zoom: 5,
+                    mapTypeControl : false,
+                    streetViewControl : false,
+                    panControl : false
+                };
+                this.map = new google.maps.Map(this.$.zoneMap, mapOptions);
+                this.map.data.addListener('click', this.onRegionClick.bind(this));
+
+                $(window).on('resize', this.redraw.bind(this));
+            },
+
+            onRegionClick : function(e) {
+                if( !e.feature ) {
+                    return;
+                }
+                window.location.hash = '#dau/'+this.getRegionNumber(e.feature);
+            },
+
+            setDauData : function(data) {
+                this.map.data.addGeoJson(data);
+                this.zoneDataSet = true;
+                if( this.fireOnShow ) {
+                    this.onShow([this.currentZone]);
+                }
+            },
+
+            onShow : function(params) {
+                if( params.length === 0 ) return;
+                this.currentZone = params[0];
+
+                if( !this.zoneDataSet ) {
+                    this.fireOnShow = true;
+                    return;
+                }
+
+                this.map.data.setStyle(function(feature) {
+                    var label = this.getRegionNumber(feature);
+                    if( label+'' === this.currentZone ){
+                        return {
+                            fillColor: '#2196f3',
+                            strokeColor: '#fff',
+                            fillOpacity : .8,
+                            strokeWeight: 1
+                        };
+                    } else {
+                        return {
+                            fillColor: '#333',
+                            strokeColor: '#fff',
+                            fillOpacity : .3,
+                            strokeWeight: 1
+                        };
+                    }
+                    
+                }.bind(this));
+
+                $.get('/cimis/region/DAU'+this.currentZone, this.onZoneDataLoad.bind(this));
+
+                if( !window.google ) return;
+                google.maps.event.trigger(this.map, 'resize');
+            },
+
+            onZoneDataLoad : function(resp) {
+                this.sortedDates = CIMIS.utils.sortDates(resp.data);
+
+                // eto chart
+                this.dt = new google.visualization.DataTable();
+                this.dt.addColumn('string', 'Date');
+                this.dt.addColumn('number', 'Avg ETo');
+
+                this.sortedDates.forEach(function(date, index){
+                    d = resp.data[date];
+                    arr = [date];
+
+                    arr.push(parseFloat(d) || 0);
+
+                    this.dt.addRow(arr);
+                }.bind(this));
+
+                if( !this.chart ) {
+                    this.chart = new google.visualization.LineChart(this.$.chart);
+                    this.options = {
+                        title : 'ETo - Evapotranspiration (mm)',
+                        curveType: 'function',
+                        height : 550,
+                        interpolateNulls : true,
+                        animation : {
+                            easing : 'out',
+                            startup : true
+                        }
+                    }
+                }
+
+                this.redraw();
+            },
+
+            redraw : function() {
+                this.debounce('redraw',function(){
+                    this.chart.draw(this.dt, this.options);
+                });
+            },
+
+            getRegionNumber : function(feature) {
+              return feature.getProperty('dau_code');
             }
         });
     </script>

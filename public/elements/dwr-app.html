@@ -76,7 +76,10 @@
               <td class="link">
                 <a class="btn btn-link btn-lg" href="#map" style="border-bottom:none">Map</a>
                 <div id="exploreToggle">
-                  <input type="checkbox" on-click="toggleExplore"/> Explore Eto Zones
+                  <input type="checkbox" on-click="toggleExplore" layer="zone"/> Explore ETo Zones
+                </div>
+                <div id="exploreToggleDau">
+                  <input type="checkbox" on-click="toggleExplore" layer="dau" /> Explore DAU Zones
                 </div>
               </td>
             </tr>
@@ -120,6 +123,7 @@
           <!--<dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>-->
           <!--<dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>-->
           <dwr-page-zones id="zones" class="animated fadeIn"></dwr-page-zones>
+          <dwr-page-dau id="dau" class="animated fadeIn"></dwr-page-dau>
           <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
         </div>
 
@@ -148,6 +152,11 @@
         this.$.map.setZoneData(data);
         this.$.zones.setZoneData(data);
       }.bind(this));
+
+      $.get('/dauco.json', function(data){
+        this.$.map.setDauData(data);
+        this.$.dau.setDauData(data);
+      }.bind(this));
     },
 
     attached : function() {
@@ -173,8 +182,6 @@
       } else {
           this.showTabs = true;
       }
-
-      //this.$.exploreToggle.style.display = (this.page == 'map') ? 'block' : 'none';
 
       $(this.$.linktable).find('tr').removeClass('active');
       $(this.$.linktable)
@@ -237,7 +244,12 @@
     },
 
     toggleExplore : function(e) {
-      this.$.map.toggleExplore(e.currentTarget.checked);
+      var layer = e.currentTarget.getAttribute('layer');
+
+      if( layer === 'dau' ) this.querySelector('[layer="zone"]').checked = false;
+      else this.querySelector('[layer="dau"]').checked = false;
+
+      this.$.map.toggleExplore(e.currentTarget.checked, layer);
     }
   });
 </script>

@@ -10,7 +10,7 @@ module.exports = function copyto(grunt) {
         build: {
             files: [{
                 cwd: 'public',
-                src: ['index.html','favicon.ico','manifest.json','manifest.webapp', 'eto_zones.json'],
+                src: ['index.html','favicon.ico','manifest.json','manifest.webapp', 'eto_zones.json', 'dauco.json'],
                 dest: 'dist/'
             },
             {
