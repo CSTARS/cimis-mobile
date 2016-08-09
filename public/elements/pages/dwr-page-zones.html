@@ -114,6 +114,10 @@
                 var h = [0, data.properties.h1, data.properties.h2];
                 var signature = CIMIS.fft.ifft(p, h, 52);
 
+                // cheating
+                var chunk = signature.splice(0, 12);
+                signature = signature.concat(chunk);
+
                 // eto chart
                 this.dt = new google.visualization.DataTable();
                 this.dt.addColumn('string', 'Date');
