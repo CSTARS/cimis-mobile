@@ -12018,7 +12018,7 @@ be used as the label of the toolbar via `aria-labelledby`.
             return {
               fillColor: '#aaaaaa',
               strokeColor: '#ffffff',
-              fillOpacity : .8,
+              fillOpacity : .6,
               strokeWeight: 1
             };
           }
@@ -12028,7 +12028,7 @@ be used as the label of the toolbar via `aria-labelledby`.
           return {
             fillColor: CIMIS.zones.getZone(label).properties.color,
             strokeColor: '#ffffff',
-            fillOpacity : .8,
+            fillOpacity : .6,
             strokeWeight: 1
           };
         }.bind(this));
@@ -12683,10 +12683,25 @@ be used as the label of the toolbar via `aria-labelledby`.
                 var mapOptions = {
                     center: { lat: 38.033291, lng: -119.961762 },
                     zoom: 5,
-                    mapTypeControl : false,
-                    streetViewControl : false,
-                    panControl : false
+                    scrollwheel : false,
+                    draggable : false,
+                    panControl:true,
+                    zoomControl:true,
+                    mapTypeControl:false,
+                    scaleControl:false,
+                    streetViewControl:false,
+                    overviewMapControl:false,
+                    rotateControl:false,
+                    zoomControlOptions : {
+                        position : google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    panControlOptions : {
+                        position : google.maps.ControlPosition.LEFT_TOP,
+                    },
+                    disableDefaultUI: true
                 };
+                console.log(google.maps.NavigationControlStyle.ZOOM_PAN);
+
                 this.map = new google.maps.Map(this.$.zoneMap, mapOptions);
                 this.map.data.addListener('click', this.onRegionClick.bind(this));
 
@@ -12723,14 +12738,14 @@ be used as the label of the toolbar via `aria-labelledby`.
                         return {
                             fillColor: CIMIS.zones.getZone(label).properties.color,
                             strokeColor: '#fff',
-                            fillOpacity : .8,
+                            fillOpacity : .6,
                             strokeWeight: 1
                         };
                     } else {
                         return {
                             fillColor: '#333',
                             strokeColor: '#fff',
-                            fillOpacity : .3,
+                            fillOpacity : .2,
                             strokeWeight: 1
                         };
                     }
@@ -12740,7 +12755,7 @@ be used as the label of the toolbar via `aria-labelledby`.
                 $.get('/cimis/region/Z'+this.currentZone, this.onZoneDataLoad.bind(this));
 
                 if( !window.google ) return;
-                google.maps.event.trigger(this.map, 'resize');
+                this.redraw();
             },
 
             onZoneDataLoad : function(resp) {
@@ -12907,6 +12922,11 @@ be used as the label of the toolbar via `aria-labelledby`.
 
             redraw : function() {
                 this.debounce('redraw',function(){
+                    var center = this.map.getCenter();
+                    google.maps.event.trigger(this.map, "resize");
+                    this.map.setCenter(center); 
+
+                    if( !this.chart ) return;
                     this.chart.draw(this.dt, this.options);
                     this.chart2.draw(this.dt2, this.options2);
                     this.chart3.draw(this.dt3, this.options3);
@@ -13000,9 +13020,22 @@ be used as the label of the toolbar via `aria-labelledby`.
                 var mapOptions = {
                     center: { lat: 38.033291, lng: -119.961762 },
                     zoom: 5,
-                    mapTypeControl : false,
-                    streetViewControl : false,
-                    panControl : false
+                    scrollwheel : false,
+                    draggable : false,
+                    panControl:true,
+                    zoomControl:true,
+                    mapTypeControl:false,
+                    scaleControl:false,
+                    streetViewControl:false,
+                    overviewMapControl:false,
+                    rotateControl:false,
+                    zoomControlOptions : {
+                        position : google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    panControlOptions : {
+                        position : google.maps.ControlPosition.LEFT_TOP,
+                    },
+                    disableDefaultUI: true
                 };
                 this.map = new google.maps.Map(this.$.zoneMap, mapOptions);
                 this.map.data.addListener('click', this.onRegionClick.bind(this));
@@ -13040,14 +13073,14 @@ be used as the label of the toolbar via `aria-labelledby`.
                         return {
                             fillColor: '#2196f3',
                             strokeColor: '#fff',
-                            fillOpacity : .8,
+                            fillOpacity : .6,
                             strokeWeight: 1
                         };
                     } else {
                         return {
                             fillColor: '#333',
                             strokeColor: '#fff',
-                            fillOpacity : .3,
+                            fillOpacity : .2,
                             strokeWeight: 1
                         };
                     }
@@ -13057,7 +13090,7 @@ be used as the label of the toolbar via `aria-labelledby`.
                 $.get('/cimis/region/DAU'+this.currentZone, this.onZoneDataLoad.bind(this));
 
                 if( !window.google ) return;
-                google.maps.event.trigger(this.map, 'resize');
+                this.redraw();
             },
 
             onZoneDataLoad : function(resp) {
@@ -13095,7 +13128,12 @@ be used as the label of the toolbar via `aria-labelledby`.
             },
 
             redraw : function() {
-                this.debounce('redraw',function(){
+                this.debounce('redraw',function() {
+                    var center = this.map.getCenter();
+                    google.maps.event.trigger(this.map, "resize");
+                    this.map.setCenter(center); 
+
+                    if( !this.chart ) return;
                     this.chart.draw(this.dt, this.options);
                 });
             },
