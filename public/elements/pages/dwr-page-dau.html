@@ -23,30 +23,12 @@
         Polymer({
             is: 'dwr-page-dau',
 
+            behaviors : [ZoneBehavior],
+
             ready : function() {
                 this.currentZone = '';
 
-                var mapOptions = {
-                    center: { lat: 38.033291, lng: -119.961762 },
-                    zoom: 5,
-                    scrollwheel : false,
-                    draggable : false,
-                    panControl:true,
-                    zoomControl:true,
-                    mapTypeControl:false,
-                    scaleControl:false,
-                    streetViewControl:false,
-                    overviewMapControl:false,
-                    rotateControl:false,
-                    zoomControlOptions : {
-                        position : google.maps.ControlPosition.RIGHT_CENTER
-                    },
-                    panControlOptions : {
-                        position : google.maps.ControlPosition.LEFT_TOP,
-                    },
-                    disableDefaultUI: true
-                };
-                this.map = new google.maps.Map(this.$.zoneMap, mapOptions);
+                this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
                 this.map.data.addListener('click', this.onRegionClick.bind(this));
 
                 $(window).on('resize', this.redraw.bind(this));
@@ -138,9 +120,8 @@
 
             redraw : function() {
                 this.debounce('redraw',function() {
-                    var center = this.map.getCenter();
                     google.maps.event.trigger(this.map, "resize");
-                    this.map.setCenter(center); 
+                    this.fitToFeature();
 
                     if( !this.chart ) return;
                     this.chart.draw(this.dt, this.options);
