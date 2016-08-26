@@ -76,10 +76,12 @@
               <td class="link">
                 <a class="btn btn-link btn-lg" href="#map" style="border-bottom:none">Map</a>
                 <div id="exploreToggle">
-                  <input type="checkbox" on-click="toggleExplore" layer="zone"/> Explore ETo Zones
+                  <i class="fa fa-spinner fa-spin" id="zoneCheckboxLoading"></i>
+                  <input type="checkbox" on-click="toggleExplore" layer="zone" id="zoneCheckbox" style="display:none" /> <span id="zoneCheckboxLabel">Loading</span> ETo Zones
                 </div>
                 <div id="exploreToggleDau">
-                  <input type="checkbox" on-click="toggleExplore" layer="dau" /> Explore DAU Zones
+                  <i class="fa fa-spinner fa-spin" id="dauCheckboxLoading"></i>
+                  <input type="checkbox" on-click="toggleExplore" layer="dau" id="dauCheckbox" style="display:none" /> <span id="dauCheckboxLabel">Loading</span> DAU Zones
                 </div>
               </td>
             </tr>
@@ -151,11 +153,19 @@
         CIMIS.zones.mergeZoneMap(data);
         this.$.map.setZoneData(data);
         this.$.zones.setZoneData(data);
+
+        this.$.zoneCheckboxLoading.style.display = 'none';
+        this.$.zoneCheckbox.style.display = 'inline-block';
+        this.$.zoneCheckboxLabel.innerHTML = 'Explore';
       }.bind(this));
 
       $.get('/dauco.json', function(data){
         this.$.map.setDauData(data);
         this.$.dau.setDauData(data);
+
+        this.$.dauCheckboxLoading.style.display = 'none';
+        this.$.dauCheckbox.style.display = 'inline-block';
+        this.$.dauCheckboxLabel.innerHTML = 'Explore';
       }.bind(this));
     },
 
