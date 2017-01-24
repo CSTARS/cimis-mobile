@@ -6,7 +6,7 @@ module.exports = function browserify(grunt) {
   grunt.loadNpmTasks('grunt-browserify');
 
   var files = {
-    'public/js/app.js': ['lib/shared/index.js']
+    'public/js/build.js': ['public/js/lib/index.js']
   };
   var browserifyOptions = {
     debug : true, // include source maps

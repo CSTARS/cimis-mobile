@@ -1,0 +1,39 @@
+<link rel="import" href="dwr-page-cimis-grid.html">
+<link rel="import" href="dwr-page-dau.html">
+<link rel="import" href="dwr-page-eto.html">
+
+<dom-module id="dwr-page-data">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <iron-pages 
+      selected="[[mapState]]" 
+      attr-for-selected="page">
+
+      <dwr-page-cimis-grid page="cimisGrid"></dwr-page-cimis-grid>
+      <dwr-page-dau page="dauZones"></dwr-page-dau>
+      <dwr-page-eto page="etoZones"></dwr-page-eto>
+
+    </iron-pages>
+    
+  </template>
+  <script>
+    Polymer({
+      is: 'dwr-page-data',
+
+      properties: {
+        appState: {
+            type: String,
+            statePath: 'appState.mapState'
+        }
+      },
+
+      behaviors: [ ReduxBehavior ]
+
+    });
+  </script>
+</dom-module>

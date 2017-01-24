@@ -58,6 +58,10 @@
           box-shadow: 0 0 5px black;
       };
     }
+
+    paper-material {
+      margin: 5px;
+    }
   </style>
 
   <template>
@@ -66,7 +70,7 @@
 
       <paper-header-panel drawer class="drawer">
         <paper-toolbar style="background-color: #2196f3; z-index: 100">
-          <h4 class="hidden-xs" style="margin:0; color:white">Spatial CIMIS</h4>
+          <h4 class="hidden-xs" style="margin:0; color:white">Spatial CIMIS [[appState.mapState]]</h4>
         </paper-toolbar>
 
         <div class="menu">
@@ -88,7 +92,7 @@
 
             <tr class="active">
               <td class="icon"><i class="fa fa-area-chart"></i></td>
-              <td class="link"><a class="btn btn-link btn-lg" href="#now">Data</a></td>
+              <td class="link"><a class="btn btn-link btn-lg" href="#data">Data</a></td>
             </tr>
 
             <tr>
@@ -107,6 +111,34 @@
           </table>
 
         </div>
+
+        <paper-menu 
+          id="mainMenu" 
+          selected="[[appState.section]]" 
+          attr-for-selected="section" 
+          selected-attribute="active"
+          on-iron-select="_setSectionFromMenu">
+
+          <paper-submenu section="map">
+            <paper-item class="menu-trigger">Map</paper-item>
+            <paper-material class="menu-content">
+
+              <paper-menu 
+                id="mapLayerMenu"
+                selected="[[appState.mapState]]"
+                attr-for-selected="layer" 
+                selected-attribute="active"
+                on-iron-select="_setLayerFromMenu">
+
+                <paper-item layer="cimisGrid">Explore Spatial CIMIS Grid</paper-item>
+                <paper-item layer="etoZones">Explore ETo Zones</paper-item>
+                <paper-item layer="dauZones">Explore DAU Zones</paper-item>
+              </paper-menu>
+            </paper-material>
+          </paper-submenu>
+          <paper-item section="data">Data</paper-item>
+          <paper-item section="about">About</paper-item>
+        </paper-menu>
       </paper-header-panel>
 
       <paper-header-panel main>
@@ -119,15 +151,11 @@
           </div>
         </paper-toolbar>
 
-        <div class="fullbleed" id="pages">
+        <iron-pages class="fullbleed" id="pages" attr-for-selected="id" selected="[[appState.section]]">
           <dwr-page-map id="map" class="animated fadeIn" on-location-update="setLocation"></dwr-page-map>
-          <dwr-page-now id="now" class="animated fadeIn" on-select-location="selectLocation"></dwr-page-now>
-          <!--<dwr-page-weekly id="weekly" class="animated fadeInRight"></dwr-page-weekly>-->
-          <!--<dwr-page-settings id="settings" class="animated fadeInRight"></dwr-page-settings>-->
-          <dwr-page-zones id="zones" class="animated fadeIn"></dwr-page-zones>
-          <dwr-page-dau id="dau" class="animated fadeIn"></dwr-page-dau>
+          <dwr-page-data id="data" class="animated fadeIn" on-select-location="selectLocation"></dwr-page-data>
           <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
-        </div>
+        </iron-pages>
 
         <dwr-select-location id="selectLocation" on-location-select="onLocationSelected"></dwr-select-location>
 
@@ -141,13 +169,24 @@
   Polymer({
     is : 'dwr-app',
 
+    properties: {
+        appState: {
+            type: Object,
+            statePath: 'appState',
+            observer : 'updatePage',
+        }
+    },
+
+    actions : AppStateActions,
+
+    behaviors: [ ReduxBehavior ],
+
     ready : function() {
-			this.$.drawer.responsiveWidth = "768px";
+      this.isReady = true;
+      this.$.drawer.responsiveWidth = "768px";
 
-      this.updatePage();
-      $(window).on('hashchange', this.updatePage.bind(this));
-
-      this.loadDates();
+      $(window).on('hashchange', this.setPage.bind(this));
+      this.setPage();
 
       $.get('/eto_zones.json', function(data){
         CIMIS.zones.mergeZoneMap(data);
@@ -167,6 +206,27 @@
         this.$.dauCheckbox.style.display = 'inline-block';
         this.$.dauCheckboxLabel.innerHTML = 'Explore';
       }.bind(this));
+    },
+
+    setPage : function() {
+      var parts = window.location.hash.replace(/#/,'').split('/');
+      var state = {}
+
+      if( parts.length > 0 ) {
+        state.section = parts.splice(0, 1);
+      }
+      if( parts.length > 0 ) {
+        if( state.section === 'map' || state.section === 'data' ) {
+          state.mapState = parts.splice(0, 1);
+        }
+      }
+      if( parts.length > 0 ) {
+        state.extras = parts;
+      }
+
+      this.dispatch('setAppState', state);
+
+      this.$.drawer.closeDrawer();
     },
 
     attached : function() {
@@ -218,7 +278,7 @@
         tmp[this.dates[index]] = this.getIndex(e.detail.data, index);
       }*/
 
-      this.$.now.render(e.detail);
+      // this.$.data.render(e.detail);
     },
 
     getIndex : function(data, index) {
@@ -247,12 +307,6 @@
       this.$.selectLocation.show();
     },
 
-    loadDates : function() {
-      /*$.get('https://cimis-mobile.firebaseio.com/dates/.json', function(resp){
-        this.dates = resp;
-      }.bind(this));*/
-    },
-
     toggleExplore : function(e) {
       var layer = e.currentTarget.getAttribute('layer');
 
@@ -260,6 +314,24 @@
       else this.querySelector('[layer="dau"]').checked = false;
 
       this.$.map.toggleExplore(e.currentTarget.checked, layer);
+    },
+
+    _setSectionFromMenu : function(e) {
+      var newState = this.$.mainMenu.selected;
+      if( !newState || newState === this.appState.section ) {
+        return;
+      }
+
+      window.location.hash = newState;
+    },
+
+    _setLayerFromMenu : function(e) {
+      var newState = this.$.mapLayerMenu.selected;
+      if( !newState || newState === this.appState.mapState ) {
+        return;
+      }
+
+      this.dispatch('setMapState', newState);
     }
   });
 </script>

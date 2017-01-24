@@ -1,4 +1,4 @@
-<dom-module name="dwr-page-now">
+<dom-module name="dwr-page-cimis-grid">
   <style>
     .chart:first-child {
       margin-top: 50px;
@@ -32,7 +32,7 @@
 
 <script>
   Polymer({
-    is : 'dwr-page-now',
+    is : 'dwr-page-cimis-grid',
 
     ready : function() {
       this.params = ['Rnl','Rso','U2', 'ETo', 'Tdew','Tn','Tx',];
@@ -228,7 +228,7 @@
 
         for( var i = 0; i < this.datatables.length; i++ ) {
           var root = document.createElement('div');
-          root.className = 'chart style-scope dwr-page-now';
+          root.className = 'chart style-scope dwr-page-cimis-grid';
           this.$.charts.appendChild(root);
           //this.charts.push(new google.charts.Line(root));
           this.charts.push(new google.visualization.LineChart(root));

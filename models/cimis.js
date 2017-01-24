@@ -1,7 +1,7 @@
 'use strict';
 
 var ringBuffer = require('../lib/ring-buffer');
-var grid = require('../lib/shared/cimis-grid');
+var grid = require('../public/js/lib/cimis-grid');
 var config;
 
 module.exports = function() {

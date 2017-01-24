@@ -23,6 +23,20 @@
 
     is : 'dwr-page-map',
 
+    properties: {
+      mapState: {
+        type: Object,
+        statePath: 'appState.mapState',
+        observer : '_toggleMapState'
+      },
+      dauData: {
+        type: Object,
+        statePath : 'collections.dau.data'
+      }
+    },
+
+    behaviors: [ ReduxBehavior, DauBehavior ],
+
     ready : function() {
       this.cache = {};
       this.first = true;
@@ -70,15 +84,29 @@
       }, 50);
     },
 
-    _toggleExplore : function(show, type) {
-      if( !type ) type = 'zone';
+    _toggleMapState : function() {
+      if( !this.map ) return;
 
-      if( show ) {
-        if( type === 'zone' ) this.map.data.addGeoJson(this.zoneData);
+      this.map.data.forEach(function(feature) {
+        this.map.data.remove(feature);
+      }.bind(this));
+
+      this.map.data.setStyle({visible: false});
+
+      this.debounce('toggleExplore', function(){
+        this._toggleExplore();
+      }, 50);
+    },
+
+    _toggleExplore : function() {
+
+
+      if( this.mapState === 'etoZones' || this.mapState === 'dauZones' ) {
+        if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.zoneData);
         else this.map.data.addGeoJson(this.dauData);
 
         this.map.data.setStyle(function(feature) {
-          if( type === 'dau' ) {
+          if( this.mapState === 'dauZones' ) {
             return {
               fillColor: '#aaaaaa',
               strokeColor: '#ffffff',
@@ -97,10 +125,8 @@
           };
         }.bind(this));
 
-        this.regionsEnabled = true;
         this.clearCurrentGrid();
       } else {
-        this.regionsEnabled = false;
         this.map.data.setStyle({visible: false});
       }
     },
@@ -117,9 +143,9 @@
         return;
       }
       if( e.feature.getProperty('dauco') ) {
-        window.location.hash = '#dau/'+this.getRegionNumber(e.feature);
+        window.location.hash = '#data/'+this.mapState+'/'+this.getRegionNumber(e.feature);
       } else{
-        window.location.hash = '#zones/'+this.getRegionNumber(e.feature);
+        window.location.hash = '#data/'+this.mapState+'/'+this.getRegionNumber(e.feature);
       }
     },
 

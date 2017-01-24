@@ -45,7 +45,17 @@
         <script src="bower_components/bootswatch-dist/js/bootstrap.js"></script>
         <script src="bower_components/proj4/dist/proj4.js"></script>
         <script src="js/etoOverlay.js"></script>
-        <script src="js/app.js"></script>
+        <script src="js/build.js"></script>
+
+        <!-- Glue -->
+        <script>
+          var ReduxBehavior = CIMIS.redux.behavior;
+          var AppStateActions = CIMIS.redux.actions.appState;
+
+          var DauBehavior = {
+            load : CIMIS.services.dau.load
+          }
+        </script>
         <!-- endbuild -->
 
         <link rel="import" href="require.html">
