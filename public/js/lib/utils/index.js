@@ -1,4 +1,5 @@
 'use strict';
+var store = require('../store');
 
 function sortDates(data) {
   var arr = [];
@@ -41,6 +42,13 @@ function toDate(str) {
   return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
 }
 
+function dispatch() {
+  var args = [].slice.call(arguments);
+  var fn = args.splice(0, 1)[0];
+  store.dispatch(fn.apply(this, args));
+}
+
 module.exports = {
-  sortDates : sortDates
+  sortDates : sortDates,
+  dispatch : dispatch
 };

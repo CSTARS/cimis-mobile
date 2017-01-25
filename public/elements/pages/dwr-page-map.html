@@ -31,11 +31,11 @@
       },
       dauData: {
         type: Object,
-        statePath : 'collections.dau.data'
+        statePath : 'collections.dau.geometry'
       }
     },
 
-    behaviors: [ ReduxBehavior, DauBehavior ],
+    behaviors: [ ReduxBehavior /*, DauBehavior */ ],
 
     ready : function() {
       this.cache = {};
@@ -67,10 +67,6 @@
       this.zoneData = data;
     },
 
-    setDauData : function(data) {
-      this.dauData = data;
-    },
-
     toggleExplore : function(show, type) {
       this.map.data.forEach(function(feature) {
         this.map.data.remove(feature);
@@ -99,11 +95,10 @@
     },
 
     _toggleExplore : function() {
-
-
       if( this.mapState === 'etoZones' || this.mapState === 'dauZones' ) {
+
         if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.zoneData);
-        else this.map.data.addGeoJson(this.dauData);
+        else this.map.data.addGeoJson(this.dauData.data);
 
         this.map.data.setStyle(function(feature) {
           if( this.mapState === 'dauZones' ) {

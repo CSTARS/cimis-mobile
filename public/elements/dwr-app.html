@@ -116,28 +116,26 @@
           id="mainMenu" 
           selected="[[appState.section]]" 
           attr-for-selected="section" 
-          selected-attribute="active"
-          on-iron-select="_setSectionFromMenu">
+          selected-attribute="active">
 
           <paper-submenu section="map">
-            <paper-item class="menu-trigger">Map</paper-item>
+            <paper-item class="menu-trigger" on-click="_setSectionFromMenu">Map</paper-item>
             <paper-material class="menu-content">
 
               <paper-menu 
                 id="mapLayerMenu"
                 selected="[[appState.mapState]]"
                 attr-for-selected="layer" 
-                selected-attribute="active"
-                on-iron-select="_setLayerFromMenu">
+                selected-attribute="active">
 
-                <paper-item layer="cimisGrid">Explore Spatial CIMIS Grid</paper-item>
-                <paper-item layer="etoZones">Explore ETo Zones</paper-item>
-                <paper-item layer="dauZones">Explore DAU Zones</paper-item>
+                <paper-item layer="cimisGrid" on-click="_setLayerFromMenu">Explore Spatial CIMIS Grid</paper-item>
+                <paper-item layer="etoZones" on-click="_setLayerFromMenu">Explore ETo Zones</paper-item>
+                <paper-item layer="dauZones" on-click="_setLayerFromMenu">Explore DAU Zones</paper-item>
               </paper-menu>
             </paper-material>
           </paper-submenu>
-          <paper-item section="data">Data</paper-item>
-          <paper-item section="about">About</paper-item>
+          <paper-item section="data" on-click="_setSectionFromMenu">Data</paper-item>
+          <paper-item section="about" on-click="_setSectionFromMenu">About</paper-item>
         </paper-menu>
       </paper-header-panel>
 
@@ -188,24 +186,24 @@
       $(window).on('hashchange', this.setPage.bind(this));
       this.setPage();
 
-      $.get('/eto_zones.json', function(data){
-        CIMIS.zones.mergeZoneMap(data);
-        this.$.map.setZoneData(data);
-        this.$.zones.setZoneData(data);
+      // $.get('/eto_zones.json', function(data){
+      //   CIMIS.zones.mergeZoneMap(data);
+      //   this.$.map.setZoneData(data);
+      //   this.$.zones.setZoneData(data);
 
-        this.$.zoneCheckboxLoading.style.display = 'none';
-        this.$.zoneCheckbox.style.display = 'inline-block';
-        this.$.zoneCheckboxLabel.innerHTML = 'Explore';
-      }.bind(this));
+      //   this.$.zoneCheckboxLoading.style.display = 'none';
+      //   this.$.zoneCheckbox.style.display = 'inline-block';
+      //   this.$.zoneCheckboxLabel.innerHTML = 'Explore';
+      // }.bind(this));
 
-      $.get('/dauco.json', function(data){
-        this.$.map.setDauData(data);
-        this.$.dau.setDauData(data);
+      // $.get('/dauco.json', function(data){
+      //   this.$.map.setDauData(data);
+      //   this.$.dau.setDauData(data);
 
-        this.$.dauCheckboxLoading.style.display = 'none';
-        this.$.dauCheckbox.style.display = 'inline-block';
-        this.$.dauCheckboxLabel.innerHTML = 'Explore';
-      }.bind(this));
+      //   this.$.dauCheckboxLoading.style.display = 'none';
+      //   this.$.dauCheckbox.style.display = 'inline-block';
+      //   this.$.dauCheckboxLabel.innerHTML = 'Explore';
+      // }.bind(this));
     },
 
     setPage : function() {
@@ -213,11 +211,16 @@
       var state = {}
 
       if( parts.length > 0 ) {
-        state.section = parts.splice(0, 1);
+        state.section = parts.splice(0, 1)[0];
       }
       if( parts.length > 0 ) {
         if( state.section === 'map' || state.section === 'data' ) {
-          state.mapState = parts.splice(0, 1);
+          state.mapState = parts.splice(0, 1)[0];
+        }
+      }
+      if( state.section === 'data' ) {
+        if( parts.length > 0 ) {
+          state.selectedLocation = parts.splice(0, 1)[0];
         }
       }
       if( parts.length > 0 ) {

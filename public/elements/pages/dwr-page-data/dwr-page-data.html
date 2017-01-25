@@ -10,9 +10,12 @@
       }
     </style>
 
+    [[mapState]]
+
     <iron-pages 
       selected="[[mapState]]" 
-      attr-for-selected="page">
+      attr-for-selected="page"
+      selected-attribute="active">
 
       <dwr-page-cimis-grid page="cimisGrid"></dwr-page-cimis-grid>
       <dwr-page-dau page="dauZones"></dwr-page-dau>
@@ -26,7 +29,7 @@
       is: 'dwr-page-data',
 
       properties: {
-        appState: {
+        mapState: {
             type: String,
             statePath: 'appState.mapState'
         }

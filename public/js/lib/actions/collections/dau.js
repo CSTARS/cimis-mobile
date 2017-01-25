@@ -3,40 +3,42 @@
  */
 var ACTIONS = {
   SET_DAU_GEOMETRY : 'SET_DAU_GEOMETRY',
-  LOAD_DAU_GEOMETRY : 'LOAD_DAU_GEOMETRY',
-  LOAD_DAU_GEOMETRY_ERROR : 'LOAD_DAU_GEOMETRY_ERROR'
+  SET_DAU_DATA : 'SET_DAU_DATA',
+  SELECT_DAU_ZONE : 'SELECT_DAU_ZONE'
 }
 
 
 /**
  * Action Functions
  */
-function setDauGeometry(data) {
+function setGeometry(data) {
   return {
     type : ACTIONS.SET_DAU_GEOMETRY,
     data : data
   }
 }
 
-function loadDauGeometry(loading) {
+function setData(id, data) {
+  data.id = id;
+  
   return {
-    type : ACTIONS.LOAD_DAU_GEOMETRY,
-    loading : loading
+    type : ACTIONS.SET_DAU_DATA,
+    id : id,
+    data : data
   }
 }
 
-function errorLoadingDauGeometry(hasError, errorMessage) {
+function selectZone(id) {
   return {
-    type : ACTIONS.LOAD_DAU_GEOMETRY_ERROR,
-    hasError : hasError,
-    errorMessage : errorMessage
+    type : ACTIONS.SELECT_DAU_ZONE,
+    id : id
   }
 }
 
 
 module.exports = {
   ACTIONS : ACTIONS,
-  setDauData : setDauData,
-  loadDauData : loadDauData,
-  errorLoadingDauGeometry : errorLoadingDauGeometry
+  setGeometry : setGeometry,
+  setData : setData,
+  selectZone : selectZone
 }

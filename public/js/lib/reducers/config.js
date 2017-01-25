@@ -1,5 +1,5 @@
-var configActions = require('../../actions/config');
-var utils = require('../utils');
+var configActions = require('../actions/config');
+var utils = require('./utils');
 
 var actions = configActions.ACTIONS;
 

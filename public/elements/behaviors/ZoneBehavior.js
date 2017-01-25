@@ -17,7 +17,7 @@ var ZoneBehavior = {
   fitToFeature : function() {
       var features = [];
       this.map.data.forEach(function(feature){
-          if( this.getRegionNumber(feature)+'' === this.currentZone ) {
+          if( this.getRegionNumber(feature)+'' === this.appState.selectedLocation) {
               features.push(feature);
           }
       }.bind(this));

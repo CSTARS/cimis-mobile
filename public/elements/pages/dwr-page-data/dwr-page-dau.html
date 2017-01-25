@@ -20,13 +20,32 @@
 
     </template>
     <script>
-        Polymer({
+        Polymer(BindRedux({
             is: 'dwr-page-dau',
 
-            behaviors : [ZoneBehavior, DauBehavior],
+            properties : {
+                active : {
+                    type : Boolean,
+                    observer : '_onActive'
+                },
+                appState : {
+                    type : Object,
+                    observer : '_onActive'
+                },
+                geometry : {
+                    type : Object, 
+                    observer : '_onGeometryUpdate'
+                },
+                currentZoneData : {
+                    type : Object,
+                    observer : '_onDataUpdate'
+                }
+            },
+
+            behaviors : [ZoneBehavior],
 
             ready : function() {
-                this.currentZone = '';
+                this.loadGeometry();
 
                 this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
                 this.map.data.addListener('click', this.onRegionClick.bind(this));
@@ -38,29 +57,38 @@
                 if( !e.feature ) {
                     return;
                 }
-                window.location.hash = '#dau/'+this.getRegionNumber(e.feature);
+                window.location.hash = '#data/dauZones/'+this.getRegionNumber(e.feature);
             },
 
-            setDauData : function(data) {
-                this.map.data.addGeoJson(data);
-                this.zoneDataSet = true;
-                if( this.fireOnShow ) {
-                    this.onShow([this.currentZone]);
+            _onGeometryUpdate : function() {
+                if( this.geometry.state !== 'loaded' ) return;
+
+                this.map.data.addGeoJson(this.geometry.data);
+                this.redrawMap();
+            },
+
+            _onActive : function() {
+                if( !this.appState || !this.active ) return;
+                if( this.appState.selectedLocation && !this.currentZoneData ) {
+                    return this.loadData(this.appState.selectedLocation);
                 }
             },
 
-            onShow : function(params) {
-                if( params.length === 0 ) return;
-                this.currentZone = params[0];
+            _onDataUpdate : function() {
+                if( !this.currentZoneData ) {
+                    return this.loadData(this.appState.selectedLocation);
+                }
 
-                if( !this.zoneDataSet ) {
-                    this.fireOnShow = true;
+                /**
+                 * TODO: handle error state
+                 * */
+                if( this.currentZoneData.state !== 'loaded' ) {
                     return;
                 }
 
                 this.map.data.setStyle(function(feature) {
                     var label = this.getRegionNumber(feature);
-                    if( label+'' === this.currentZone ){
+                    if( label+'' === this.appState.selectedLocation ){
                         return {
                             fillColor: '#2196f3',
                             strokeColor: '#fff',
@@ -75,17 +103,14 @@
                             strokeWeight: 1
                         };
                     }
-                    
                 }.bind(this));
 
-                $.get('/cimis/region/DAU'+this.currentZone, this.onZoneDataLoad.bind(this));
-
-                if( !window.google ) return;
-                this.redraw();
+                this.redrawMap();
+                this.onZoneDataLoad();
             },
 
-            onZoneDataLoad : function(resp) {
-                this.sortedDates = CIMIS.utils.sortDates(resp.data);
+            onZoneDataLoad : function() {
+                this.sortedDates = CIMIS.utils.sortDates(this.currentZoneData.data.data);
 
                 // eto chart
                 this.dt = new google.visualization.DataTable();
@@ -93,7 +118,7 @@
                 this.dt.addColumn('number', 'Avg ETo');
 
                 this.sortedDates.forEach(function(date, index){
-                    d = resp.data[date];
+                    d = this.currentZoneData.data.data[date];
                     arr = [date];
 
                     arr.push(parseFloat(d) || 0);
@@ -115,22 +140,35 @@
                     }
                 }
 
-                this.redraw();
+                this.redrawChart();
             },
 
             redraw : function() {
-                this.debounce('redraw',function() {
-                    google.maps.event.trigger(this.map, "resize");
-                    this.fitToFeature();
+                this.redrawChart();
+                this.redrawMap();
+            },
 
+            redrawChart : function() {
+                if( !this.active ) return;
+
+                this.debounce('redrawChart',function() {
                     if( !this.chart ) return;
                     this.chart.draw(this.dt, this.options);
+                });
+            },
+
+            redrawMap : function() {
+                if( !this.active ) return;
+
+                this.debounce('redrawMap',function() {
+                    google.maps.event.trigger(this.map, "resize");
+                    this.fitToFeature();
                 });
             },
 
             getRegionNumber : function(feature) {
               return feature.getProperty('dau_code');
             }
-        });
+        }));
     </script>
 </dom-module>

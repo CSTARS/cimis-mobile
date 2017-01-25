@@ -25,7 +25,8 @@
     "proj4": "^2.3.10",
     "redis": "^0.12.1",
     "redux": "^3.6.0",
-    "request": "^2.61.0"
+    "request": "^2.61.0",
+    "superagent": "^3.3.2"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

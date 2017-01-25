@@ -7,7 +7,9 @@ var appSections = appStateActions.APP_SECTIONS;
 
 var initialState = {
   section : appSections.map,
-  mapState : mapStates.cimisGrid
+  mapState : mapStates.cimisGrid,
+  selectedLocation : '',
+  extras : []
 };
 
 function setMapState(state, action) {

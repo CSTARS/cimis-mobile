@@ -5,33 +5,42 @@ var actions = dauActions.ACTIONS;
 
 var initialState = {
   geometry : {
-    data : {},
-    loading : false,
-    error : false
+    data : null,
+    state : 'init'
   },
-  data : {}
+  byId : {},
+  selected : ''
 };
 
-function setDauLoadingGeometryState(state, action) {
-  return utils.assign(state, {geometry: {loading: action.loading}});
-}
-
+/**
+ * Geometry
+ */
 function setGeometry(state, action) {
-  return utils.assign(state, {geometry: {data: action.data}});
+  state.geometry = utils.assign(state.geometry, action.data);
+  return state;
 }
 
-function setError(state, action) {
-  return utils.assign(state, {geometry: {error: action.error}});
+/**
+ * Data
+ */
+function setData(state, action) {
+  state.byId = utils.assign(state.byId, {[action.id]: action.data});
+  return state;
+}
+
+function selectZone(state, action) {
+  if( state.selected === action.id ) return state;
+  return utils.assign(state, {selected: action.id});
 }
 
 function dau(state = initialState, action) {
   switch (action.type) {
-    case actions.LOAD_DAU_GEOMETRY:
-      return setDauLoadingGeometryState(state, action);
     case actions.SET_DAU_GEOMETRY:
       return setGeometry(state, action);
-    case actions.LOAD_DAU_GEOMETRY_ERROR:
-      return setGeometryError(state, action);
+    case actions.SET_DAU_DATA:
+      return setData(state, action);
+    case actions.SELECT_DAU_ZONE:
+      return selectZone(state, action);
     default:
       return state
   }
