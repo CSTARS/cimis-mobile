@@ -12,16 +12,16 @@ var initialState = {
 /**
  * Dates
  */
-function setDates(state, action) {
-  state.dates = utils.assign(state.dates, action.data);
+function setDates(state, value) {
+  state.dates = utils.assign(state.dates, value);
   return state;
 }
 
 /**
  * Data
  */
-function setData(state, action) {
-  state.byId = utils.assign(state.byId, {[action.id]: action.data});
+function setData(state, value) {
+  state.byId = utils.assign(state.byId, {[value.id]: value});
   return state;
 }
 
@@ -31,10 +31,20 @@ function select(state, action) {
 
 function cimis(state = initialState, action) {
   switch (action.type) {
-    case actions.SET_CIMIS_DATES:
-      return setDates(state, action);
-    case actions.SET_CIMIS_DATA:
-      return setData(state, action);
+    case actions.LOAD_CIMIS_DATES_REQUEST:
+      return setDates(state, {state: 'loading'});
+    case actions.LOAD_CIMIS_DATES_SUCCESS:
+      return setDates(state, {state: 'loaded', data: action.response.body});
+    case actions.LOAD_CIMIS_DATES_FAILURE:
+      return setDates(state, {state: 'error', error: action.error});
+
+    case actions.LOAD_CIMIS_REQUEST:
+      return setData(state, {state: 'loading', id: action.id});
+    case actions.LOAD_CIMIS_SUCCESS:
+      return setData(state, {state: 'loaded', data: action.response.body, id: action.id});
+    case actions.LOAD_CIMIS_FAILURE:
+      return setData(state, {state: 'error', error: action.error, id: action.id});
+
     case actions.SELECT_CIMIS_GRID_LOCATION:
       return select(state, action);
     default:

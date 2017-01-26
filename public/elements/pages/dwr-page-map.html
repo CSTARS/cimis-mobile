@@ -76,7 +76,7 @@
 
       this._toggleMapState();
 
-      this.loadDates();
+      this._loadDates();
     },
 
     setZoneData : function(data) {
@@ -210,10 +210,8 @@
       });
 
       
-      this.dispatch('select', id);
-
-      // this.zoomToBounds();
-      this.loadCimisGridData(id);
+      this._selectGridId(id);
+      this._loadGridData(id);
     },
 
     clearCurrentGrid : function() {
@@ -226,15 +224,26 @@
       this.map.fitBounds(this.bounds);
     },
 
+    _selectGridId : function(id) {
+      this.dispatch('select', id);
+    },
+
+    _loadDates : function() {
+      this.dispatch('loadDates');
+    },
+
+    _loadGridData : function(id) {
+      if( !this.active || !id ) return;
+      this.dispatch('loadData', id);
+    },
+
     _onActive : function() {
-        if( this.selectedCimisGridData && this.active ) {
-            return this.loadCimisGridData(this.selectedCimisGrid);
-        }
+      this._loadGridData(this.selectedCimisGrid);
     },
 
     _onGridDataUpdate : function() {
         if( !this.selectedCimisGridData ) {
-            return this.loadCimisGridData(this.selectedCimisGrid);
+            return this._loadGridData(this.selectedCimisGrid);
         }
 
         if( this.selectedCimisGridData.state !== 'loaded' ) return;

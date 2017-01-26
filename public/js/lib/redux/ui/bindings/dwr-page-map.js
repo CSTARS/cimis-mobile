@@ -3,10 +3,6 @@ var actions = require('../../actions/collections/cimis');
 
 module.exports = {
   actions : actions,
-  behavior : {
-    loadDates : services.loadDates,
-    loadCimisGridData : services.loadData
-  },
   propertyPaths : {
     mapState : 'appState.mapState',
     dauData : 'collections.dau.geometry',

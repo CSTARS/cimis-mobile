@@ -1,27 +1,31 @@
+var services = require('../../../services/cimis');
+
 /**
  * STATE ENUMs
  */
 var ACTIONS = {
-  SET_CIMIS_DATES : 'SET_CIMIS_DATES',
-  SET_CIMIS_DATA : 'SET_CIMIS_DATA',
+  LOAD_CIMIS_REQUEST: 'LOAD_CIMIS_REQUEST', 
+  LOAD_CIMIS_SUCCESS: 'LOAD_CIMIS_SUCCESS', 
+  LOAD_CIMIS_FAILURE: 'LOAD_CIMIS_FAILURE',
+  LOAD_CIMIS_DATES_REQUEST: 'LOAD_CIMIS_DATES_REQUEST', 
+  LOAD_CIMIS_DATES_SUCCESS: 'LOAD_CIMIS_DATES_SUCCESS', 
+  LOAD_CIMIS_DATES_FAILURE: 'LOAD_CIMIS_DATES_FAILURE',
   SELECT_CIMIS_GRID_LOCATION : 'SELECT_CIMIS_GRID_LOCATION'
 }
 
 /**
  * Action Functions
  */
-function setDates(data) {
+function loadDates() {
   return {
-    type : ACTIONS.SET_CIMIS_DATES,
-    data : data
-  }
-}
-
-function setData(id, data) {
-  return {
-    type : ACTIONS.SET_CIMIS_DATA,
-    id : id,
-    data : data
+    types: [ACTIONS.LOAD_CIMIS_DATES_REQUEST, ACTIONS.LOAD_CIMIS_DATES_SUCCESS, ACTIONS.LOAD_CIMIS_DATES_FAILURE],
+    shouldCallAPI: (state) => {
+      return state.collections.cimis.dates.state !== 'loaded'
+    },
+    callAPI: (callback) => { 
+      services.loadDates(callback) ;
+    },
+    payload: {}
   }
 }
 
@@ -32,9 +36,23 @@ function select(id) {
   }
 }
 
+function loadData(gridId) {
+  return {
+    types: [ACTIONS.LOAD_CIMIS_REQUEST, ACTIONS.LOAD_CIMIS_SUCCESS, ACTIONS.LOAD_CIMIS_FAILURE],
+    shouldCallAPI: (state) => !state.collections.cimis.byId[gridId],
+    callAPI: (callback) => { 
+      services.loadData(gridId, callback);
+    },
+    payload: { 
+      id : gridId
+    }
+  }
+}
+
+
 module.exports = {
   ACTIONS : ACTIONS,
-  setDates: setDates,
-  setData : setData,
+  loadDates: loadDates,
+  loadData: loadData,
   select : select
 }

@@ -149,7 +149,7 @@
           </div>
         </paper-toolbar>
 
-        <iron-pages class="fullbleed" id="pages" attr-for-selected="id" selected="[[appState.section]]">
+        <iron-pages class="fullbleed" id="pages" selected-attribute="active" attr-for-selected="id" selected="[[appState.section]]">
           <dwr-page-map id="map" class="animated fadeIn" on-location-update="setLocation"></dwr-page-map>
           <dwr-page-data id="data" class="animated fadeIn" on-select-location="selectLocation"></dwr-page-data>
           <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
