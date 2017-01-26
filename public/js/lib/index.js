@@ -1,11 +1,7 @@
 
 
 module.exports = {
-  redux : {
-    store : require('./store'),
-    behavior : require('./behavior'),
-    actions : require('./actions')
-  },
+  redux : require('./redux'),
   services : require('./services'),
   fft : require('./fft'),
   zones : require('./eto-zones'),

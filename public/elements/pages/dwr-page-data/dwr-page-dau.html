@@ -4,19 +4,28 @@
         <style>
             :host {
                 display: block;
+                padding: 10px;
+            }
+            #zoneMap {
+                height: 400px;
+            }
+            paper-material {
+                margin: 25px 10px;
+            }
+            h2 {
+                font-weight: 200;
             }
         </style>
-        
-        <div style="padding: 5%">
-            <h4 class="page-header">
-                <small>DAU Zone</small> <span>[[currentZone]]</span>  
-                <a class="btn btn-link pull-right" href="#map">Back to Map</a>
-            </h4>
 
-            <div style="height:400px" id="zoneMap"></div>
+        <h2>DAU Zone: <span>[[selected]]</span></h2>
 
+        <paper-material>
+            <div id="zoneMap"></div>
+        </paper-material>
+
+        <paper-material style="padding-right:15px">
             <div id="chart"></div>
-        </div>
+        </paper-material>
 
     </template>
     <script>
@@ -28,7 +37,7 @@
                     type : Boolean,
                     observer : '_onActive'
                 },
-                appState : {
+                selected : {
                     type : Object,
                     observer : '_onActive'
                 },
@@ -68,15 +77,14 @@
             },
 
             _onActive : function() {
-                if( !this.appState || !this.active ) return;
-                if( this.appState.selectedLocation && !this.currentZoneData ) {
-                    return this.loadData(this.appState.selectedLocation);
+                if( this.selected && this.active ) {
+                    return this.loadData(this.selected);
                 }
             },
 
             _onDataUpdate : function() {
                 if( !this.currentZoneData ) {
-                    return this.loadData(this.appState.selectedLocation);
+                    return this.loadData(this.selected);
                 }
 
                 /**
@@ -88,7 +96,7 @@
 
                 this.map.data.setStyle(function(feature) {
                     var label = this.getRegionNumber(feature);
-                    if( label+'' === this.appState.selectedLocation ){
+                    if( label+'' === this.selected ){
                         return {
                             fillColor: '#2196f3',
                             strokeColor: '#fff',

@@ -51,11 +51,13 @@
         <script>
           var BindRedux = function(bindDefs, reduxBehavior) {
             return function(eleDef) {
-              var bindings = bindDefs[eleDef.is];
-              if( !bindings ) return eleDef;
-              
+
+              // always add the redux behavior
               if( !eleDef.behaviors ) eleDef.behaviors = [];
               eleDef.behaviors.push(reduxBehavior);
+
+              var bindings = bindDefs[eleDef.is];
+              if( !bindings ) return eleDef;
 
               if( bindings.behavior ) {
                 eleDef.behaviors.push(bindings.behavior);
@@ -79,41 +81,14 @@
             }
           }
 
-          var ReduxBehavior = CIMIS.redux.behavior;
           var AppStateActions = CIMIS.redux.actions.appState;
 
-          var DauReduxBinding = {
-            actions : CIMIS.redux.actions.collections.dau,
-            behavior : {
-              loadGeometry : CIMIS.services.dau.loadGeometry,
-              loadData : CIMIS.services.dau.loadData
-            },
-            propertyPaths : {
-              geometry : 'collections.dau.geometry',
-              appState : 'appState',
-              currentZone : 'collections.dau.selected',
-              currentZoneData : function(state) {
-                // console.log('FUCK YOU: '+state.collections.dau.selected+' - '+CIMIS.redux.store.getState().collections.dau.selected);
-                // if( state.collections.dau.selected !== CIMIS.redux.store.getState().collections.dau.selected ) {
-                //   debugger;
-                // }
-                return state.collections.dau.byId[state.appState.selectedLocation];
-              }
-            }
-          }
 
-          var bindDefs = {
-            'dwr-page-dau' : DauReduxBinding
-          }
-
-          BindRedux = new BindRedux(bindDefs, CIMIS.redux.behavior);
+          BindRedux = new BindRedux(CIMIS.redux.ui.bindings, CIMIS.redux.ui.behavior);
         </script>
         <!-- endbuild -->
 
         <link rel="import" href="require.html">
-
-
-
     </head>
 
     <body>

@@ -1,7 +1,7 @@
 var request = require('superagent');
-var actions = require('../actions/collections/dau');
-var dispatch = require('../utils').dispatch;
-var store = require('../store');
+var actions = require('../redux/actions/collections/dau');
+var dispatch = require('../redux/utils').dispatch;
+var store = require('../redux/store');
 
 function loadGeometry(callback) {
   dispatch(actions.setGeometry, {state: 'loading'});
@@ -19,6 +19,11 @@ function loadGeometry(callback) {
 }
 
 function loadData(dauZoneId, callback) {
+  var data = store.getState().collections.dau.byId[dauZoneId];
+  if( data && data.state !== 'error' ) {
+    return;
+  }
+
   dispatch(actions.setData, dauZoneId, {state: 'loading'});
 
   request

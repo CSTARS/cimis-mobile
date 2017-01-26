@@ -118,7 +118,7 @@
           attr-for-selected="section" 
           selected-attribute="active">
 
-          <paper-submenu section="map">
+          <paper-submenu section="map" id="submenu">
             <paper-item class="menu-trigger" on-click="_setSectionFromMenu">Map</paper-item>
             <paper-material class="menu-content">
 
@@ -164,7 +164,7 @@
 </dom-module>
 
 <script>
-  Polymer({
+  Polymer(BindRedux({
     is : 'dwr-app',
 
     properties: {
@@ -176,8 +176,6 @@
     },
 
     actions : AppStateActions,
-
-    behaviors: [ ReduxBehavior ],
 
     ready : function() {
       this.isReady = true;
@@ -228,8 +226,14 @@
       }
 
       this.dispatch('setAppState', state);
-
+      
       this.$.drawer.closeDrawer();
+
+      if( this.getState().appState.section === 'map' ) {
+        this.$.submenu.open();
+      } else {
+        this.$.submenu.close();
+      }
     },
 
     attached : function() {
@@ -303,7 +307,7 @@
     },
 
     onLocationSelected : function(e) {
-      this.$.map.setLocation(e.detail);
+      // this.$.map.setLocation(e.detail);
     },
 
     selectLocation : function() {
@@ -336,5 +340,5 @@
 
       this.dispatch('setMapState', newState);
     }
-  });
+  }));
 </script>

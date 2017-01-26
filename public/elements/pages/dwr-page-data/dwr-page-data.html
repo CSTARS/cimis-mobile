@@ -10,8 +10,6 @@
       }
     </style>
 
-    [[mapState]]
-
     <iron-pages 
       selected="[[mapState]]" 
       attr-for-selected="page"
@@ -25,7 +23,7 @@
     
   </template>
   <script>
-    Polymer({
+    Polymer(BindRedux({
       is: 'dwr-page-data',
 
       properties: {
@@ -33,10 +31,8 @@
             type: String,
             statePath: 'appState.mapState'
         }
-      },
+      }
 
-      behaviors: [ ReduxBehavior ]
-
-    });
+    }));
   </script>
 </dom-module>
