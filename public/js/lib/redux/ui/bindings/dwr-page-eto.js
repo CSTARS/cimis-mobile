@@ -1,4 +1,4 @@
-var actions = require('../../actions/collections/dau');
+var actions = require('../../actions/collections/etoZones');
 
 
 module.exports = {
@@ -17,10 +17,10 @@ module.exports = {
     }
   },
   propertyPaths : {
-    geometry : 'collections.dau.geometry',
-    selected : 'collections.dau.selected',
+    geometry : 'collections.etoZones.geometry',
+    selected : 'collections.etoZones.selected',
     currentZoneData : function(state) {
-      return state.collections.dau.byId[state.collections.dau.selected];
+      return state.collections.etoZones.byId[state.collections.etoZones.selected];
     }
   }
 }

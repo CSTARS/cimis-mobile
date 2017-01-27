@@ -52,10 +52,8 @@
 
 
     ready : function() {
-      this.cache = {};
       this.first = true;
 
-      this.regionsEnabled = false;
 
       var mapOptions = {
         center: { lat: 38.033291, lng: -119.961762 },
@@ -75,7 +73,6 @@
       this.map.data.addListener('click', this.onRegionClick.bind(this));
 
       this._toggleMapState();
-
       this._loadDates();
     },
 
@@ -224,24 +221,21 @@
       this.map.fitBounds(this.bounds);
     },
 
-    _selectGridId : function(id) {
-      this.dispatch('select', id);
-    },
-
-    _loadDates : function() {
-      this.dispatch('loadDates');
-    },
-
-    _loadGridData : function(id) {
-      if( !this.active || !id ) return;
-      this.dispatch('loadData', id);
-    },
-
     _onActive : function() {
       this._loadGridData(this.selectedCimisGrid);
+
+      if( window.google ) {
+        this.debounce('resizeMap', function(){
+          google.maps.event.trigger(this.$.map, 'resize');
+        }, 50);
+      }
     },
 
     _onGridDataUpdate : function() {
+      this.debounce('onGridDataUpdate', this._onGridDataUpdateDelay, 50);
+    },
+
+    _onGridDataUpdateDelay : function() {
         if( !this.selectedCimisGridData ) {
             return this._loadGridData(this.selectedCimisGrid);
         }
@@ -269,15 +263,6 @@
       this.yesterday = dates[dates.length-1];
     },
 
-    onShow : function() {
-        if( !window.google ) return;
-        google.maps.event.trigger(this.$.map, 'resize');
-
-        if( this.first && this.latLng ) {
-          this.first = false;
-          this.zoomToGrid();
-        }
-    },
 
     ga : function(name, type, value) {
       if( !window.ga ) return;

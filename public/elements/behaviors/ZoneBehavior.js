@@ -14,10 +14,10 @@ var ZoneBehavior = {
       disableDefaultUI: true
   },
 
-  fitToFeature : function() {
+  fitToFeature : function(selectedId) {
       var features = [];
       this.map.data.forEach(function(feature){
-          if( this.getRegionNumber(feature)+'' === this.appState.selectedLocation) {
+          if( this.getRegionNumber(feature)+'' === selectedId) {
               features.push(feature);
           }
       }.bind(this));

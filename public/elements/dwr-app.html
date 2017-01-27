@@ -70,47 +70,8 @@
 
       <paper-header-panel drawer class="drawer">
         <paper-toolbar style="background-color: #2196f3; z-index: 100">
-          <h4 class="hidden-xs" style="margin:0; color:white">Spatial CIMIS [[appState.mapState]]</h4>
+          <h4 class="hidden-xs" style="margin:0; color:white">Spatial CIMIS</h4>
         </paper-toolbar>
-
-        <div class="menu">
-          <table style="width:100%" id="linktable">
-            <tr>
-              <td class="icon"><i class="fa fa-map-o"></i></td>
-              <td class="link">
-                <a class="btn btn-link btn-lg" href="#map" style="border-bottom:none">Map</a>
-                <div id="exploreToggle">
-                  <i class="fa fa-spinner fa-spin" id="zoneCheckboxLoading"></i>
-                  <input type="checkbox" on-click="toggleExplore" layer="zone" id="zoneCheckbox" style="display:none" /> <span id="zoneCheckboxLabel">Loading</span> ETo Zones
-                </div>
-                <div id="exploreToggleDau">
-                  <i class="fa fa-spinner fa-spin" id="dauCheckboxLoading"></i>
-                  <input type="checkbox" on-click="toggleExplore" layer="dau" id="dauCheckbox" style="display:none" /> <span id="dauCheckboxLabel">Loading</span> DAU Zones
-                </div>
-              </td>
-            </tr>
-
-            <tr class="active">
-              <td class="icon"><i class="fa fa-area-chart"></i></td>
-              <td class="link"><a class="btn btn-link btn-lg" href="#data">Data</a></td>
-            </tr>
-
-            <tr>
-              <td class="icon"><i class="fa fa-info-circle"></i></td>
-              <td class="link"><a class="btn btn-link btn-lg" href="#about">About</a></td>
-            </tr>
-
-            <tr>
-              <td class="icon"><i class="fa fa-mobile"></i></td>
-              <td class="link"><a class="btn btn-link btn-lg" href="#about/install" id="install">Install on Mobile</a></td>
-            </tr>
-            <tr>
-              <td class="icon"><i class="fa fa-edit"></i></td>
-              <td class="link"><a class="btn btn-link btn-lg" href="#about/survey">Survey</a></td>
-            </tr>
-          </table>
-
-        </div>
 
         <paper-menu 
           id="mainMenu" 
@@ -170,12 +131,9 @@
     properties: {
         appState: {
             type: Object,
-            statePath: 'appState',
             observer : 'updatePage',
         }
     },
-
-    actions : AppStateActions,
 
     ready : function() {
       this.isReady = true;
@@ -216,11 +174,7 @@
           state.mapState = parts.splice(0, 1)[0];
         }
       }
-      if( state.section === 'data' ) {
-        if( parts.length > 0 ) {
-          state.selectedLocation = parts.splice(0, 1)[0];
-        }
-      }
+
       if( parts.length > 0 ) {
         state.extras = parts;
       }
@@ -248,31 +202,31 @@
     },
 
     updatePage : function() {
-      var hash = window.location.hash || '';
-      var parts = hash.replace(/#/,'').split('/');
-      this.page = parts.splice(0, 1)[0];
+      // var hash = window.location.hash || '';
+      // var parts = hash.replace(/#/,'').split('/');
+      // this.page = parts.splice(0, 1)[0];
 
-      if( !this.$[this.page] ) this.page = 'map';
+      // if( !this.$[this.page] ) this.page = 'map';
 
-      if( this.page == 'settings' || this.page == 'map' ) {
-          this.showTabs = false;
-      } else {
-          this.showTabs = true;
-      }
+      // if( this.page == 'settings' || this.page == 'map' ) {
+      //     this.showTabs = false;
+      // } else {
+      //     this.showTabs = true;
+      // }
 
-      $(this.$.linktable).find('tr').removeClass('active');
-      $(this.$.linktable)
-        .find('[href="'+hash+'"]')
-        .parent().parent()
-        .addClass('active');
+      // $(this.$.linktable).find('tr').removeClass('active');
+      // $(this.$.linktable)
+      //   .find('[href="'+hash+'"]')
+      //   .parent().parent()
+      //   .addClass('active');
       
 
-      $(this.$.pages).children().hide();
+      // $(this.$.pages).children().hide();
 
-      this.$[this.page].style.display = 'block'
-      if( this.$[this.page].onShow  ) this.$[this.page].onShow(parts);
+      // this.$[this.page].style.display = 'block'
+      // if( this.$[this.page].onShow  ) this.$[this.page].onShow(parts);
 
-      this.$.drawer.closeDrawer();
+      // this.$.drawer.closeDrawer();
     },
 
     setLocation : function(e) {

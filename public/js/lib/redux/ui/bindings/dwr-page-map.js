@@ -1,8 +1,19 @@
-var services = require('../../../services/cimis');
 var actions = require('../../actions/collections/cimis');
 
 module.exports = {
   actions : actions,
+  behavior : {
+    _selectGridId : function(id) {
+      this.dispatch('select', id);
+    },
+    _loadDates : function() {
+      this.dispatch('loadDates');
+    },
+    _loadGridData : function(id) {
+      if( !this.active || !id ) return;
+      this.dispatch('loadData', id);
+    }
+  },
   propertyPaths : {
     mapState : 'appState.mapState',
     dauData : 'collections.dau.geometry',

@@ -29,8 +29,28 @@
 
     </template>
     <script>
-        Polymer({
+        Polymer(BindRedux({
             is: 'dwr-page-eto',
+
+            properties : {
+                active : {
+                    type : Boolean,
+                    observer : '_onActive'
+                },
+                selected : {
+                    type : Object,
+                    observer : '_onActive'
+                },
+                geometry : {
+                    type : Object, 
+                    observer : '_onGeometryUpdate'
+                },
+                currentZoneData : {
+                    type : Object,
+                    observer : '_onDataUpdate'
+                }
+            },
+
 
             behaviors : [ZoneBehavior],
 
@@ -348,6 +368,6 @@
                 if( w > 52 ) w = w-52; 
                 return w;
             }
-        });
+        }));
     </script>
 </dom-module>

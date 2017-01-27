@@ -77,12 +77,21 @@
             },
 
             _onActive : function() {
-                if( this.selected && this.active ) {
-                    return this.loadData(this.selected);
+                if( !this.active ) return;
+
+                var parts = window.location.hash.replace(/#/,'').split('/');
+                if( parts.length >= 3 ) {
+                    this.selectZone(parts[2]);
                 }
+
+                this.loadData(this.selected);
             },
 
             _onDataUpdate : function() {
+                this.debounce('_onDataUpdate', this._onDataUpdateAsync, 50);
+            },
+
+            _onDataUpdateAsync : function() {
                 if( !this.currentZoneData ) {
                     return this.loadData(this.selected);
                 }
@@ -170,7 +179,7 @@
 
                 this.debounce('redrawMap',function() {
                     google.maps.event.trigger(this.map, "resize");
-                    this.fitToFeature();
+                    this.fitToFeature(this.selected);
                 });
             },
 

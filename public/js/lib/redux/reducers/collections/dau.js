@@ -15,16 +15,16 @@ var initialState = {
 /**
  * Geometry
  */
-function setGeometry(state, action) {
-  state.geometry = utils.assign(state.geometry, action.data);
+function setGeometry(state, value) {
+  state.geometry = utils.assign(state.geometry, value);
   return state;
 }
 
 /**
  * Data
  */
-function setData(state, action) {
-  state.byId = utils.assign(state.byId, {[action.id]: action.data});
+function setData(state, value) {
+  state.byId = utils.assign(state.byId, {[value.id]: value});
   return state;
 }
 
@@ -35,12 +35,23 @@ function selectZone(state, action) {
 
 function dau(state = initialState, action) {
   switch (action.type) {
-    case actions.SET_DAU_GEOMETRY:
-      return setGeometry(state, action);
-    case actions.SET_DAU_DATA:
-      return setData(state, action);
     case actions.SELECT_DAU_ZONE:
       return selectZone(state, action);
+    
+    case actions.LOAD_DAU_GEOMETRY_REQUEST:
+      return setGeometry(state, {state: 'loading'});
+    case actions.LOAD_DAU_GEOMETRY_SUCCESS:
+      return setGeometry(state, {state: 'loaded', data: action.response.body});
+    case actions.LOAD_DAU_GEOMETRY_FAILURE:
+      return setGeometry(state, {state: 'error', error: action.error});
+
+    case actions.LOAD_DAU_REQUEST:
+      return setData(state, {state: 'loading', id: action.id});
+    case actions.LOAD_DAU_SUCCESS:
+      return setData(state, {state: 'loaded', data: action.response.body, id: action.id});
+    case actions.LOAD_DAU_FAILURE:
+      return setData(state, {state: 'error', error: action.error, id: action.id});
+
     default:
       return state
   }
