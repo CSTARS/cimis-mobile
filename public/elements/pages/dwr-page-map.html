@@ -33,9 +33,13 @@
         type: String,
         observer : '_toggleMapState'
       },
-      dauData: {
+      dauGeometry: {
         type: Object,
         observer : '_onDauLoad'
+      },
+      etoGeometry: {
+        type: Object,
+        observer : '_onEtoLoad'
       },
       dates: {
         type: Object,
@@ -49,7 +53,6 @@
         observer : '_onGridDataUpdate'
       }
     },
-
 
     ready : function() {
       this.first = true;
@@ -98,6 +101,12 @@
       }
     },
 
+    _onEtoLoad : function() {
+      if( this.mapState === 'etoZones' ) {
+        this._toggleExplore();
+      }
+    },
+
     _toggleMapState : function() {
       if( !this.map || !this.mapState ) return;
 
@@ -115,8 +124,8 @@
     _toggleExplore : function() {
       if( this.mapState === 'etoZones' || this.mapState === 'dauZones' ) {
 
-        if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.zoneData);
-        else this.map.data.addGeoJson(this.dauData.data);
+        if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.etoGeometry.data);
+        else this.map.data.addGeoJson(this.dauGeometry.data);
 
         this.map.data.setStyle(function(feature) {
           if( this.mapState === 'dauZones' ) {
@@ -131,7 +140,7 @@
           var label = this.getRegionNumber(feature);
 
           return {
-            fillColor: CIMIS.zones.getZone(label).properties.color,
+            fillColor: this.getZone(label).properties.color,
             strokeColor: '#ffffff',
             fillOpacity : .6,
             strokeWeight: 1
@@ -174,7 +183,7 @@
       }
 
       this.latLng = new google.maps.LatLng(e.latitude, e.longitude);
-      this.grid = CIMIS.grid.llToGrid(this.latLng);
+      this.grid = this.llToGrid(this.latLng);
 
 
        this.bounds = new google.maps.LatLngBounds(
@@ -259,7 +268,7 @@
     // get the latest date
     _onDatesLoad : function() {
       if( this.dates.state !== 'loaded' ) return;
-      dates = CIMIS.utils.sortDates(this.dates.data);
+      dates = this.sortDates(this.dates.data);
       this.yesterday = dates[dates.length-1];
     },
 

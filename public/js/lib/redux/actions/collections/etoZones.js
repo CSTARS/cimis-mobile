@@ -1,36 +1,55 @@
+var services = require('../../../services/etoZones');
+
 /**
  * STATE ENUMs
  */
 var ACTIONS = {
-  SET_ETO_ZONE_GEOMETRY : 'SET_ETO_ZONE_GEOMETRY',
-  SET_ETO_ZONE_DATA : 'SET_ETO_ZONE_DATA',
-  SELECT_ETO_ZONE_ZONE : 'SELECT_ETO_ZONE_ZONE'
+  SELECT_ETO_ZONE : 'SELECT_ETO_ZONE',
+
+  LOAD_ETO_REQUEST: 'LOAD_ETO_REQUEST', 
+  LOAD_ETO_SUCCESS: 'LOAD_ETO_SUCCESS', 
+  LOAD_ETO_FAILURE: 'LOAD_ETO_FAILURE',
+
+  LOAD_ETO_GEOMETRY_REQUEST: 'LOAD_ETO_GEOMETRY_REQUEST', 
+  LOAD_ETO_GEOMETRY_SUCCESS: 'LOAD_ETO_GEOMETRY_SUCCESS', 
+  LOAD_ETO_GEOMETRY_FAILURE: 'LOAD_ETO_GEOMETRY_FAILURE'
 }
 
 
 /**
  * Action Functions
  */
-function setGeometry(data) {
+function loadGeometry(id, data) {
   return {
-    type : ACTIONS.SET_ETO_ZONE_GEOMETRY,
-    data : data
+    types: [ACTIONS.LOAD_ETO_GEOMETRY_REQUEST, ACTIONS.LOAD_ETO_GEOMETRY_SUCCESS, ACTIONS.LOAD_ETO_GEOMETRY_FAILURE],
+    shouldCallAPI: (state) => {
+      return state.collections.etoZones.geometry.state === 'init';
+    },
+    callAPI: (callback) => { 
+      services.loadGeometry(callback);
+    },
+    payload: { 
+      id : id
+    }
   }
 }
 
-function setData(id, data) {
-  data.id = id;
-  
+function loadData(id, data) {
   return {
-    type : ACTIONS.SET_ETO_ZONE_DATA,
-    id : id,
-    data : data
+    types: [ACTIONS.LOAD_ETO_REQUEST, ACTIONS.LOAD_ETO_SUCCESS, ACTIONS.LOAD_ETO_FAILURE],
+    shouldCallAPI: (state) => !state.collections.etoZones.byId[id],
+    callAPI: (callback) => { 
+      services.loadData(id, callback);
+    },
+    payload: { 
+      id : id
+    }
   }
 }
 
 function selectZone(id) {
   return {
-    type : ACTIONS.SELECT_ETO_ZONE_ZONE,
+    type : ACTIONS.SELECT_ETO_ZONE,
     id : id
   }
 }
@@ -38,7 +57,7 @@ function selectZone(id) {
 
 module.exports = {
   ACTIONS : ACTIONS,
-  setGeometry : setGeometry,
-  setData : setData,
+  loadGeometry : loadGeometry,
+  loadData : loadData,
   selectZone : selectZone
 }

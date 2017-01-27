@@ -1,9 +1,10 @@
 var actions = require('../../actions/collections/etoZones');
-
+var utils = require('../../../eto-zones');
 
 module.exports = {
   actions : actions,
   behavior : {
+    getZone : utils.getZone,
     loadGeometry : function() {
       this.dispatch('loadGeometry')
     },

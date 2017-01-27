@@ -1,7 +1,4 @@
 var request = require('superagent');
-var actions = require('../redux/actions/collections/dau');
-var dispatch = require('../redux/utils').dispatch;
-var store = require('../redux/store');
 var getHost = require('./utils').getHost;
 
 function loadGeometry(callback) {

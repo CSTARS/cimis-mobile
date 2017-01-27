@@ -11,7 +11,7 @@
     </style>
 
     <iron-pages 
-      selected="[[mapState]]" 
+      selected="[[selected]]" 
       attr-for-selected="page"
       selected-attribute="active">
 
@@ -27,10 +27,24 @@
       is: 'dwr-page-data',
 
       properties: {
-        mapState: {
-            type: String,
-            statePath: 'appState.mapState'
+        appState: {
+            type: Object,
+            statePath: 'appState',
+            observer : '_onStateChange'
+        },
+        selected : {
+          type : String,
+          value : ''
         }
+      },
+
+      _onStateChange : function() {
+        if( this.appState.section !== 'data' ) {
+          this.selected = '';
+          return;
+        }
+
+        this.selected = this.appState.mapState;
       }
 
     }));

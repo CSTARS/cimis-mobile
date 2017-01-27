@@ -67,6 +67,7 @@
                     return;
                 }
                 window.location.hash = '#data/dauZones/'+this.getRegionNumber(e.feature);
+                this._onActive();
             },
 
             _onGeometryUpdate : function() {
@@ -85,6 +86,7 @@
                 }
 
                 this.loadData(this.selected);
+                this.redraw();
             },
 
             _onDataUpdate : function() {

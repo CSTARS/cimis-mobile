@@ -1,4 +1,4 @@
-var zones = [
+module.exports = [
   {
     zone  : 13,
     avg   : 2.2,
@@ -95,53 +95,4 @@ var zones = [
     delta : 4.3,
     color : '#ffff00'
   }
-]
-
-function mergeZoneMap(geojson) {
-  geojson.features.forEach(function(feature, index){
-    var zoneData = getZoneByAvgDelta(feature.properties.zone);
-    if( !zoneData ) return;
-    for( var key in zoneData.data ) {
-      feature.properties[key] = zoneData.data[key];
-    }
-  });
-
-  for( var i = 0; i < zones.length; i++ ) {
-    for( var j = 0; j < geojson.features.length; j++ ) {
-      if( zones[i].zone === geojson.features[j].properties.zone ) {
-        zones[i] = geojson.features[j];
-        break;
-      }
-    }
-  }
-}
-
-function getZoneByAvgDelta(id) {
-  for( var i = 0; i < zones.length; i++ ) {
-    if( zones[i].avg.toFixed(1)+'_'+zones[i].delta.toFixed(1) === id ) {
-      return {
-        data : zones[i],
-        index : i
-      }
-    }
-  }
-  return null;
-}
-
-function getZone(id) {
-  id = parseInt(id);
-  for( var i = 0; i < zones.length; i++ ) {
-    if( zones[i].properties.zone === id ) return zones[i];
-  }
-  return {};
-}
-
-function getAll() {
-  return zones;
-}
-
-module.exports = {
-  getZone : getZone,
-  getAll : getAll,
-  mergeZoneMap : mergeZoneMap
-}
+];
