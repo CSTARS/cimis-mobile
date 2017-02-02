@@ -39,7 +39,7 @@
             google.load('visualization', '1', {packages: ['corechart','line']});
         </script>
 
-        <!-- build:js scripts/app.js -->
+
         <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
         <script src="bower_components/jquery/dist/jquery.js"></script>
         <script src="bower_components/bootswatch-dist/js/bootstrap.js"></script>
@@ -49,51 +49,17 @@
 
         <!-- Glue -->
         <script>
-          var BindRedux = function(bindDefs, reduxBehavior) {
-            return function(eleDef) {
-
-              // always add the redux behavior
-              if( !eleDef.behaviors ) eleDef.behaviors = [];
-              eleDef.behaviors.push(reduxBehavior);
-
-              var bindings = bindDefs[eleDef.is];
-              if( !bindings ) return eleDef;
-
-              if( bindings.behavior ) {
-                eleDef.behaviors.push(bindings.behavior);
-              }
-
-              if( bindings.actions ) {
-                if( !eleDef.actions ) eleDef.actions = {};
-                for( var key in bindings.actions ) {
-                  eleDef.actions[key] = bindings.actions[key];
-                }
-              };
-
-              if( bindings.propertyPaths && eleDef.properties ) {
-                for( var key in bindings.propertyPaths ) {
-                  if( !eleDef.properties[key] ) continue;
-                  eleDef.properties[key].statePath = bindings.propertyPaths[key];
-                }
-              }
-
-              return eleDef;
-            }
-          }
-
-          var AppStateActions = CIMIS.redux.actions.appState;
-
-
-          BindRedux = new BindRedux(CIMIS.redux.ui.bindings, CIMIS.redux.ui.behavior);
+          var AppUtils = CIMIS.utils;
+          var CimisGridBehavior = CIMIS.grid;
+          var EventBus = CIMIS.eventBus;
         </script>
-        <!-- endbuild -->
+
 
         <link rel="import" href="require.html">
     </head>
 
     <body>
         <dwr-app></dwr-app>
-        <!--<bs-app-container></bs-app-container>-->
 
         <script>
           if( window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {

@@ -7,5 +7,7 @@ module.exports = {
   etoZoneUtils : require('./eto-zones'),
   grid : require('./cimis-grid'),
   utils : require('./utils'),
-  definitions : require('./definitions.json')
+  definitions : require('./definitions.json'),
+  eventBus : require('./eventBus'),
+  controllers : require('./controllers')
 };

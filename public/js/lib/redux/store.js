@@ -1,9 +1,13 @@
 var redux = require('redux');
 
-module.exports = redux.createStore(
+var store = redux.createStore(
                     require('./reducers'),
                     redux.applyMiddleware(
                       require('./middleware/api')
                       ,require('./middleware/logging')
                     )
                   );
+
+require('./observers')(store);
+
+module.exports = store;

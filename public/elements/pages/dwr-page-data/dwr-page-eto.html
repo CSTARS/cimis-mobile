@@ -20,29 +20,34 @@
  
         <h2>ETo Zone <span>[[selected]]</span></h2>
 
-        <paper-material>
-            <div style="padding: 10px">
-                <h4>Average: <span id="average" style="font-weight:bold"></span></h4>
-                <h4>Delta: <span id="delta" style="font-weight:bold"></span></h4>
-            </div>
-            <div id="zoneMap"></div>
-        </paper-material>
+        <div state="loaded">
+            <paper-material>
+                <div style="padding: 10px">
+                    <h4>Average: <span id="average" style="font-weight:bold"></span></h4>
+                    <h4>Delta: <span id="delta" style="font-weight:bold"></span></h4>
+                </div>
+                <div id="zoneMap"></div>
+            </paper-material>
 
-        <paper-material style="padding-right:15px">
-            <div id="chart"></div>
-        </paper-material>
+            <paper-material style="padding-right:15px">
+                <div id="chart"></div>
+            </paper-material>
 
-        <paper-material style="padding-right:15px">
-            <div id="chart2"></div>
-        </paper-material>
+            <paper-material style="padding-right:15px">
+                <div id="chart2"></div>
+            </paper-material>
 
-        <paper-material style="padding-right:15px">
-            <div id="chart3"></div>
-        </paper-material>
+            <paper-material style="padding-right:15px">
+                <div id="chart3"></div>
+            </paper-material>
+        </div>
+
+        <div state="loading">Loading...</div>
+        <div state="error">Error Loading ETo Zone :(</div>
 
     </template>
     <script>
-        Polymer(BindRedux({
+        Polymer({
             is: 'dwr-page-eto',
 
             properties : {
@@ -51,26 +56,34 @@
                     observer : '_onActive'
                 },
                 selected : {
-                    type : Object,
-                    observer : '_onActive'
+                    type : Object
                 },
                 geometry : {
-                    type : Object, 
-                    observer : '_onGeometryUpdate'
+                    type : Object
                 },
                 currentZoneData : {
                     type : Object,
-                    observer : '_onDataUpdate'
+                    value : function() {
+                        return {
+                            state : 'loading'
+                        }
+                    }
                 }
             },
 
-            behaviors : [ZoneBehavior],
+            behaviors : [ZoneBehavior, StateToggleBehavior, EventBusBehavior],
+
+            ebBind : {
+                'eto-zone-geometry-update' : '_onGeometryUpdate',
+                'eto-zone-data-update' : '_onDataUpdate',
+                'eto-zone-selected-update' : '_onEtoZoneSelected'
+            },
 
             ready : function() {
                 this.now = new Date();
                 this.nowWeek = this.getWeekOfYear(0, this.now);
 
-                this.loadGeometry();
+                this._loadGeometry();
 
                 this.months = ["Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"];
 
@@ -96,23 +109,30 @@
                 };
 
                 this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
-                this.map.data.addListener('click', this.onRegionClick.bind(this));
+                this.map.data.addListener('click', this._onRegionClick.bind(this));
 
                 $(window).on('resize', this.redraw.bind(this));
             },
 
-            onRegionClick : function(e) {
+            _loadGeometry : function() {
+                this.getEventBus().emit('get-eto-zone-geometry');
+            },
+
+            _onGeometryUpdate : function(e) {
+                if( e.state !== 'loaded' ) return;
+
+                this.geometry = e;
+                this.map.data.addGeoJson(this.geometry.data);
+                this.redraw();
+                this._renderData();
+            },
+
+            _onRegionClick : function(e) {
                 if( !e.feature ) {
                     return;
                 }
                 window.location.hash = '#data/etoZones/'+this.getRegionNumber(e.feature);
                 this._onActive();
-            },
-
-            _onGeometryUpdate : function() {
-                if( this.geometry.state !== 'loaded' ) return;
-                this.map.data.addGeoJson(this.geometry.data);
-                this._onDataUpdate();
             },
 
             _onActive : function() {
@@ -122,24 +142,42 @@
                 if( parts.length >= 3 ) {
                     this.selectZone(parts[2]);
                 }
+            },
 
-                this.loadData(this.selected);
-                this.redraw();
+            _onEtoZoneSelected : function(e) {
+                this.selected = e;
+            },
+            
+            _selectZone : function(id) {
+                var event = {
+                    id: id, 
+                    handler : this._onDataUpdate.bind(this)
+                };
+                this.getEventBus().emit('select-eto-zone', event);
             },
 
             _onDataUpdate : function() {
                 this.debounce('_onDataUpdate', this._onDataUpdateAsync, 50);
             },
 
-            _onDataUpdateAsync : function() {
-                // geometry required to render
+            _onDataUpdate : function(e) {
+                this.currentZoneData = e;
+
                 if( this.geometry.state !== 'loaded' ) {
                     return;
                 }
 
-                if( !this.currentZoneData ) {
-                    return this.loadData(this.selected);
-                }
+                this._renderData();
+            },
+
+            _renderData : function() {
+                this.debounce('_renderData', function() {
+                    this._renderDataAsync();
+                }, 50);
+            },
+
+            _renderDataAsync : function() {
+                this.toggleState(this.currentZoneData.state);
 
                 if( this.currentZoneData.state !== 'loaded' ) {
                     return;
@@ -391,6 +429,6 @@
                 if( w > 52 ) w = w-52; 
                 return w;
             }
-        }));
+        });
     </script>
 </dom-module>

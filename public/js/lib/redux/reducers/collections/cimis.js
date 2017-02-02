@@ -17,11 +17,12 @@ function setDates(state, value) {
   return state;
 }
 
+
 /**
  * Data
  */
 function setData(state, value) {
-  state.byId = utils.assign(state.byId, {[value.id]: value});
+  state.byId = Object.assign({}, state.byId, {[value.id]: value});
   return state;
 }
 

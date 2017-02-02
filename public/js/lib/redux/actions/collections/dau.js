@@ -34,7 +34,7 @@ function loadGeometry(id, data) {
   }
 }
 
-function loadData(id, data) {
+function loadData(id) {
   return {
     types: [ACTIONS.LOAD_DAU_REQUEST, ACTIONS.LOAD_DAU_SUCCESS, ACTIONS.LOAD_DAU_FAILURE],
     shouldCallAPI: (state) => !state.collections.dau.byId[id],
@@ -49,8 +49,16 @@ function loadData(id, data) {
 
 function selectZone(id) {
   return {
-    type : ACTIONS.SELECT_DAU_ZONE,
-    id : id
+    types: [ACTIONS.LOAD_DAU_REQUEST, ACTIONS.LOAD_DAU_SUCCESS, ACTIONS.LOAD_DAU_FAILURE],
+    shouldCallAPI: (state) => !state.collections.dau.byId[id],
+    shouldSelect : (state) => state.collections.dau.selected !== id,
+    select : ACTIONS.SELECT_DAU_ZONE,
+    callAPI: (callback) => { 
+      services.loadData(id, callback);
+    },
+    payload: { 
+      id : id
+    }
   }
 }
 

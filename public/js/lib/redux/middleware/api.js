@@ -5,9 +5,12 @@ module.exports = function(store) {
     return function(action) {
 
       const {
+        api,
         types,
         callAPI,
         shouldCallAPI = () => true,
+        select,
+        shouldSelect = () => true,
         payload = {}
       } = action
 
@@ -26,6 +29,12 @@ module.exports = function(store) {
 
       if (typeof callAPI !== 'function') {
         throw new Error('Expected callAPI to be a function.')
+      }
+
+      if( select && shouldSelect(store.getState()) ) {
+        dispatch(Object.assign({}, payload, {
+          type: select
+        }))
       }
 
       if (!shouldCallAPI(store.getState())) {

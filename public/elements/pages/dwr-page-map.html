@@ -19,7 +19,7 @@
 </dom-module>
 
 <script>
-  Polymer(BindRedux({
+  Polymer({
 
     is : 'dwr-page-map',
 
@@ -29,34 +29,41 @@
         value : false,
         observer : '_onActive'
       },
+      
       mapState: {
-        type: String,
-        observer : '_toggleMapState'
+        type: String
       },
+      
       dauGeometry: {
-        type: Object,
-        observer : '_onDauLoad'
+        type: Object
       },
       etoGeometry: {
-        type: Object,
-        observer : '_onEtoLoad'
+        type: Object
       },
+
       dates: {
-        type: Object,
-        observer : '_onDatesLoad'
+        type: Object
       },
       selectedCimisGrid : {
         type: String
       },
       selectedCimisGridData : {
-        type : Object,
-        observer : '_onGridDataUpdate'
+        type : Object
       }
+    },
+
+    behaviors : [EventBusBehavior, AppUtils, CimisGridBehavior],
+
+    ebBind : {
+      'cimis-grid-data-update' : '_onGridDataUpdate',
+      'cimis-grid-dates-update' : '_onDatesLoad',
+      'app-state-update' : '_onMapStateUpdate',
+      'dau-geometry-update' : '_onDauLoad',
+      'eto-geometry-update' : '_onEtoLoad',
     },
 
     ready : function() {
       this.first = true;
-
 
       var mapOptions = {
         center: { lat: 38.033291, lng: -119.961762 },
@@ -72,15 +79,15 @@
 
       this.map.data.setStyle({visible: false});
 
-      google.maps.event.addListener(this.map, 'click', this.onMapClick.bind(this));
-      this.map.data.addListener('click', this.onRegionClick.bind(this));
+      google.maps.event.addListener(this.map, 'click', this._onMapClick.bind(this));
+      this.map.data.addListener('click', this._onRegionClick.bind(this));
 
-      this._toggleMapState();
+      // this._toggleMapState();
       this._loadDates();
     },
 
-    setZoneData : function(data) {
-      this.zoneData = data;
+    _loadDates : function() {
+      this.getEventBus().emit('get-cimis-grid-dates');
     },
 
     toggleExplore : function() {
@@ -95,20 +102,38 @@
       }, 50);
     },
 
-    _onDauLoad : function() {
-      if( this.mapState === 'dauZones' ) {
-        this._toggleExplore();
+    _onDauLoad : function(e) {
+      this.dauGeometry = e;
+      if( e.state === 'loaded' && this.mapState === 'dauZones' ) {
+        this._onMapStateUpdate();
       }
     },
 
-    _onEtoLoad : function() {
+    _onEtoLoad : function(e) {
       if( this.mapState === 'etoZones' ) {
-        this._toggleExplore();
+        this._onMapStateUpdate();
       }
     },
 
-    _toggleMapState : function() {
+    _onMapStateUpdate : function() {
       if( !this.map || !this.mapState ) return;
+      
+      if( this.renderedMapState === this.mapState ) return;
+
+      if( this.mapState === 'etoZones' && this.etoGeometry.state !== 'loaded' ) {
+        return;
+      }
+      if( this.mapState === 'dauZones' && this.dauGeometry.state !== 'loaded' ) {
+        return;
+      }
+
+      this.debounce('_renderMapState', function(){
+        this._toggleExplore();
+      }, 50);
+    },
+
+    _renderMapState : function() {
+      
 
       this.map.data.forEach(function(feature) {
         this.map.data.remove(feature);
@@ -116,12 +141,6 @@
 
       this.map.data.setStyle({visible: false});
 
-      this.debounce('toggleExplore', function(){
-        this._toggleExplore();
-      }, 50);
-    },
-
-    _toggleExplore : function() {
       if( this.mapState === 'etoZones' || this.mapState === 'dauZones' ) {
 
         if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.etoGeometry.data);
@@ -151,16 +170,17 @@
       } else {
         this.map.data.setStyle({visible: false});
       }
+
+      this.renderedMapState = this.mapState;
     },
 
     getRegionNumber : function(feature) {
       var zone = feature.getProperty('zone');
       if( zone ) return zone;
       return feature.getProperty('dau_code');
-      // return parseInt(feature.getProperty('Description').replace(/\D/g,''));
     },
 
-    onRegionClick : function(e) {
+    _onRegionClick : function(e) {
       if( !e.feature ) {
         return;
       }
@@ -171,7 +191,7 @@
       }
     },
 
-    onMapClick : function(e){
+    _onMapClick : function(e){
       e = {
         latitude : e.latLng.lat(),
         longitude : e.latLng.lng()
@@ -231,8 +251,6 @@
     },
 
     _onActive : function() {
-      this._loadGridData(this.selectedCimisGrid);
-
       if( window.google ) {
         this.debounce('resizeMap', function(){
           google.maps.event.trigger(this.$.map, 'resize');
@@ -240,18 +258,25 @@
       }
     },
 
-    _onGridDataUpdate : function() {
-      this.debounce('onGridDataUpdate', this._onGridDataUpdateDelay, 50);
+    _selectGridId : function(id) {
+      this.getEventBus().emit('select-cimis-grid', {id: id});
     },
 
-    _onGridDataUpdateDelay : function() {
-        if( !this.selectedCimisGridData ) {
-            return this._loadGridData(this.selectedCimisGrid);
-        }
+    _loadGridData : function(id) {
+      this.getEventBus().emit('get-cimis-grid-data', {id: id});
+    },
 
-        if( this.selectedCimisGridData.state !== 'loaded' ) return;
+    _onGridDataUpdate : function(e) {
+      this.debounce('onGridDataUpdate', function() {
+        this._onGridDataUpdateDelay(e);
+      }, 50);
+    },
 
-        this.ga('gridview', window.userType || 'unknown', this.selectedCimisGridData);
+    _onGridDataUpdateDelay : function(e) {
+        if( e.state !== 'loaded') return;
+        this.selectedCimisGridData = e;
+
+        this.ga('gridview', window.userType || 'unknown', this.selectedCimisGrid);
 
         var data = this.selectedCimisGridData.data;
 
@@ -266,8 +291,10 @@
     },
 
     // get the latest date
-    _onDatesLoad : function() {
-      if( this.dates.state !== 'loaded' ) return;
+    _onDatesLoad : function(e) {
+      if( e.state !== 'loaded' ) return;
+      this.dates = e;
+
       dates = this.sortDates(this.dates.data);
       this.yesterday = dates[dates.length-1];
     },
@@ -277,5 +304,5 @@
       if( !window.ga ) return;
       ga('send', 'event', name, type, value, 1);
     }
-  }));
+  });
 </script>

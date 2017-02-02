@@ -74,13 +74,13 @@
         </paper-toolbar>
 
         <paper-menu 
-          id="mainMenu" 
+          id="mainMenu"
           selected="[[appState.section]]" 
           attr-for-selected="section" 
           selected-attribute="active">
 
           <paper-submenu section="map" id="submenu">
-            <paper-item class="menu-trigger" on-click="_setSectionFromMenu">Map</paper-item>
+            <paper-item class="menu-trigger" on-click="_setUrlStateFromMenu">Map</paper-item>
             <paper-material class="menu-content">
 
               <paper-menu 
@@ -95,7 +95,7 @@
               </paper-menu>
             </paper-material>
           </paper-submenu>
-          <paper-item section="about" on-click="_setSectionFromMenu">About</paper-item>
+          <paper-item section="about" on-click="_setUrlStateFromMenu">About</paper-item>
         </paper-menu>
       </paper-header-panel>
 
@@ -124,44 +124,27 @@
 </dom-module>
 
 <script>
-  Polymer(BindRedux({
+  Polymer({
     is : 'dwr-app',
 
     properties: {
         appState: {
-            type: Object,
-            observer : 'updatePage',
+            type: Object
         }
     },
 
-    ready : function() {
-      this.isReady = true;
-      this.$.drawer.responsiveWidth = "768px";
+    behaviors : [EventBusBehavior],
 
-      $(window).on('hashchange', this.setPage.bind(this));
-      this.setPage();
-
-      // $.get('/eto_zones.json', function(data){
-      //   CIMIS.zones.mergeZoneMap(data);
-      //   this.$.map.setZoneData(data);
-      //   this.$.zones.setZoneData(data);
-
-      //   this.$.zoneCheckboxLoading.style.display = 'none';
-      //   this.$.zoneCheckbox.style.display = 'inline-block';
-      //   this.$.zoneCheckboxLabel.innerHTML = 'Explore';
-      // }.bind(this));
-
-      // $.get('/dauco.json', function(data){
-      //   this.$.map.setDauData(data);
-      //   this.$.dau.setDauData(data);
-
-      //   this.$.dauCheckboxLoading.style.display = 'none';
-      //   this.$.dauCheckbox.style.display = 'inline-block';
-      //   this.$.dauCheckboxLabel.innerHTML = 'Explore';
-      // }.bind(this));
+    ebBind : {
+      'app-state-update' : '_onAppStateUpdate'
     },
 
-    setPage : function() {
+    ready : function() {
+      $(window).on('hashchange', this.setAppStateFromUrl.bind(this));
+      this.setAppStateFromUrl();
+    },
+
+    setAppStateFromUrl : function() {
       var parts = window.location.hash.replace(/#/,'').split('/');
       var state = {}
 
@@ -178,15 +161,19 @@
         state.extras = parts;
       }
 
-      this.dispatch('setAppState', state);
-      
-      this.$.drawer.closeDrawer();
+      this.getEventBus().emit('set-app-state', {state: state});
+    },
 
-      if( this.getState().appState.section === 'map' ) {
+    _onAppStateUpdate : function(e) {
+      this.appState = e;
+
+      if( this.appState.section === 'map' ) {
         this.$.submenu.open();
       } else {
         this.$.submenu.close();
       }
+
+      this.$.drawer.closeDrawer();
     },
 
     attached : function() {
@@ -194,56 +181,6 @@
       if( window.standaloneMode ) {
         this.$.install.style.display = 'none';
       }
-    },
-
-    toggle : function() {
-      this.$.drawer.togglePanel();
-    },
-
-    updatePage : function() {
-      // var hash = window.location.hash || '';
-      // var parts = hash.replace(/#/,'').split('/');
-      // this.page = parts.splice(0, 1)[0];
-
-      // if( !this.$[this.page] ) this.page = 'map';
-
-      // if( this.page == 'settings' || this.page == 'map' ) {
-      //     this.showTabs = false;
-      // } else {
-      //     this.showTabs = true;
-      // }
-
-      // $(this.$.linktable).find('tr').removeClass('active');
-      // $(this.$.linktable)
-      //   .find('[href="'+hash+'"]')
-      //   .parent().parent()
-      //   .addClass('active');
-      
-
-      // $(this.$.pages).children().hide();
-
-      // this.$[this.page].style.display = 'block'
-      // if( this.$[this.page].onShow  ) this.$[this.page].onShow(parts);
-
-      // this.$.drawer.closeDrawer();
-    },
-
-    setLocation : function(e) {
-      // order data by date;
-      /*var tmp = {};
-      for( var i = 13; i >= 0; i-- ) {
-        var d = this.getDate(i);
-        var index = this.dates.indexOf(d);
-
-        tmp[this.dates[index]] = this.getIndex(e.detail.data, index);
-      }*/
-
-      // this.$.data.render(e.detail);
-    },
-
-    getIndex : function(data, index) {
-      if( data.length <= index ) return null;
-      return data[index];
     },
 
     getDate : function(index) {
@@ -259,24 +196,7 @@
       return y+'-'+m+'-'+d;
     },
 
-    onLocationSelected : function(e) {
-      // this.$.map.setLocation(e.detail);
-    },
-
-    selectLocation : function() {
-      this.$.selectLocation.show();
-    },
-
-    toggleExplore : function(e) {
-      var layer = e.currentTarget.getAttribute('layer');
-
-      if( layer === 'dau' ) this.querySelector('[layer="zone"]').checked = false;
-      else this.querySelector('[layer="dau"]').checked = false;
-
-      this.$.map.toggleExplore(e.currentTarget.checked, layer);
-    },
-
-    _setSectionFromMenu : function(e) {
+    _setUrlStateFromMenu : function(e) {
       var newState = this.$.mainMenu.selected;
       if( !newState || newState === this.appState.section ) {
         return;
@@ -291,7 +211,7 @@
         return;
       }
 
-      this.dispatch('setMapState', newState);
+      this.getEventBus().emit('set-app-map-state', {state: state});
     }
-  }));
+  });
 </script>

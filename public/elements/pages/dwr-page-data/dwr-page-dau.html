@@ -19,17 +19,22 @@
 
         <h2>DAU Zone: <span>[[selected]]</span></h2>
 
-        <paper-material>
-            <div id="zoneMap"></div>
-        </paper-material>
+        <div state="loaded">
+            <paper-material>
+                <div id="zoneMap"></div>
+            </paper-material>
 
-        <paper-material style="padding-right:15px">
-            <div id="chart"></div>
-        </paper-material>
+            <paper-material style="padding-right:15px">
+                <div id="chart"></div>
+            </paper-material>
+        </div>
+
+        <div state="loading">Loading...</div>
+        <div state="error">Error Loading Dau :(</div>
 
     </template>
     <script>
-        Polymer(BindRedux({
+        Polymer({
             is: 'dwr-page-dau',
 
             properties : {
@@ -38,31 +43,53 @@
                     observer : '_onActive'
                 },
                 selected : {
-                    type : Object,
-                    observer : '_onActive'
+                    type : Object
                 },
                 geometry : {
-                    type : Object, 
-                    observer : '_onGeometryUpdate'
+                    type : Object
                 },
                 currentZoneData : {
                     type : Object,
-                    observer : '_onDataUpdate'
+                    value : function() {
+                        return {};
+                    }
                 }
             },
 
-            behaviors : [ZoneBehavior],
-
-            ready : function() {
-                this.loadGeometry();
-
-                this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
-                this.map.data.addListener('click', this.onRegionClick.bind(this));
-
-                $(window).on('resize', this.redraw.bind(this));
+            ebBind : {
+                'dau-geometry-update' : '_onGeometryUpdate',
+                'dau-data-update' : '_onDataUpdate',
+                'dau-selected-update' : '_onDauSelected'
             },
 
-            onRegionClick : function(e) {
+            behaviors : [ZoneBehavior, EventBusBehavior, StateToggleBehavior, AppUtils],
+
+            ready : function() {
+                this._loadGeometry();
+
+                this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
+                this.map.data.addListener('click', this._onRegionClick.bind(this));
+
+                $(window).on('resize', this.redraw.bind(this));
+                $(window).on('hashchange', this._onActive.bind(this));
+
+                this.toggleState('loading');
+            },
+
+            _loadGeometry : function() {
+                this.getEventBus().emit('get-dau-geometry');
+            },
+
+            _onGeometryUpdate : function(e) {
+                if( e.state !== 'loaded' ) return;
+
+                this.geometry = e;
+                this.map.data.addGeoJson(this.geometry.data);
+                this.redrawMap();
+                this._renderData();
+            },
+
+            _onRegionClick : function(e) {
                 if( !e.feature ) {
                     return;
                 }
@@ -70,37 +97,46 @@
                 this._onActive();
             },
 
-            _onGeometryUpdate : function() {
-                if( this.geometry.state !== 'loaded' ) return;
-
-                this.map.data.addGeoJson(this.geometry.data);
-                this.redrawMap();
-            },
-
             _onActive : function() {
                 if( !this.active ) return;
 
                 var parts = window.location.hash.replace(/#/,'').split('/');
                 if( parts.length >= 3 ) {
-                    this.selectZone(parts[2]);
+                    this._selectZone(parts[2]);
                 }
-
-                this.loadData(this.selected);
-                this.redraw();
             },
 
-            _onDataUpdate : function() {
-                this.debounce('_onDataUpdate', this._onDataUpdateAsync, 50);
+            _selectZone : function(id) {
+                var event = {
+                    id: id, 
+                    handler : this._onDataUpdate.bind(this)
+                };
+                this.getEventBus().emit('select-dau', event);
             },
 
-            _onDataUpdateAsync : function() {
-                if( !this.currentZoneData ) {
-                    return this.loadData(this.selected);
+            _onDauSelected : function(e) {
+                this.selected = e;
+            },
+
+            _onDataUpdate : function(e) {
+                this.currentZoneData = e;
+
+                if( this.geometry.state !== 'loaded' ) {
+                    return;
                 }
 
-                /**
-                 * TODO: handle error state
-                 * */
+                this._renderData();
+            },
+
+            _renderData : function() {
+                this.debounce('_renderData', function() {
+                    this._renderDataAsync();
+                }, 50);
+            },
+
+            _renderDataAsync : function() {
+                this.toggleState(this.currentZoneData.state);
+
                 if( this.currentZoneData.state !== 'loaded' ) {
                     return;
                 }
@@ -129,7 +165,7 @@
             },
 
             onZoneDataLoad : function() {
-                this.sortedDates = CIMIS.utils.sortDates(this.currentZoneData.data.data);
+                this.sortedDates = this.sortDates(this.currentZoneData.data.data);
 
                 // eto chart
                 this.dt = new google.visualization.DataTable();
@@ -168,26 +204,25 @@
             },
 
             redrawChart : function() {
-                if( !this.active ) return;
+                if( !this.active || !this.chart) return;
 
                 this.debounce('redrawChart',function() {
-                    if( !this.chart ) return;
                     this.chart.draw(this.dt, this.options);
                 });
             },
 
             redrawMap : function() {
-                if( !this.active ) return;
+                if( !this.active || !this.map ) return;
 
                 this.debounce('redrawMap',function() {
                     google.maps.event.trigger(this.map, "resize");
-                    this.fitToFeature(this.selected);
+                    // this.fitToFeature(this.selected);
                 });
             },
 
             getRegionNumber : function(feature) {
               return feature.getProperty('dau_code');
             }
-        }));
+        });
     </script>
 </dom-module>

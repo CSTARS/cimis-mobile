@@ -12,26 +12,14 @@ var initialState = {
 };
 
 function setMapState(state, action) {
-  if( !mapStates[action.state] ) {
-    action.state = initialState.mapState;
-  }
-
-  if( state.mapState === action.state ) return state;
-
   return utils.assign(state, {mapState: action.state});
 }
 
 function setState(state, action) {
-  return utils.assign(state, action.state);
+  return Object.assign({}, action.state);
 }
 
 function setSection(state, action) {
-  if( !appSections[action.section] ) {
-    action.section = initialState.section;
-  }
-
-  if( state.section === action.section ) return state;
-
   return utils.assign(state, {section: action.section});
 }
 
