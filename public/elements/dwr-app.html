@@ -123,7 +123,7 @@
           <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
         </iron-pages>
 
-        <dwr-select-location id="selectLocation" on-location-select="onLocationSelected"></dwr-select-location>
+        <!--<dwr-select-location id="selectLocation" on-location-select="onLocationSelected"></dwr-select-location>-->
 
       </paper-header-panel>
     </paper-drawer-panel>
@@ -211,7 +211,6 @@
     },
 
     attached : function() {
-      this.$.selectLocation.init(this.$.map.map);
       if( window.standaloneMode ) {
         this.$.install.style.display = 'none';
       }

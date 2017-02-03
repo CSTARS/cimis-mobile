@@ -1,4 +1,5 @@
 <dom-module id="dwr-page-about">
+  <style include="shared-styles"></style>
   <style>
     :host {
       display: block;
@@ -13,6 +14,15 @@
       display : block;
     }
     iron-pages {
+      margin: 15px;
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: 200;
+    }
+
+    paper-material {
+      padding: 15px;
       margin: 15px;
     }
   </style>
@@ -30,14 +40,14 @@
 
     <iron-pages selected="{{selectedTab}}">
       <div>
-        <h4 class="page-header" id="about-header">About</h4>
+        <h1 id="about-header">About</h1>
 
-        <div class="media">
-          <div class="media-left">
+        <div class="layout center">
+          <div style="padding: 15px">
             <img class="media-object" src="/icons/cimis_icon_96.png" />
           </div>
-          <div class="media-body">
-            <h4 class="media-heading">CIMIS</h4>
+          <div>
+            <h2>CIMIS</h2>
             <div>The California Irrigation Management Information System (CIMIS) is designed
               to help growers develop efficient water budgets and irrigation strategies.
               CIMIS is a standardized way of accounting for water consumed through
@@ -47,85 +57,88 @@
           </div>
         </div>
 
-        <h5>Links</h5>
+        <h2>Links</h2>
 
-        <ul class="list-group">
-          <li class="list-group-item"><a href="http://www.cimis.water.ca.gov/" target="_blank">CIMIS Home</a></li>
-          <li class="list-group-item"><a href="http://cimis.casil.ucdavis.edu/cimis/" target="_blank">Spatial CIMIS Data Directory</a></li>
-          <li class="list-group-item"><a href="http://www.water.ca.gov/" target="_blank">DWR</a></li>
-        </ul>
+        <paper-menu>
+          <paper-item><a href="http://www.cimis.water.ca.gov/" target="_blank">CIMIS Home</a></paper-item>
+          <paper-item><a href="http://cimis.casil.ucdavis.edu/cimis/" target="_blank">Spatial CIMIS Data Directory</a></paper-item>
+          <paper-item><a href="http://www.water.ca.gov/" target="_blank">DWR</a></paper-item>
+        <paper-menu>
       </div>
 
       <div>
-        <h4 class="page-header" id="survey-header">Survey</h4>
+        <h1 id="survey-header">Survey</h1>
         <div class="help-block">Please help us understand who is using this app by marking the appropriate selection below.</div>
 
-        <div class="padding">
-          <div class="form-horizontal">
-            <div class="form-group">
-              <label for="userTypeInput" class="col-sm-2 control-label">I am:</label>
-              <div class="col-sm-10">
-                <div class="checkbox"> <label> <input type="radio" name="userType" value="farmer" on-click="updateUserType"> A Farmer</label> </div>
-                <div class="checkbox"> <label> <input type="radio" name="userType" value="public" on-click="updateUserType"> General Public</label> </div>
-                <div class="checkbox"> <label> <input type="radio" name="userType" checked value="unknown" on-click="updateUserType"> Prefer not to say</label> </div>
-              </div>
-
-            </div>
+        <div class="layout">
+          <label for="userTypeInput">I am:</label>
+          <div>
+            <div class="checkbox"> <label> <input type="radio" name="userType" value="farmer" on-click="updateUserType"> A Farmer</label> </div>
+            <div class="checkbox"> <label> <input type="radio" name="userType" value="public" on-click="updateUserType"> General Public</label> </div>
+            <div class="checkbox"> <label> <input type="radio" name="userType" checked value="unknown" on-click="updateUserType"> Prefer not to say</label> </div>
           </div>
         </div>
       </div>
 
       <div>
-        <h4 class="page-header" id="api-header">API</h4>
-        <div class="padding">
+        <h1 id="api-header">API</h1>
+        <div>
           <div>The last two weeks of Spatial CIMIS can be accessed using the follow Rest API calls.  All
             API responses are <a href="http://www.json.org/" target="_blanl">JSON</a> formatted.</div>
 
-          <h5>By CIMIS Row/Column Id</h5>
+          <h2>By CIMIS Row/Column Id</h2>
 
-          <p><span class="host"></span>/cimis/[ROW ID]/[COLUMN ID]</p>
-          <p>Example: <a href="/cimis/190/131" target="_blank"><span class="host"></span>/cimis/190/131</a></p>
+          <paper-material>
+            <p><span class="host"></span>/cimis/[ROW ID]/[COLUMN ID]</p>
+            <p>Example: <a href="/cimis/190/131" target="_blank"><span class="host"></span>/cimis/190/131</a></p>
+          </paper-material>
 
-          <h5>By Latitude/Longitude</h5>
+          <h2>By Latitude/Longitude</h2>
 
-          <p><span class="host"></span>/cimis/ll/[LONGITUDE]/[LATITUDE]</p>
-          <p>Example: <a href="/cimis/ll/-121.704/38.7240" target="_blank"><span class="host"></span>/cimis/ll/-121.704/38.7240</a></p>
+          <paper-material>
+            <p><span class="host"></span>/cimis/ll/[LONGITUDE]/[LATITUDE]</p>
+            <p>Example: <a href="/cimis/ll/-121.704/38.7240" target="_blank"><span class="host"></span>/cimis/ll/-121.704/38.7240</a></p>
+          </paper-material>
 
-          <h5>Get Current Dates</h5>
-          <p>Get a list of available dates.</p>
-          <p><a href="/cimis/dates" target="_blank"><span class="host"></span>/cimis/dates</a></p>
+          <h2>Get Current Dates</h2>
+          <paper-material>
+            <p>Get a list of available dates.</p>
+            <p><a href="/cimis/dates" target="_blank"><span class="host"></span>/cimis/dates</a></p>
+          </paper-material>
         </div>
       </div>
 
       <div>
-        <h4 class="page-header" id="install-header">Install on Mobile</h4>
-        <div class="padding">
+        <h1 id="install-header">Install on Mobile</h1>
+        <div>
           You can install this Spatial CIMIS app on your phone or tablet.  Once installed you
           access the Spatial CIMIS from the icon on your home screen.
 
-          <h5>Chrome on Android</h5>
-          <p>Click the <i class="fa fa-ellipsis-v"></i> menu icon, then click 'Add to Home Screen'</p>
+          <paper-material>
+            <h2>Chrome on Android</h2>
+            <p>Click the <i class="fa fa-ellipsis-v"></i> menu icon, then click 'Add to Home Screen'</p>
 
-          <h5>Safari on iOS</h5>
-          <p>Click the <img src="/icons/bookmark.png" /> bookmark icon, then click 'Add to Home Screen'</p>
+            <h2>Safari on iOS</h2>
+            <p>Click the <img src="/icons/bookmark.png" /> bookmark icon, then click 'Add to Home Screen'</p>
+          </paper-material>
         </div>
       </div>
 
       <div>
-        <h4 class="page-header" id="parameters-header">Spatial CIMIS Parameters</h4>
-        <div class="padding" id="parameters"></div>
+        <h1 id="parameters-header">Spatial CIMIS Parameters</h1>
+        <paper-material style="margin:0" id="parameters"></paper-material>
       </div>
 
       <div>
-        <h4 class="page-header" id="grid-header">Spatial CIMIS Grid</h4>
-        <div class="padding">
+        <h1 class="page-header" id="grid-header">Spatial CIMIS Grid</h1>
+        <paper-material>
           <div><a href="http://epsg.io/3310" target="_blank">EPSG:3310</a></div>
           <div><b>Number of Columns:</b> 510</div>
           <div><b>Number of Rows:</b> 560</div>
           <div><b>Left X Corner:</b> -410000</div>
           <div><b>Bottom Y Corner:</b> -660000</div>
           <div><b>Cell Size:</b> 2000</div>
-        </div>
+        </paper-material>
       </div>
     </iron-pages>
 
