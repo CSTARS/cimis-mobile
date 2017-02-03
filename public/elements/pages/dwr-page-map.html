@@ -35,10 +35,16 @@
       },
       
       dauGeometry: {
-        type: Object
+        type: Object,
+        value : function() {
+          return {state: 'loading'}
+        }
       },
       etoGeometry: {
-        type: Object
+        type: Object,
+        value : function() {
+          return {state: 'loading'}
+        }
       },
 
       dates: {
@@ -52,14 +58,14 @@
       }
     },
 
-    behaviors : [EventBusBehavior, AppUtils, CimisGridBehavior],
+    behaviors : [EventBusBehavior, AppUtils, CimisGridBehavior, EtoZoneBehavior],
 
     ebBind : {
       'cimis-grid-data-update' : '_onGridDataUpdate',
       'cimis-grid-dates-update' : '_onDatesLoad',
       'app-state-update' : '_onMapStateUpdate',
       'dau-geometry-update' : '_onDauLoad',
-      'eto-geometry-update' : '_onEtoLoad',
+      'eto-zone-geometry-update' : '_onEtoLoad',
     },
 
     ready : function() {
@@ -90,17 +96,17 @@
       this.getEventBus().emit('get-cimis-grid-dates');
     },
 
-    toggleExplore : function() {
-      this.debounce('toggleExplore', function(){
-        this.map.data.forEach(function(feature) {
-          this.map.data.remove(feature);
-        }.bind(this));
+    // toggleExplore : function() {
+    //   this.debounce('toggleExplore', function(){
+    //     this.map.data.forEach(function(feature) {
+    //       this.map.data.remove(feature);
+    //     }.bind(this));
 
-        this.map.data.setStyle({visible: false});
+    //     this.map.data.setStyle({visible: false});
 
-        this._toggleExplore();
-      }, 50);
-    },
+    //     this._renderMapState();
+    //   }, 50);
+    // },
 
     _onDauLoad : function(e) {
       this.dauGeometry = e;
@@ -110,14 +116,18 @@
     },
 
     _onEtoLoad : function(e) {
+      this.etoGeometry = e;
       if( this.mapState === 'etoZones' ) {
         this._onMapStateUpdate();
       }
     },
 
-    _onMapStateUpdate : function() {
-      if( !this.map || !this.mapState ) return;
-      
+    _onMapStateUpdate : function(e) {
+      if( e ) {
+        this.mapState = e.mapState;
+      }
+
+      if( !this.map ) return;
       if( this.renderedMapState === this.mapState ) return;
 
       if( this.mapState === 'etoZones' && this.etoGeometry.state !== 'loaded' ) {
@@ -128,7 +138,7 @@
       }
 
       this.debounce('_renderMapState', function(){
-        this._toggleExplore();
+        this._renderMapState();
       }, 50);
     },
 

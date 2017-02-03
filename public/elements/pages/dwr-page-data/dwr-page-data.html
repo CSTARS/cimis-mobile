@@ -29,7 +29,6 @@
       properties: {
         appState: {
             type: Object
-            // observer : '_onStateChange'
         },
         selected : {
           type : String,
@@ -37,7 +36,15 @@
         }
       },
 
-      _onStateChange : function() {
+      behaviors : [EventBusBehavior],
+
+      ebBind : {
+        'app-state-update' : '_onAppStateUpdate'
+      },
+
+      _onAppStateUpdate : function(e) {
+        this.appState = e;
+
         if( this.appState.section !== 'data' ) {
           this.selected = '';
           return;

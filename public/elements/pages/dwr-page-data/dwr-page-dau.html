@@ -46,7 +46,10 @@
                     type : Object
                 },
                 geometry : {
-                    type : Object
+                    type : Object,
+                    value : function() {
+                        return {state: 'loading'};
+                    }
                 },
                 currentZoneData : {
                     type : Object,

@@ -6,8 +6,8 @@ var mapStates = appStateActions.MAP_STATES;
 var appSections = appStateActions.APP_SECTIONS;
 
 var initialState = {
-  section : appSections.map,
-  mapState : mapStates.cimisGrid,
+  section : '',
+  mapState : '',
   extras : []
 };
 
@@ -16,7 +16,7 @@ function setMapState(state, action) {
 }
 
 function setState(state, action) {
-  return Object.assign({}, action.state);
+  return Object.assign({}, state, action.state);
 }
 
 function setSection(state, action) {

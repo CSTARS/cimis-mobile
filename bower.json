@@ -30,6 +30,7 @@
     "paper-material": "PolymerElements/paper-material#^1.0.6",
     "paper-tabs": "^1.7.0",
     "event-bus-behavior": "jrmerz/event-bus-behavior",
-    "state-toggle-behavior": "jrmerz/state-toggle-behavior"
+    "state-toggle-behavior": "jrmerz/state-toggle-behavior",
+    "paper-spinner": "PolymerElements/paper-spinner#^1.2.1"
   }
 }

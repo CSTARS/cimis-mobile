@@ -4,6 +4,7 @@ var utils = require('./utils');
 var actions = configActions.ACTIONS;
 
 var initialState = {
+  logging : false,
   host : ''
 };
 

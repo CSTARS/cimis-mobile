@@ -89,9 +89,17 @@
                 attr-for-selected="layer" 
                 selected-attribute="active">
 
-                <paper-item layer="cimisGrid" on-click="_setLayerFromMenu">Explore Spatial CIMIS Grid</paper-item>
-                <paper-item layer="etoZones" on-click="_setLayerFromMenu">Explore ETo Zones</paper-item>
-                <paper-item layer="dauZones" on-click="_setLayerFromMenu">Explore DAU Zones</paper-item>
+                <paper-item layer="cimisGrid" on-click="_setLayerFromMenu">
+                  Explore Spatial CIMIS Grid
+                </paper-item>
+                <paper-item layer="etoZones" on-click="_setLayerFromMenu" disabled>
+                  <paper-spinner id="etoSpinner" active ></paper-spinner>
+                  Explore ETo Zones
+                </paper-item>
+                <paper-item layer="dauZones" on-click="_setLayerFromMenu" disabled>
+                  <paper-spinner id="dauSpinner" active></paper-spinner>
+                  Explore DAU Zones
+                </paper-item>
               </paper-menu>
             </paper-material>
           </paper-submenu>
@@ -136,7 +144,9 @@
     behaviors : [EventBusBehavior],
 
     ebBind : {
-      'app-state-update' : '_onAppStateUpdate'
+      'app-state-update' : '_onAppStateUpdate',
+      'dau-geometry-update' : '_onDauLoad',
+      'eto-zone-geometry-update' : '_onEtoLoad'
     },
 
     ready : function() {
@@ -162,6 +172,30 @@
       }
 
       this.getEventBus().emit('set-app-state', {state: state});
+    },
+
+    _onDauLoad : function(e) {
+      switch(e.state) {
+        case 'loaded':
+          this.querySelector('[layer="dauZones"]').removeAttribute('disabled');
+          this.$.dauSpinner.removeAttribute('active');
+          this.$.dauSpinner.style.display = 'none';
+          break;
+        case 'error':
+          this.querySelector('[layer="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
+      }
+    },
+
+    _onEtoLoad : function(e) {
+      switch(e.state) {
+        case 'loaded':
+          this.querySelector('[layer="etoZones"]').removeAttribute('disabled');
+          this.$.etoSpinner.removeAttribute('active');
+          this.$.etoSpinner.style.display = 'none';
+          break;
+        case 'error':
+          this.querySelector('[layer="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
+      }
     },
 
     _onAppStateUpdate : function(e) {
@@ -211,7 +245,7 @@
         return;
       }
 
-      this.getEventBus().emit('set-app-map-state', {state: state});
+      this.getEventBus().emit('set-app-map-state', {state: newState});
     }
   });
 </script>
