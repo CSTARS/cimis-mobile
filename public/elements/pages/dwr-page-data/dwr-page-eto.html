@@ -115,7 +115,7 @@
                 this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
                 this.map.data.addListener('click', this._onRegionClick.bind(this));
 
-                $(window).on('resize', this.redraw.bind(this));
+                window.addEventListener('resize', this.redraw.bind(this));
             },
 
             _loadGeometry : function() {

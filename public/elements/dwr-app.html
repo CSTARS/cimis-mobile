@@ -1,38 +1,9 @@
 <dom-module id="dwr-app">
+  <style include="shared-styles"></style>
   <style>
     :host {
         display: block;
         height: 100%;
-    }
-
-    .menu a {
-      display: block;
-      text-align: left;
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    .menu td.link {
-      border-bottom: #eee;
-      padding: 15px;
-    }
-
-    .menu td.icon {
-      vertical-align: top;
-      padding: 15px;
-      font-size: 24px;
-      text-align: center;
-    }
-
-    .menu tr.active {
-      background-color: #eee;
-    }
-    .menu tr.active .icon {
-      color: #aaa;
-    }
-
-    .toggleButton {
-      font-size: 22px;
     }
 
     .fullbleed {
@@ -43,24 +14,16 @@
       right: 0;
     }
 
-    paper-header-panel[main] {
-      --paper-header-panel-shadow: {
-          height: 6px;
-          margin-top: -6px;
-          box-shadow: 0 0 5px black;
-      };
-    }
-
-    paper-header-panel[drawer] {
-      --paper-header-panel-shadow: {
-          height: 100%;
-          bottom: 0px;
-          box-shadow: 0 0 5px black;
-      };
+    h3 {
+      font-weight: 200
     }
 
     paper-material {
       margin: 5px;
+    }
+
+    #locationBtn {
+      display: none;
     }
   </style>
 
@@ -69,8 +32,8 @@
     <paper-drawer-panel id="drawer" responsive-width="768px">
 
       <paper-header-panel drawer class="drawer">
-        <paper-toolbar style="background-color: #2196f3; z-index: 100">
-          <h4 class="hidden-xs" style="margin:0; color:white">Spatial CIMIS</h4>
+        <paper-toolbar>
+          <h3>Spatial CIMIS</h3>
         </paper-toolbar>
 
         <paper-menu 
@@ -108,22 +71,26 @@
       </paper-header-panel>
 
       <paper-header-panel main>
-        <paper-toolbar style="background-color: #2196f3; z-index: 100">
-          <a class="btn btn-link" paper-drawer-toggle style="color:white"><i class="fa fa-bars" paper-drawer-toggle></i></a>
+        <paper-toolbar>
+          <paper-icon-button paper-drawer-toggle icon="menu"></paper-icon-button>
 
-          <div class="visible-xs-inline-block">Spatial CIMIS</div>
-          <div class="flex">
-            <a class="btn btn-primary pull-right" on-click="selectLocation"><i class="fa fa-crosshairs"></i></a>
+          <div class="flex"></div>
+          <div>
+            <paper-icon-button id="locationBtn" icon="maps:my-location" on-click="_selectLocation"></paper-icon-button>
           </div>
         </paper-toolbar>
 
-        <iron-pages class="fullbleed" id="pages" selected-attribute="active" attr-for-selected="id" selected="[[appState.section]]">
-          <dwr-page-map id="map" class="animated fadeIn" on-location-update="setLocation"></dwr-page-map>
-          <dwr-page-data id="data" class="animated fadeIn" on-select-location="selectLocation"></dwr-page-data>
-          <dwr-page-about id="about" class="animated fadeIn"></dwr-page-about>
+        <iron-pages 
+          class="fullbleed" 
+          selected-attribute="active" 
+          attr-for-selected="id" 
+          selected="[[appState.section]]">
+          
+          <dwr-page-map id="map"></dwr-page-map>
+          <dwr-page-data id="data"></dwr-page-data>
+          <dwr-page-about id="about"></dwr-page-about>
+          <dwr-page-location id="location"></dwr-page-location>
         </iron-pages>
-
-        <!--<dwr-select-location id="selectLocation" on-location-select="onLocationSelected"></dwr-select-location>-->
 
       </paper-header-panel>
     </paper-drawer-panel>
@@ -150,7 +117,7 @@
     },
 
     ready : function() {
-      $(window).on('hashchange', this.setAppStateFromUrl.bind(this));
+      window.addEventListener('hashchange', this.setAppStateFromUrl.bind(this));
       this.setAppStateFromUrl();
     },
 
@@ -203,8 +170,10 @@
 
       if( this.appState.section === 'map' ) {
         this.$.submenu.open();
+        this.$.locationBtn.style.display = 'block';
       } else {
         this.$.submenu.close();
+        this.$.locationBtn.style.display = 'none';
       }
 
       this.$.drawer.closeDrawer();
@@ -245,6 +214,10 @@
       }
 
       this.getEventBus().emit('set-app-map-state', {state: newState});
+    },
+
+    _selectLocation : function() {
+      window.location.hash = 'location';
     }
   });
 </script>

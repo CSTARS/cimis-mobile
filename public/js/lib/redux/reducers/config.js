@@ -3,10 +3,7 @@ var utils = require('./utils');
 
 var actions = configActions.ACTIONS;
 
-var initialState = {
-  logging : false,
-  host : ''
-};
+var initialState = require('../../config');
 
 function setHost(state, action) {
   return utils.assign(state, {host: action.host});

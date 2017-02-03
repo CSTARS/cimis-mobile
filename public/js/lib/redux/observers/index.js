@@ -7,7 +7,8 @@ var observers = []
           .concat(require('./cimis'))
           .concat(require('./appState'))
           .concat(require('./dau'))
-          .concat(require('./etoZones'));
+          .concat(require('./etoZones'))
+          .concat(require('./location'));
 
 
 module.exports = function(store) {

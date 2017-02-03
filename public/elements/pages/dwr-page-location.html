@@ -1,0 +1,271 @@
+<dom-module id="dwr-page-location">
+  <style include="shared-styles"></style>
+  <style>
+    :host {
+      display: block;
+    }
+
+    h1, h2 {
+      font-weight: 200;
+    }
+
+    paper-material {
+      padding: 15px;
+      margin: 15px;
+    }
+  </style>
+
+  <template>
+
+    <h1>Set Location</h1>
+
+    <paper-material>
+      <h2>My Location</h2>
+      <div>
+        <paper-button raised on-click="geolocate" id="geolocate">
+          <iron-icon icon="maps:my-location"></iron-icon>
+          Geolocate
+        </paper-button>
+        <div id="geolocateMsg"></div>
+      </div>
+
+      <h2>Search</h2>
+      <div>
+        <paper-input type="text" id="inputSearch" label="Location name" on-keyup="onKeyPress" ></paper-input>
+
+        <div state="loading">
+          <span class="label label-success"><i class="fa fa-spinner fa-spin"></i> Searching</span>
+        </div>
+        <div state="error">
+          Error loading geocoding results :(
+        </div>
+        <div state="loaded">
+          <div id="noResults" style="display:none"></div>
+          <template is="dom-repeat" items="[[results]]">
+            <div><a index$="[[index]]" on-click="_onLocationSelect" style="cursor:pointer">[[item.address]]</a></div>
+          </template>
+        </div>
+      </div>
+    </paper-material>
+
+    <paper-material>
+      <h2>History</h2>
+      <div id="savedLocationsTable"></div>
+    </paper-material>
+
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is : 'dwr-page-location',
+
+    properties : {
+      results : {
+        type : Array,
+        value : function() {
+          return [];
+        }
+      }
+    },
+
+    behaviors : [EventBusBehavior, StateToggleBehavior],
+
+    ebBind : {
+      'location-search-update' : '_onLocationSearch'
+    },
+
+    ready : function() {
+      this.searchTimer = -1;
+      this.currentLocations = this.load();
+    },
+
+
+    init : function(map) {
+      this.map = map;
+      this.geocoder = new google.maps.Geocoder();
+
+      setTimeout(function(){
+        if( !window.localStorage ) return;
+
+        var lastLocation = window.localStorage.getItem('cimis-location');
+        if( lastLocation ) {
+          try {
+            var lastLocation = JSON.parse(lastLocation);
+            if( lastLocation.latitude === undefined ) return;
+            this.fire('location-select', lastLocation);
+          } catch(e) {}
+        }
+      }.bind(this), 200);
+    },
+
+    show : function() {
+      this.renderCurrentLocations();
+    },
+
+    onKeyPress : function() {
+      this.query = this.$.inputSearch.value;
+
+      if( this.searchTimer != -1 ) clearTimeout(this.searchTimer);
+      if( !this.query ) return;
+
+      this.searchTimer = setTimeout(function(){
+        this.query = this.$.inputSearch.value;
+        this.searchTimer = -1;
+        this.geocode();
+      }.bind(this), 200);
+    },
+
+    geocode : function() {
+      this.getEventBus().emit('search-location', {query: this.query})
+    },
+
+    _onLocationSearch: function(e) {
+      this.toggleState(e.state);
+      if( e.state !== 'loaded' ) return;
+
+      var tmp = e.data.map(function(item){
+                    return {
+                      name : item.name,
+                      address : item.formatted_address,
+                      latitude : item.geometry.location.lat,
+                      longitude : item.geometry.location.lng
+                    }
+                  });
+
+      this.set('results', tmp);
+
+      if( this.results.length == 0 ) {
+        this.$.resultList.style.display = 'none';
+        this.$.resultList.innerText = 'No resuls found for "'+this.query+'"';
+        return;
+      }
+
+      this.$.resultList.style.display = 'block';
+    },
+
+    _onLocationSelect : function(e) {
+      var index = parseInt(e.currentTarget.getAttribute('index'));
+
+      this.getEventBus().emit('select-location', {location: this.results[index]});
+
+      this.ga('data', 'location', 'select-searched');
+      
+      this.currentLocations.push(this.results[index]);
+      this.save();
+
+      this.$.inputSearch.value = '';
+      this.set('results', []);
+      window.location.hash = 'map';
+    },
+
+    save : function() {
+      if( !window.localStorage ) return;
+      window.localStorage.setItem('cimis-history', JSON.stringify(this.currentLocations));
+    },
+
+    load : function() {
+      if( !window.localStorage ) return [];
+      var history = window.localStorage.getItem('cimis-history');
+      if( !history ) return [];
+      return JSON.parse(history);
+    },
+
+    renderCurrentLocations : function() {
+      if( this.currentLocations.length == 0 ) {
+        this.$.savedLocationsTable.innerText = 'None';
+        return;
+      }
+
+      var table = '<table class="table">';
+      for( var i = 0; i < this.currentLocations.length; i++ ) {
+        var l = this.currentLocations[i];
+
+        table += '<tr >'+
+                '<td>'+
+                    '<a style="cursor:pointer" goto index="'+i+'"><i class="fa fa-map-marker"></i> '+l.address+'</a>'+
+                '</td>'+
+                '<td>'+
+                    '<a class="btn btn-link" trash index="'+i+'" ><i class="fa fa-trash"></i></a>'+
+                '</td>'+
+            '</tr>';
+      }
+
+      var ele = $(this.$.savedLocationsTable).html(table+'</table>')
+
+      ele
+        .find('a[trash]')
+        .on('click', function(e){
+          this.ga('data', 'location', 'remove-saved');
+
+          var index = parseInt(e.currentTarget.getAttribute('index'));
+          this.currentLocations.splice(index, 1);
+          this.renderCurrentLocations();
+          this.save();
+        }.bind(this));
+
+      ele
+        .find('a[goto]')
+        .on('click', function(e){
+          this.ga('data', 'location', 'select-saved');
+
+          var index = parseInt(e.currentTarget.getAttribute('index'));
+          this.fire('location-select', this.currentLocations[index]);
+          $(this.$.popup).modal('hide');
+        }.bind(this));
+
+    },
+
+    geolocate : function() {
+      if( this.geolocating ) return;
+      this.setLocating(true);
+
+      if ( navigator.geolocation ) {
+        navigator.geolocation.getCurrentPosition(this.onGeolocate.bind(this), this.onGeolocatError.bind(this));
+      } else {
+        this.setLocating(false);
+        this.$.geolocateMsg.innerHTML = '<div class="text text-danger">Geolocation is not supported by this browser.  Sorry :(</div>';
+      }
+    },
+
+    onGeolocate : function(position) {
+      this.ga('data', 'location', 'geolocate');
+
+      var event = {
+        latitude : position.coords.latitude,
+        longitude : position.coords.longitude,
+        address : 'My Location'
+      };
+
+      this.getEventBus().emit('select-location', {location: event});
+      window.location.hash = 'map';
+
+      this.setLocating(false);
+    },
+
+    onGeolocatError : function(err) {
+      this.ga('data', 'location', 'geolocate-error');
+      this.$.geolocateMsg.innerHTML = '<div class="text text-danger">Geolocation Error. '+(err.message ? err.message : JSON.stringify(err))+'</div>';
+      this.setLocating(false);
+    },
+
+    setLocating : function(locating) {
+      this.geolocating = locating;
+      if( locating ) {
+        this.$.geolocateMsg.innerHTML = '';
+        this.$.geolocate.setAttribute('disabled', '');
+        this.$.geolocate.innerHTML = 'Geolocating...';
+      } else {
+        this.$.geolocate.removeAttribute('disabled');
+        this.$.geolocate.innerHTML = 'Geolocate';
+      }
+    },
+
+    ga : function(name, type, value) {
+      if( !window.ga ) return;
+      ga('send', 'event', name, type, value, 1);
+    }
+
+  })
+
+</script>
