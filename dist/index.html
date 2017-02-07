@@ -26,25 +26,21 @@
         <meta name="description" content="State of California, CIMIS, California Irrigation Management Information System">
         <meta name="keywords" content="California, state, government, CIMIS, DWR">
 
-        <link rel="stylesheet" href="style/app.css">
-
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyB4rlURkcCLTg4nR8vBhMSLIPHyYKpahck"></script>
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
         <script type="text/javascript">
             google.load('visualization', '1', {packages: ['corechart','line']});
         </script>
 
-        <script src="scripts/app.js"></script>
+
+        <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+
 
         <link rel="import" href="require.html">
-
-
-
     </head>
 
     <body>
         <dwr-app></dwr-app>
-        <!--<bs-app-container></bs-app-container>-->
 
         <script>
           if( window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
@@ -67,7 +63,7 @@
             ga('send', 'pageview',{userId: window.userType || 'unknown'});
             ga('send', 'event', 'pageview', window.userType || 'unknown', location.pathname + location.search + location.hash, 1);
 
-            $(window).on('hashchange',function(){
+            window.addEventListener('hashchange',function(){
               ga('send','pageview',{
                 page: location.pathname + location.search + location.hash,
                 userId: window.userType || 'unknown'

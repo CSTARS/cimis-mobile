@@ -12,12 +12,12 @@
             paper-material {
                 margin: 25px 10px;
             }
-            h2 {
+            h1 {
                 font-weight: 200;
             }
         </style>
 
-        <h2>DAU Zone: <span>[[selected]]</span></h2>
+        <h1>DAU Zone: <span>[[selected]]</span></h1>
 
         <div state="loaded">
             <paper-material>
@@ -219,8 +219,8 @@
 
                 this.debounce('redrawMap',function() {
                     google.maps.event.trigger(this.map, "resize");
-                    // this.fitToFeature(this.selected);
-                });
+                    this.fitToFeature(this.selected);
+                }, 50);
             },
 
             getRegionNumber : function(feature) {

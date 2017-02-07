@@ -10,6 +10,7 @@ module.exports = function browserify(grunt) {
   };
   var browserifyOptions = {
     debug : true, // include source maps
+    transform: [['babelify', {presets: ['es2015']}]],
     standalone : 'CIMIS'
   };
 

@@ -40,7 +40,10 @@
 
  EtoOverlay.prototype.setValue = function(txt) {
    // Create the img element and attach it to the div.
-   if( this.span_ ) this.span_.innerHTML = txt;
+   if( this.span_ ) {
+     this.span_.innerHTML = txt;
+     this.updateIconSize();
+   }
    this.value = txt;
  }
 
@@ -64,9 +67,27 @@
    div.style.lineHeight = (fontSize)+'px';
    div.style.left = sw.x + 'px';
    div.style.top = ne.y + 'px';
-   div.style.width = (ne.x - sw.x) + 'px';
-   div.style.height = (sw.y - ne.y) + 'px';
+
+   this.width = (ne.x - sw.x);
+   this.height = (sw.y - ne.y);
+
+   div.style.width = this.width + 'px';
+   div.style.height = this.height + 'px';
+
+   this.updateIconSize();
  };
+
+ EtoOverlay.prototype.updateIconSize = function() {
+  if( !this.div_ ) return;
+
+  setTimeout(function(){
+    var ele = this.div_.querySelector('[set-size]');
+    if( ele ) {
+      ele.style.width = Math.floor(this.width) + 'px';
+      ele.style.height = Math.floor(this.height) + 'px';
+    }
+  }.bind(this), 0);
+ }
 
  EtoOverlay.prototype.onRemove = function() {
    this.div_.parentNode.removeChild(this.div_);

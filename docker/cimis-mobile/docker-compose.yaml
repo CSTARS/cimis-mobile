@@ -8,12 +8,13 @@ services:
     ports:
      - "6379:6379"
 
-  node:
-    image: node:latest
-    volumes:
-      - ../../:/cimis-mobile
-    links:
-      - redis
-    ports:
-      - "8000:8000"
-    command: bash -c "cd cimis-mobile && npm run docker-dev"
+  # node:
+  #   image: node:latest
+  #   volumes:
+  #     - ../../:/cimis-mobile
+  #   links:
+  #     - redis
+  #   ports:
+  #     - "8000:8000"
+  #   # command: bash -c "cd cimis-mobile && npm run docker-dev"
+  #   command: bash -c "cd cimis-mobile && node server.js --docker"

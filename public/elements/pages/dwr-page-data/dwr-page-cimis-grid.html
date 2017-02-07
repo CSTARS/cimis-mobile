@@ -1,38 +1,59 @@
 <dom-module name="dwr-page-cimis-grid">
   <style>
-    .chart:first-child {
-      margin-top: 50px;
+    :host {
+      display: block;
+      padding: 10px;
     }
-    .chart {
-      margin: 100px 25px 0 25px;
+
+    paper-material {
+      margin: 15px;
+      padding-right: 15px;
     }
-    @media(max-width: 768px) {
-      .chart {
-        margin: 75px 10px 0 10px;
-      }
+
+    h1 {
+      font-weight: 200;
+    }
+    #docs {
+      text-align: right;
     }
   </style>
 
   <template>
-    <div id="warning" style="padding: 15px">
-      <div class="text text-danger well" style="font-size: 20px"><i class="fa fa-warning"></i> You must select a location first.</div>
 
-      <div style="text-align:center">
-        <a class="btn btn-default btn-lg" on-click="setLocation"><i class="fa fa-crosshairs"></i> Set Location</a>
-      </div>
+    <h1 id="gridLabel"></h1>
+    <div id="docs">
+      <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
     </div>
 
-    <h4 class="page-header" id="gridLabel" style="display:none; margin: 0 10px"></h4>
-    <div id="docs" style="margin: 0 10px; display:none; text-align:right"><a href="#about/api"><i class="fa fa-book"></i> API Documentation</a></div>
+    <div state="loaded">
+      <div id="charts"></div>
+      <div id="chartRoot"></div>
+    </div>
 
-    <div id="charts" style="margin: 0 -25px"></div>
-    <div id="chartRoot"></div>
+    <div state="loading">Loading...</div>
+    <div state="error">Error Loading CIMIS grid :(</div>
+
   </template>
 </dom-module>
 
 <script>
   Polymer({
     is : 'dwr-page-cimis-grid',
+
+    properties : {
+      active : {
+        type : Boolean,
+        value : false,
+        observer : '_onActive'
+      }
+    },
+
+    behaviors : [EventBusBehavior, StateToggleBehavior],
+
+    ebBind : {
+      'cimis-grid-data-update' : '_onDataUpdate',
+      'cimis-grid-selected-update' : '_onCimisGridSelected'
+    },
 
     ready : function() {
       this.params = ['Rnl','Rso','U2', 'ETo', 'Tdew','Tn','Tx',];
@@ -110,6 +131,7 @@
       this.charts = null;
       this.datatables = [];
       this.resize();
+      this.toggleState('loading');
 
       window.addEventListener('resize', function(){
         this.resize();
@@ -138,7 +160,7 @@
       dt.addColumn('number', 'ETo');
 
       this.sortedDates.forEach(function(date){
-        d = this.data.data[date];
+        d = this.currentGridData.data.data[date];
         arr = [date];
 
         arr.push(d.ETo || 0);
@@ -156,7 +178,7 @@
       dt.addColumn('number', 'Min Temperature');
 
       this.sortedDates.forEach(function(date){
-        d = this.data.data[date];
+        d = this.currentGridData.data.data[date];
         arr = [date];
 
         arr.push(d.Tdew || 0);
@@ -175,7 +197,7 @@
       dt.addColumn('number', 'Shortwave Radiation');
 
       this.sortedDates.forEach(function(date){
-        d = this.data.data[date];
+        d = this.currentGridData.data.data[date];
         arr = [date];
 
         arr.push(d.Rnl || 0);
@@ -193,7 +215,7 @@
 
 
       this.sortedDates.forEach(function(date){
-        d = this.data.data[date];
+        d = this.currentGridData.data.data[date];
         arr = [date];
 
         arr.push(d.U2 || 0);
@@ -204,21 +226,31 @@
       this.datatables.push(dt);
     },
 
-    render : function(data) {
-      if( this.data == null ) {
-        this.$.warning.innerHTML = '';
-        this.$.gridLabel.style.display = 'block';
-        this.$.docs.style.display = 'block';
+    _onCimisGridSelected : function(e) {
+      this.selected = e;
+    },
+
+    _onDataUpdate : function(e) {
+      this.currentGridData = e;
+      this.debounce('_renderData', function() {
+          this._renderDataAsync();
+      }, 50);
+    },
+
+    _renderDataAsync : function() {
+      this.toggleState(this.currentGridData.state);
+
+      if( this.currentGridData.state !== 'loaded' ) {
+          return;
       }
 
+      var data = this.currentGridData.data;
 
-      if( data ) {
-        this.data = data;
-        this.sortedDates = CIMIS.utils.sortDates(data.data);
-        this.$.gridLabel.innerHTML = '<i class="fa fa-map-marker"></i> Cell: '+data.location.row+', '+data.location.col +
-          ' <a class="pull-right" href="/cimis/'+data.location.row+'/'+data.location.col+
-          '" target="_blank">API</a>';
-      }
+      this.sortedDates = CIMIS.utils.sortDates(data.data);
+      this.$.gridLabel.innerHTML = 'Cell: '+data.location.row+', '+data.location.col +
+        ' <a style="float:right" href="/cimis/'+data.location.row+'/'+data.location.col+
+        '" target="_blank">API</a>';
+
 
       this.createDataTables();
 
@@ -227,9 +259,12 @@
         this.$.charts.innerHTML = '';
 
         for( var i = 0; i < this.datatables.length; i++ ) {
+
+          var decor = document.createElement('paper-material');
           var root = document.createElement('div');
-          root.className = 'chart style-scope dwr-page-cimis-grid';
-          this.$.charts.appendChild(root);
+          decor.appendChild(root);
+          Polymer.dom(this.$.charts).appendChild(decor);
+ 
           //this.charts.push(new google.charts.Line(root));
           this.charts.push(new google.visualization.LineChart(root));
         }
@@ -240,8 +275,23 @@
       }
     },
 
-    onShow : function(){
-      this.redraw();
+    _onActive : function() {
+      if( !this.active ) return;
+
+      var parts = window.location.hash.replace(/#/,'').split('/');
+      if( parts.length >= 3 ) {
+          this._selectZone(parts[2]);
+      }
+
+      // this.redraw();
+    },
+
+    _selectZone : function(id) {
+        var event = {
+            id: id, 
+            handler : this._onDataUpdate.bind(this)
+        };
+        this.getEventBus().emit('select-cimis-grid', event);
     },
 
     redraw : function() {
@@ -250,11 +300,6 @@
       for( var i = 0; i < this.datatables.length; i++ ) {
         this.charts[i].draw(this.datatables[i], this.options[i]);
       }
-    },
-
-    setLocation : function() {
-      this.fire('select-location');
     }
-
   })
 </script>

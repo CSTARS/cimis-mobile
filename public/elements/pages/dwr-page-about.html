@@ -25,6 +25,20 @@
       padding: 15px;
       margin: 15px;
     }
+
+    .checkbox {
+      margin-bottom: 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    table td, table th {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
   </style>
 
   <template>
@@ -68,16 +82,21 @@
 
       <div>
         <h1 id="survey-header">Survey</h1>
-        <div class="help-block">Please help us understand who is using this app by marking the appropriate selection below.</div>
 
-        <div class="layout">
-          <label for="userTypeInput">I am:</label>
-          <div>
-            <div class="checkbox"> <label> <input type="radio" name="userType" value="farmer" on-click="updateUserType"> A Farmer</label> </div>
-            <div class="checkbox"> <label> <input type="radio" name="userType" value="public" on-click="updateUserType"> General Public</label> </div>
-            <div class="checkbox"> <label> <input type="radio" name="userType" checked value="unknown" on-click="updateUserType"> Prefer not to say</label> </div>
+        <paper-material>
+          <div class="help-block" style="font-size: 16px; margin-bottom: 15px">
+            Please help us understand who is using this app by marking the appropriate selection below.
           </div>
-        </div>
+
+          <div class="layout">
+            <label style="padding-right: 15px" for="userTypeInput">I am:</label>
+            <div>
+              <div class="checkbox"> <label> <input type="radio" name="userType" value="farmer" on-click="updateUserType"> A Farmer</label> </div>
+              <div class="checkbox"> <label> <input type="radio" name="userType" value="public" on-click="updateUserType"> General Public</label> </div>
+              <div class="checkbox"> <label> <input type="radio" name="userType" checked value="unknown" on-click="updateUserType"> Prefer not to say</label> </div>
+            </div>
+          </div>
+        </paper-material>
       </div>
 
       <div>
@@ -126,18 +145,48 @@
 
       <div>
         <h1 id="parameters-header">Spatial CIMIS Parameters</h1>
-        <paper-material style="margin:0" id="parameters"></paper-material>
+        <paper-material style="margin:0" id="parameters">
+          <table>
+            <tr>
+              <th>Parameter</th><th>Name</th><th>Units</th>
+            </tr>
+            <template is="dom-repeat" items="[[definitions]]">
+              <tr>
+                <td>[[item.param]]</td><td>[[item.label]]</td><td>[[item.units]]</td>
+              </tr>
+            </template>
+          </table>
+        </paper-material>
       </div>
 
       <div>
         <h1 class="page-header" id="grid-header">Spatial CIMIS Grid</h1>
         <paper-material>
-          <div><a href="http://epsg.io/3310" target="_blank">EPSG:3310</a></div>
-          <div><b>Number of Columns:</b> 510</div>
-          <div><b>Number of Rows:</b> 560</div>
-          <div><b>Left X Corner:</b> -410000</div>
-          <div><b>Bottom Y Corner:</b> -660000</div>
-          <div><b>Cell Size:</b> 2000</div>
+          
+          <h3><a href="http://epsg.io/3310" target="_blank">EPSG:3310</a></h3>
+
+          <table>
+            <tr>
+              <td><b>Number of Columns:</b></td>
+              <td>510</td>
+            </tr>
+            <tr>
+              <td><b>Number of Rows:</b></td>
+              <td>560</td>
+            </tr>
+            <tr>
+              <td><b>Left X Corner:</b></td>
+              <td>-410000</td>
+            </tr>
+            <tr>
+              <td><b>Bottom Y Corner:</b></td>
+              <td>-660000</td>
+            </tr>
+            <tr>
+              <td><b>Cell Size:</b></td>
+              <td>2000</td>
+            </tr>
+          </table>
         </paper-material>
       </div>
     </iron-pages>
@@ -166,17 +215,17 @@
     },
 
     createParamsTable : function() {
-      var table =
-        '<table class="table">' +
-          '<tr>' +
-            '<th>Parameter</th><th>Name</th><th>Units</th>'+
-          '</tr>';
+      var tmp = [];
 
       for( var param in CIMIS.definitions ) {
-        table += '<tr>'+
-          '<td>'+param+'</td><td>'+CIMIS.definitions[param].label+'</td><td>'+CIMIS.definitions[param].units+'</td></tr>';
+        tmp.push({
+          param : param,
+          label : CIMIS.definitions[param].label,
+          units : CIMIS.definitions[param].units
+        })
       }
-      this.$.parameters.innerHTML = table+'</table>';
+
+      this.set('definitions', tmp);
     },
 
     updateUserType : function(e) {
