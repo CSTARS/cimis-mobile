@@ -14,7 +14,7 @@
       right: 0;
     }
 
-    h3 {
+    h2 {
       font-weight: 200
     }
 
@@ -29,7 +29,7 @@
 
   <template>
 
-    <paper-drawer-panel id="drawer" responsive-width="768px">
+    <!--<paper-drawer-panel id="drawer" responsive-width="768px">
 
       <paper-header-panel drawer class="drawer">
         <paper-toolbar>
@@ -68,17 +68,37 @@
           </paper-submenu>
           <paper-item section="about" on-click="_setUrlStateFromMenu">About</paper-item>
         </paper-menu>
-      </paper-header-panel>
+      </paper-header-panel>-->
 
       <paper-header-panel main>
         <paper-toolbar>
-          <paper-icon-button paper-drawer-toggle icon="menu"></paper-icon-button>
+          <h2>Spatial CIMIS</h2>
+          <!--<paper-icon-button paper-drawer-toggle icon="menu"></paper-icon-button>-->
 
           <div class="flex"></div>
-          <div>
+          <!--<div>-->
             <paper-icon-button id="locationBtn" icon="maps:my-location" on-click="_selectLocation"></paper-icon-button>
             <paper-icon-button id="backToMapBtn" icon="arrow-back" on-click="_backToMap"></paper-icon-button>
-          </div>
+
+            <paper-menu-button horizontal-align="right">
+              <paper-icon-button icon="more-vert" class="dropdown-trigger" style="margin:0"></paper-icon-button>
+              <paper-menu class="dropdown-content" id="mapLayerMenu" attr-for-selected="page">
+                <paper-item page="cimisGrid" on-click="_setLayerFromMenu">
+                  Explore Spatial CIMIS Grid
+                </paper-item>
+                <paper-item page="etoZones" on-click="_setLayerFromMenu" disabled>
+                  <paper-spinner id="etoSpinner" active ></paper-spinner>
+                  Explore ETo Zones
+                </paper-item>
+                <paper-item page="dauZones" on-click="_setLayerFromMenu" disabled>
+                  <paper-spinner id="dauSpinner" active></paper-spinner>
+                  Explore DAU Zones
+                </paper-item>
+                <paper-item page="about" on-click="_setUrlStateFromMenu">About</paper-item>
+              </paper-menu>
+            </paper-menu-button>
+
+          <!--</div>-->
         </paper-toolbar>
 
         <iron-pages 
@@ -94,7 +114,7 @@
         </iron-pages>
 
       </paper-header-panel>
-    </paper-drawer-panel>
+    <!--</paper-drawer-panel>-->
 
   </template>
 </dom-module>
@@ -150,24 +170,24 @@
     _onDauLoad : function(e) {
       switch(e.state) {
         case 'loaded':
-          this.querySelector('[layer="dauZones"]').removeAttribute('disabled');
+          this.querySelector('[page="dauZones"]').removeAttribute('disabled');
           this.$.dauSpinner.removeAttribute('active');
           this.$.dauSpinner.style.display = 'none';
           break;
         case 'error':
-          this.querySelector('[layer="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
+          this.querySelector('[page="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
       }
     },
 
     _onEtoLoad : function(e) {
       switch(e.state) {
         case 'loaded':
-          this.querySelector('[layer="etoZones"]').removeAttribute('disabled');
+          this.querySelector('[page="etoZones"]').removeAttribute('disabled');
           this.$.etoSpinner.removeAttribute('active');
           this.$.etoSpinner.style.display = 'none';
           break;
         case 'error':
-          this.querySelector('[layer="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
+          this.querySelector('[page="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
       }
     },
 
@@ -175,16 +195,16 @@
       this.appState = e;
 
       if( this.appState.section === 'map' ) {
-        this.$.submenu.open();
+        // this.$.submenu.open();
         this.$.locationBtn.style.display = 'block';
         this.$.backToMapBtn.style.display = 'none';
       } else {
-        this.$.submenu.close();
+        // this.$.submenu.close();
         this.$.locationBtn.style.display = 'none';
         this.$.backToMapBtn.style.display = 'block';
       }
 
-      this.$.drawer.closeDrawer();
+      // this.$.drawer.closeDrawer();
     },
 
     attached : function() {
@@ -207,7 +227,7 @@
     },
 
     _setUrlStateFromMenu : function(e) {
-      var newState = this.$.mainMenu.selected;
+      var newState = this.$.mapLayerMenu.selected;
       if( !newState || newState === this.appState.section ) {
         return;
       }
@@ -222,6 +242,10 @@
       }
 
       this.getEventBus().emit('set-app-map-state', {state: newState});
+
+      if( this.appState.section !== 'map' ) {
+        window.location.hash = 'map';
+      }
     },
 
     _selectLocation : function() {
