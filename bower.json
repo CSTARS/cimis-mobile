@@ -1,6 +1,6 @@
 {
   "name": "cimis-mobile",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "authors": [
     "Justin Merz <jrmerz@gmail.com>"
   ],
@@ -15,23 +15,21 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "^1.5.0",
     "proj4": "~2.3.7",
-    "paper-header-panel": "^1.1.6",
-    "paper-toolbar": "^1.1.4",
-    "paper-drawer-panel": "^1.0.9",
-    "iron-flex-layout": "^1.3.1",
-    "iron-pages": "PolymerElements/iron-pages#^1.0.8",
-    "paper-menu": "PolymerElements/paper-menu#^1.2.2",
-    "paper-item": "PolymerElements/paper-item#^1.2.1",
-    "paper-material": "PolymerElements/paper-material#^1.0.6",
-    "paper-tabs": "^1.7.0",
-    "event-bus-behavior": "jrmerz/event-bus-behavior",
-    "state-toggle-behavior": "jrmerz/state-toggle-behavior",
-    "paper-spinner": "PolymerElements/paper-spinner#^1.2.1",
-    "iron-icons": "^1.2.0",
-    "paper-button": "PolymerElements/paper-button#^1.0.14",
-    "paper-input": "PolymerElements/paper-input#^1.1.23",
-    "paper-menu-button": "^1.5.2"
+    "paper-header-panel": "PolymerElements/paper-header-panel#^2.0.0",
+    "paper-toolbar": "PolymerElements/paper-toolbar#^2.0.0",
+    "paper-drawer-panel": "PolymerElements/paper-drawer-panel#^2.0.0",
+    "iron-pages": "PolymerElements/iron-pages#^2.0.0",
+    "paper-menu": "PolymerElements/paper-menu#^1.3.0",
+    "paper-item": "PolymerElements/paper-item#^2.0.0",
+    "paper-material": "PolymerElements/paper-material#^2.0.0",
+    "paper-tabs": "PolymerElements/paper-tabs#^2.0.0",
+    "paper-spinner": "PolymerElements/paper-spinner#^2.0.0",
+    "iron-icons": "PolymerElements/iron-icons#^2.0.1",
+    "paper-button": "PolymerElements/paper-button#^2.0.0",
+    "paper-input": "PolymerElements/paper-input#^2.0.1",
+    "paper-menu-button": "^1.5.2",
+    "polymer": "Polymer/polymer#^2.0.2",
+    "cork-common-utils": "cork-elements/cork-common-utils"
   }
 }

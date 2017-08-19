@@ -1,0 +1,14 @@
+<script>
+  const GeolocationMixin = subclass =>
+  
+    class GeolocationInterface extends subclass {
+        constructor() {
+          super();
+          this._iocInject('GeolocationModel');
+        }
+
+        _geolocate(query) {
+          return this.GeolocationModel.geolocate(query);
+        }
+    }
+</script>

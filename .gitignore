@@ -1,8 +1,7 @@
 .build
 .tmp
 node_modules
-app/bower_components
-public/bower_components
+bower_components
 npm-debug.log
 dump.rdb
 data
