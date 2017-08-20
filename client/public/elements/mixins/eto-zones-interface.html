@@ -1,0 +1,22 @@
+<script>
+  const EtoZonesMixin = subclass =>
+  
+    class EtoZonesInterface extends subclass {
+        constructor() {
+          super();
+          this._iocInject('EtoZoneModel');
+        }
+
+        _getEtoZonesGeometry() {
+          return this.EtoZoneModel.getGeometry();
+        }
+
+        _getEtoZoneGeometry(id) {
+          return this.EtoZoneModel.getZoneGeometry(id);
+        }
+
+        _getEtoZoneData(id) {
+          return this.EtoZOneModel.getZoneData(id);
+        }
+    }
+</script>
