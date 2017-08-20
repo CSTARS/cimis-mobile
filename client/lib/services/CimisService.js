@@ -16,10 +16,8 @@ class CimisService extends BaseService {
     }
 
     async getDates() {
-      // todo: make a helper for this?
-      if( this.cached(this.store.data.dates) ) {
-        return this.store.data.dates;
-      }
+      var cached = this.store.data.dates;
+      if( this.isLoaded(cached) ) return cached;
 
       this.store.setDatesLoading();
 
@@ -31,9 +29,8 @@ class CimisService extends BaseService {
     }
 
     async getData(cimisGridId) {
-      if( this.cached(this.store.data.byId[cimisGridId]) ) {
-        return this.store.data.byId[cimisGridId];
-      }
+      var cached = this.store.data.byId[cimisGridId];
+      if( this.isLoaded(cached) ) return cached;
 
       var urlId = cimisGridId.replace(/-/, '/');      
       this.store.setDataLoading(cimisGridId);
@@ -44,15 +41,6 @@ class CimisService extends BaseService {
         onSuccess : (body) => this.store.setDataLoaded(cimisGridId, body)
       });
     }
-
-    cached(object) {
-      if( object && object.state === this.store.STATE.LOADED ) {
-        return true;
-      }
-      return false;
-    }
-
-
 }
 
 module.exports = new CimisService();
