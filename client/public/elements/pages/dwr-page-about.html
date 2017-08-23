@@ -197,26 +197,31 @@
 </dom-module>
 
 <script>
-  Polymer({
-    is : 'dwr-page-about',
+  class DwrPageAbout extends Polymer.Element {
 
-    properties : {
-      selectedTab : {
-        type : Number,
-        value : 0
+    static get is() { return 'dwr-page-about'; }
+
+    static get properties() {
+      return {
+        selectedTab : {
+          type : Number,
+          value : 0
+        }
       }
-    },
+    }
 
-    attached : function() {
+    connectedCallback() {
+      this.connectedCallback();
+
       this.querySelector('.host').innerHTML = window.location.protocol+'//'+window.location.host;
       this.createParamsTable();
 
       if( window.userType ) {
         this.querySelector('input[value="'+window.userType+'"]').checked = true;
       }
-    },
+    }
 
-    createParamsTable : function() {
+    _createParamsTable() {
       var tmp = [];
 
       for( var param in CIMIS.definitions ) {
@@ -227,14 +232,16 @@
         })
       }
 
-      this.set('definitions', tmp);
-    },
+      this.definitions = tmp;
+    }
 
-    updateUserType : function(e) {
+    updateUserType(e) {
       var type = e.currentTarget.value;
 
       window.localStorage.setItem('userType', type);
       window.userType = type;
     }
-  })
+  }
+
+  window.customElements.define(DwrPageAbout.is, DwrPageAbout);
 </script>

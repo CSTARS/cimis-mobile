@@ -29,76 +29,47 @@
 
   <template>
 
-    <!--<paper-drawer-panel id="drawer" responsive-width="768px">
-
-      <paper-header-panel drawer class="drawer">
-        <paper-toolbar>
-          <h3>Spatial CIMIS</h3>
-        </paper-toolbar>
-
-        <paper-menu 
-          id="mainMenu"
-          selected="[[appState.section]]" 
-          attr-for-selected="section" 
-          selected-attribute="active">
-
-          <paper-submenu section="map" id="submenu">
-            <paper-item class="menu-trigger" on-click="_setUrlStateFromMenu">Map</paper-item>
-            <paper-material class="menu-content">
-
-              <paper-menu 
-                id="mapLayerMenu"
-                selected="[[appState.mapState]]"
-                attr-for-selected="layer" 
-                selected-attribute="active">
-
-                <paper-item layer="cimisGrid" on-click="_setLayerFromMenu">
-                  Explore Spatial CIMIS Grid
-                </paper-item>
-                <paper-item layer="etoZones" on-click="_setLayerFromMenu" disabled>
-                  <paper-spinner id="etoSpinner" active ></paper-spinner>
-                  Explore ETo Zones
-                </paper-item>
-                <paper-item layer="dauZones" on-click="_setLayerFromMenu" disabled>
-                  <paper-spinner id="dauSpinner" active></paper-spinner>
-                  Explore DAU Zones
-                </paper-item>
-              </paper-menu>
-            </paper-material>
-          </paper-submenu>
-          <paper-item section="about" on-click="_setUrlStateFromMenu">About</paper-item>
-        </paper-menu>
-      </paper-header-panel>-->
-
       <paper-header-panel main>
         <paper-toolbar>
           <h2>Spatial CIMIS</h2>
-          <!--<paper-icon-button paper-drawer-toggle icon="menu"></paper-icon-button>-->
 
-          <div class="flex"></div>
-          <!--<div>-->
-            <paper-icon-button id="locationBtn" icon="maps:my-location" on-click="_selectLocation"></paper-icon-button>
-            <paper-icon-button id="backToMapBtn" icon="arrow-back" on-click="_backToMap"></paper-icon-button>
+
+          <div style="flex:1"></div>
+
+            <paper-icon-button 
+              id="locationBtn" 
+              icon="maps:my-location" 
+              on-click="_selectLocation">
+            </paper-icon-button>
+            
+            <paper-icon-button 
+              id="backToMapBtn" 
+              icon="arrow-back" 
+              on-click="_backToMap"
+            ></paper-icon-button>
 
             <paper-menu-button horizontal-align="right">
               <paper-icon-button icon="more-vert" class="dropdown-trigger" style="margin:0"></paper-icon-button>
               <paper-menu class="dropdown-content" id="mapLayerMenu" attr-for-selected="page">
+
                 <paper-item page="cimisGrid" on-click="_setLayerFromMenu">
                   Explore Spatial CIMIS Grid
                 </paper-item>
+
                 <paper-item page="etoZones" on-click="_setLayerFromMenu" disabled>
                   <paper-spinner id="etoSpinner" active ></paper-spinner>
                   Explore ETo Zones
                 </paper-item>
+
                 <paper-item page="dauZones" on-click="_setLayerFromMenu" disabled>
                   <paper-spinner id="dauSpinner" active></paper-spinner>
                   Explore DAU Zones
                 </paper-item>
+
                 <paper-item page="about" on-click="_setUrlStateFromMenu">About</paper-item>
               </paper-menu>
             </paper-menu-button>
 
-          <!--</div>-->
         </paper-toolbar>
 
         <iron-pages 
@@ -114,38 +85,44 @@
         </iron-pages>
 
       </paper-header-panel>
-    <!--</paper-drawer-panel>-->
 
   </template>
 </dom-module>
 
 <script>
-  Polymer({
-    is : 'dwr-app',
+  class DwrApp extends Mixin(Polymer.Element)
+      .with(EventBusMixin, AppStateMixin, DauMixin, EtoZoneMixin) {
+    
+    static get is() { return 'dwr-app'; }
 
-    properties: {
-        appState: {
-            type: Object,
-            value : function() {
-              return {}
+    static get properties() {
+      return {
+        appState : {
+          type : Object,
+          value : function() {
+            return {
+              section : 'map'
             }
+          }
         }
-    },
+      }
+    }
 
-    behaviors : [EventBusBehavior],
+    ready() {
+      super.ready();
+      window.addEventListener('hashchange', this._setAppStateFromUrl.bind(this));
+      this._setAppStateFromUrl();
+    }
 
-    ebBind : {
-      'app-state-update' : '_onAppStateUpdate',
-      'dau-geometry-update' : '_onDauLoad',
-      'eto-zone-geometry-update' : '_onEtoLoad'
-    },
+    connectedCallback() {
+      super.connectedCallback();
 
-    ready : function() {
-      window.addEventListener('hashchange', this.setAppStateFromUrl.bind(this));
-      this.setAppStateFromUrl();
-    },
+      if( window.standaloneMode ) {
+        this.$.install.style.display = 'none';
+      }
+    }
 
-    setAppStateFromUrl : function() {
+    _setAppStateFromUrl() {
       var parts = window.location.hash.replace(/#/,'').split('/');
       var state = {
         section : 'map'
@@ -164,10 +141,10 @@
         state.extras = parts;
       }
 
-      this.getEventBus().emit('set-app-state', {state: state});
-    },
+      this._setAppState(state);
+    }
 
-    _onDauLoad : function(e) {
+    _onDauGeometryUpdate(e) {
       switch(e.state) {
         case 'loaded':
           this.querySelector('[page="dauZones"]').removeAttribute('disabled');
@@ -177,9 +154,9 @@
         case 'error':
           this.querySelector('[page="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
       }
-    },
+    }
 
-    _onEtoLoad : function(e) {
+    _onEtoZonesGeometryUpdate(e) {
       switch(e.state) {
         case 'loaded':
           this.querySelector('[page="etoZones"]').removeAttribute('disabled');
@@ -191,69 +168,62 @@
       }
     },
 
-    _onAppStateUpdate : function(e) {
+    _onAppStateUpdate(e) {
       this.appState = e;
 
       if( this.appState.section === 'map' ) {
-        // this.$.submenu.open();
         this.$.locationBtn.style.display = 'block';
         this.$.backToMapBtn.style.display = 'none';
       } else {
-        // this.$.submenu.close();
         this.$.locationBtn.style.display = 'none';
         this.$.backToMapBtn.style.display = 'block';
       }
+    }
 
-      // this.$.drawer.closeDrawer();
-    },
 
-    attached : function() {
-      if( window.standaloneMode ) {
-        this.$.install.style.display = 'none';
-      }
-    },
+    // getDate(index) {
+    //   var d = new Date(new Date().getTime()-(86400000*(index+1)) );
 
-    getDate : function(index) {
-      var d = new Date(new Date().getTime()-(86400000*(index+1)) );
+    //   var y = d.getYear()+1900;
+    //   var m = d.getMonth()+1;
+    //   var d = d.getDate();
 
-      var y = d.getYear()+1900;
-      var m = d.getMonth()+1;
-      var d = d.getDate();
+    //   if( m < 10 ) m = '0'+m;
+    //   if( d < 10 ) d = '0'+d;
 
-      if( m < 10 ) m = '0'+m;
-      if( d < 10 ) d = '0'+d;
+    //   return y+'-'+m+'-'+d;
+    // }
 
-      return y+'-'+m+'-'+d;
-    },
-
-    _setUrlStateFromMenu : function(e) {
+    _setUrlStateFromMenu(e) {
       var newState = this.$.mapLayerMenu.selected;
       if( !newState || newState === this.appState.section ) {
         return;
       }
 
       window.location.hash = newState;
-    },
+    }
 
-    _setLayerFromMenu : function(e) {
+    _setLayerFromMenu(e) {
       var newState = this.$.mapLayerMenu.selected;
       if( !newState || newState === this.appState.mapState ) {
         return;
       }
 
-      this.getEventBus().emit('set-app-map-state', {state: newState});
+      this._setAppState(newState);
 
       if( this.appState.section !== 'map' ) {
         window.location.hash = 'map';
       }
-    },
+    }
 
-    _selectLocation : function() {
+    _selectLocation() {
       window.location.hash = 'location';
-    },
+    }
 
-    _backToMap : function() {
+    _backToMap() {
       window.location.hash = 'map';
     }
-  });
+  }
+
+  window.customElements.define(DwrApp.is, DwrApp);
 </script>

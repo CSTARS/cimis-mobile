@@ -1,22 +1,24 @@
 var BaseModel = require('cork-app-utils').BaseModel;
-var AppStateStore = require('../stores/AppStateStore');
+var CimisGridStore = require('../stores/CimisStore');
+var CimisGridService = require('../services/CimisService');
 
 class CimisGridModel extends BaseModel {
 
   constructor() {
     super();
-    this.store = AppStateStore;
+    this.store = CimisGridStore;
+    this.service = CimisGridService;
     this.registerIOC('CimisGridModel');
   }
 
-  async get() {
-    return this.store.data;
+  getDates() {
+    return this.service.getDates();
   }
 
-  set(update) {
-    this.store.set(update);
-    return this.get();
+  getData(id) {
+    return this.service.getData(id);
   }
+
 }
 
 module.exports = new CimisGridModel();

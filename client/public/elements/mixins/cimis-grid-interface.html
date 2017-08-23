@@ -1,0 +1,19 @@
+<script>
+    const CimisGridMixin = subclass => 
+    
+      class CimisGridInterface extends subclass {
+          constructor() {
+            super();
+            this._iocInject('CimisGridModel');
+          }
+          
+          _getCimisGridDates() {
+            return this.CimisGridModel.getDates();
+          }
+
+          _getCimisGridData() {
+            return this.AppStateModel.getData(id);
+          }
+      }
+    
+  </script>

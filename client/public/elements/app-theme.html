@@ -1,11 +1,13 @@
-<style is="custom-style">
-     body {
-      @apply(--paper-font-common-base);
+<custom-style>
+  <style>
+    html, body {
+      @apply --paper-font-common-base;
       font-size: 14px;
       font-weight: 300;
       margin: 0;
     }
-    :root {
+
+    html {
       --dark-primary-color:       #1976D2;
       --default-primary-color:    #2196F3;
       --light-primary-color:      #BBDEFB;
@@ -22,51 +24,49 @@
       --paper-tabs-selection-bar-color : var(--default-primary-color);
       --paper-tab-ink: var(--default-primary-color);
     }
+  </style>
+</custom-style>
 
-    
-
-</style>
 
 <dom-module id="shared-styles">
   <template>
     <style>
-      .layout {
-        @apply(--layout-horizontal);
-      }
-      .center {
-        @apply(--layout-center);
-      }
-      .flex {
-        @apply(--layout-flex);
-      }
       .help-block {
         font-size: 12px;
         color: var(--secondary-text-color);
       }
+      
       .floated-label {
         color: var(--default-primary-color);
         font-size: 12px;
         font-weight: 400;
       }
+      
       .text-danger {
         color : red;
       }
+      
       .text-warning {
         color: orange;
       }
+      
       .highlight {
         color: var(--accent-color);
       }
+      
       table.data {
         width: 100%;
         border-collapse: collapse;
       }
+      
       table.data th, table.data td {
         padding: 13px;
       }
+      
       table.data tr {
         border-bottom: 1px solid #eee;
       }
+
       table.data.fixed tr td:first-child {
         width: 35%;
       }
