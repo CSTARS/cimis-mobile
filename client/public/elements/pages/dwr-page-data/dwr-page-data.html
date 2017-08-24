@@ -23,26 +23,26 @@
     
   </template>
   <script>
-    Polymer({
-      is: 'dwr-page-data',
+    class DwrPageData extends Mixin(Polymer.Element)
+      .with(EventBusMixin, AppStateMixin) {
 
-      properties: {
-        appState: {
-            type: Object
-        },
-        selected : {
-          type : String,
-          value : ''
+      static get is() { return 'dwr-page-data'; }
+      
+      static get properties() {
+        return {
+          properties: {
+            appState: {
+                type: Object
+            },
+            selected : {
+              type : String,
+              value : ''
+            }
+          }
         }
-      },
+      }
 
-      behaviors : [EventBusBehavior],
-
-      ebBind : {
-        'app-state-update' : '_onAppStateUpdate'
-      },
-
-      _onAppStateUpdate : function(e) {
+      _onAppStateUpdate(e) {
         this.appState = e;
 
         if( this.appState.section !== 'data' ) {
@@ -52,7 +52,7 @@
 
         this.selected = this.appState.mapState;
       }
-
-    });
+    }
+    window.customElements.define(DwrPageData.is, DwrPageData);
   </script>
 </dom-module>

@@ -1,231 +1,218 @@
 
 <dom-module id="dwr-page-dau">
-    <template>
-        <style>
-            :host {
-                display: block;
-                padding: 10px;
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      #zoneMap {
+        height: 400px;
+      }
+      paper-material {
+        margin: 25px 10px;
+      }
+      h1 {
+        font-weight: 200;
+      }
+    </style>
+
+    <h1>DAU Zone: <span>[[selected]]</span></h1>
+
+    <div state="loaded">
+      <paper-material>
+        <div id="zoneMap"></div>
+      </paper-material>
+
+      <paper-material style="padding-right:15px">
+        <div id="chart"></div>
+      </paper-material>
+    </div>
+
+    <div state="loading">Loading...</div>
+    <div state="error">Error Loading Dau :(</div>
+
+  </template>
+  <script>
+
+    class DwrPageDau extends Mixin(Polymer.Element)
+      .with(EventBusMixin, AppStateMixin, DauMixin) {
+
+      static get is() { return 'dwr-page-dau'; }
+
+      static get properties() {
+        return {
+          selected : {
+            type : Object
+          },
+          geometry : {
+            type : Object,
+            value : function() {
+              return {state: 'loading'};
             }
-            #zoneMap {
-                height: 400px;
+          },
+          currentZoneData : {
+            type : Object,
+            value : function() {
+              return {};
             }
-            paper-material {
-                margin: 25px 10px;
-            }
-            h1 {
-                font-weight: 200;
-            }
-        </style>
+          }
+        }
+      }
 
-        <h1>DAU Zone: <span>[[selected]]</span></h1>
+      ready() {
+        this._getDauGeometry();
 
-        <div state="loaded">
-            <paper-material>
-                <div id="zoneMap"></div>
-            </paper-material>
+        this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
+        this.map.data.addListener('click', this._onRegionClick.bind(this));
 
-            <paper-material style="padding-right:15px">
-                <div id="chart"></div>
-            </paper-material>
-        </div>
+        window.addEventListener('resize', this.redraw.bind(this));
+        window.addEventListener('hashchange', this._onActive.bind(this));
 
-        <div state="loading">Loading...</div>
-        <div state="error">Error Loading Dau :(</div>
+        this.toggleState('loading');
+      }
 
-    </template>
-    <script>
-        Polymer({
-            is: 'dwr-page-dau',
+      _onActive() {
+        if( !this.active ) return;
 
-            properties : {
-                active : {
-                    type : Boolean,
-                    observer : '_onActive'
-                },
-                selected : {
-                    type : Object
-                },
-                geometry : {
-                    type : Object,
-                    value : function() {
-                        return {state: 'loading'};
-                    }
-                },
-                currentZoneData : {
-                    type : Object,
-                    value : function() {
-                        return {};
-                    }
-                }
-            },
+        var parts = window.location.hash.replace(/#/,'').split('/');
+        if( parts.length >= 3 ) {
+          this._selectZone(parts[2]);
+        }
+      }
 
-            ebBind : {
-                'dau-geometry-update' : '_onGeometryUpdate',
-                'dau-data-update' : '_onDataUpdate',
-                'dau-selected-update' : '_onDauSelected'
-            },
+      _onDauGeometryUpdate(e) {
+        if( e.state !== 'loaded' ) return;
 
-            behaviors : [ZoneBehavior, EventBusBehavior, StateToggleBehavior, AppUtils],
+        this.geometry = e;
+        this.map.data.addGeoJson(this.geometry.data);
+        this.redrawMap();
+        this._renderData();
+      }
 
-            ready : function() {
-                this._loadGeometry();
+      _onRegionClick(e) {
+        if( !e.feature ) {
+          return;
+        }
+        window.location.hash = '#data/dauZones/'+this.getRegionNumber(e.feature);
+        this._onActive();
+      }
 
-                this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
-                this.map.data.addListener('click', this._onRegionClick.bind(this));
-
-                window.addEventListener('resize', this.redraw.bind(this));
-                window.addEventListener('hashchange', this._onActive.bind(this));
-
-                this.toggleState('loading');
-            },
-
-            _loadGeometry : function() {
-                this.getEventBus().emit('get-dau-geometry');
-            },
-
-            _onGeometryUpdate : function(e) {
-                if( e.state !== 'loaded' ) return;
-
-                this.geometry = e;
-                this.map.data.addGeoJson(this.geometry.data);
-                this.redrawMap();
-                this._renderData();
-            },
-
-            _onRegionClick : function(e) {
-                if( !e.feature ) {
-                    return;
-                }
-                window.location.hash = '#data/dauZones/'+this.getRegionNumber(e.feature);
-                this._onActive();
-            },
-
-            _onActive : function() {
-                if( !this.active ) return;
-
-                var parts = window.location.hash.replace(/#/,'').split('/');
-                if( parts.length >= 3 ) {
-                    this._selectZone(parts[2]);
-                }
-            },
-
-            _selectZone : function(id) {
-                var event = {
-                    id: id, 
-                    handler : this._onDataUpdate.bind(this)
-                };
-                this.getEventBus().emit('select-dau', event);
-            },
-
-            _onDauSelected : function(e) {
-                this.selected = e;
-            },
-
-            _onDataUpdate : function(e) {
-                this.currentZoneData = e;
-
-                if( this.geometry.state !== 'loaded' ) {
-                    return;
-                }
-
-                this._renderData();
-            },
-
-            _renderData : function() {
-                this.debounce('_renderData', function() {
-                    this._renderDataAsync();
-                }, 50);
-            },
-
-            _renderDataAsync : function() {
-                this.toggleState(this.currentZoneData.state);
-
-                if( this.currentZoneData.state !== 'loaded' ) {
-                    return;
-                }
-
-                this.map.data.setStyle(function(feature) {
-                    var label = this.getRegionNumber(feature);
-                    if( label+'' === this.selected ){
-                        return {
-                            fillColor: '#2196f3',
-                            strokeColor: '#fff',
-                            fillOpacity : .6,
-                            strokeWeight: 1
-                        };
-                    } else {
-                        return {
-                            fillColor: '#333',
-                            strokeColor: '#fff',
-                            fillOpacity : .2,
-                            strokeWeight: 1
-                        };
-                    }
-                }.bind(this));
-
-                this.redrawMap();
-                this.onZoneDataLoad();
-            },
-
-            onZoneDataLoad : function() {
-                this.sortedDates = this.sortDates(this.currentZoneData.data.data);
-
-                // eto chart
-                this.dt = new google.visualization.DataTable();
-                this.dt.addColumn('string', 'Date');
-                this.dt.addColumn('number', 'Avg ETo');
-
-                this.sortedDates.forEach(function(date, index){
-                    d = this.currentZoneData.data.data[date];
-                    arr = [date];
-
-                    arr.push(parseFloat(d) || 0);
-
-                    this.dt.addRow(arr);
-                }.bind(this));
-
-                if( !this.chart ) {
-                    this.chart = new google.visualization.LineChart(this.$.chart);
-                    this.options = {
-                        title : 'ETo - Evapotranspiration (mm)',
-                        curveType: 'function',
-                        height : 550,
-                        interpolateNulls : true,
-                        animation : {
-                            easing : 'out',
-                            startup : true
-                        }
-                    }
-                }
-
-                this.redrawChart();
-            },
-
-            redraw : function() {
-                this.redrawChart();
-                this.redrawMap();
-            },
-
-            redrawChart : function() {
-                if( !this.active || !this.chart) return;
-
-                this.debounce('redrawChart',function() {
-                    this.chart.draw(this.dt, this.options);
-                });
-            },
-
-            redrawMap : function() {
-                if( !this.active || !this.map ) return;
-
-                this.debounce('redrawMap',function() {
-                    google.maps.event.trigger(this.map, "resize");
-                    this.fitToFeature(this.selected);
-                }, 50);
-            },
-
-            getRegionNumber : function(feature) {
-              return feature.getProperty('dau_code');
-            }
+      _selectZone(id) {
+        this._setAppState({
+          selectedDauLocation : id
         });
-    </script>
+      }
+
+      _onDauSelected(e) {
+        this.selected = e.selectedDauLocation;
+      }
+
+      _onDataUpdate(e) {
+        this.currentZoneData = e;
+
+        if( this.geometry.state !== 'loaded' ) {
+          return;
+        }
+
+        this._renderData();
+      }
+
+      _renderData() {
+        this.debounce('_renderData', function() {
+          this._renderDataAsync();
+        }, 50);
+      }
+
+      _renderDataAsync() {
+        this.toggleState(this.currentZoneData.state);
+
+        if( this.currentZoneData.state !== 'loaded' ) {
+          return;
+        }
+
+        this.map.data.setStyle(function(feature) {
+          var label = this.getRegionNumber(feature);
+          if( label+'' === this.selected ){
+            return {
+              fillColor: '#2196f3',
+              strokeColor: '#fff',
+              fillOpacity : .6,
+              strokeWeight: 1
+            };
+          } else {
+            return {
+              fillColor: '#333',
+              strokeColor: '#fff',
+              fillOpacity : .2,
+              strokeWeight: 1
+            };
+          }
+        }.bind(this));
+
+        this.redrawMap();
+        this.onZoneDataLoad();
+      }
+
+      onZoneDataLoad() {
+        this.sortedDates = this.sortDates(this.currentZoneData.data.data);
+
+        // eto chart
+        this.dt = new google.visualization.DataTable();
+        this.dt.addColumn('string', 'Date');
+        this.dt.addColumn('number', 'Avg ETo');
+
+        this.sortedDates.forEach(function(date, index){
+          d = this.currentZoneData.data.data[date];
+          arr = [date];
+
+          arr.push(parseFloat(d) || 0);
+
+          this.dt.addRow(arr);
+        }.bind(this));
+
+        if( !this.chart ) {
+          this.chart = new google.visualization.LineChart(this.$.chart);
+          this.options = {
+            title : 'ETo - Evapotranspiration (mm)',
+            curveType: 'function',
+            height : 550,
+            interpolateNulls : true,
+            animation : {
+              easing : 'out',
+              startup : true
+            }
+          }
+        }
+
+        this.redrawChart();
+      }
+
+      redraw() {
+        this.redrawChart();
+        this.redrawMap();
+      }
+
+      redrawChart() {
+        if( !this.active || !this.chart) return;
+
+        this.debounce('redrawChart', () => {
+          this.chart.draw(this.dt, this.options);
+        });
+      }
+
+      redrawMap() {
+        if( !this.active || !this.map ) return;
+
+        this.debounce('redrawMap', () => {
+          google.maps.event.trigger(this.map, "resize");
+          this.fitToFeature(this.selected);
+        }, 50);
+      }
+
+      getRegionNumber(feature) {
+        return feature.getProperty('dau_code');
+      } 
+    }
+  </script>
 </dom-module>

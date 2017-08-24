@@ -37,25 +37,13 @@
 </dom-module>
 
 <script>
-  Polymer({
-    is : 'dwr-page-cimis-grid',
+  class DwrPageCimisGrid extends Mixin(Polymer.Element)
+      .with(EventBusMixin, AppStateMixin, CimisGridMixin) {
 
-    properties : {
-      active : {
-        type : Boolean,
-        value : false,
-        observer : '_onActive'
-      }
-    },
+    static get is() { return 'dwr-page-cimis-grid'; }
 
-    behaviors : [EventBusBehavior, StateToggleBehavior],
-
-    ebBind : {
-      'cimis-grid-data-update' : '_onDataUpdate',
-      'cimis-grid-selected-update' : '_onCimisGridSelected'
-    },
-
-    ready : function() {
+    ready() {
+      super.ready();
       this.params = ['Rnl','Rso','U2', 'ETo', 'Tdew','Tn','Tx',];
       this.data = null;
 
@@ -133,13 +121,14 @@
       this.resize();
       this.toggleState('loading');
 
-      window.addEventListener('resize', function(){
+      window.addEventListener('resize', () =>{
         this.resize();
         this.redraw();
-      }.bind(this));
-    },
+      });
+    }
 
-    resize : function(){
+    resize() {
+      if( !this.active ) return;
       var size = 550;
       if( window.innerWidth < 768 ) {
         size = 450;
@@ -148,9 +137,9 @@
       for( var i = 0; i < this.options.length; i++ ) {
         this.options[i].height = size;
       }
-    },
+    }
 
-    createDataTables : function() {
+    createDataTables() {
       this.datatables = [];
       var d, arr;
 
@@ -224,20 +213,22 @@
       }.bind(this));
 
       this.datatables.push(dt);
-    },
+    }
 
-    _onCimisGridSelected : function(e) {
-      this.selected = e;
-    },
+    _onAppStateUpdate(e) {
+      if( this.selected === e.selectedCimisLocation ) return;
+      this.selected = e.selectedCimisLocation;
+      this._onDataUpdate();
+    }
 
-    _onDataUpdate : function(e) {
+    _onCimisDataUpdate(e) {
       this.currentGridData = e;
       this.debounce('_renderData', function() {
           this._renderDataAsync();
       }, 50);
-    },
+    }
 
-    _renderDataAsync : function() {
+    _renderDataAsync() {
       this.toggleState(this.currentGridData.state);
 
       if( this.currentGridData.state !== 'loaded' ) {
@@ -273,33 +264,31 @@
       for( var i = 0; i < this.datatables.length; i++ ) {
         this.charts[i].draw(this.datatables[i], this.options[i]);
       }
-    },
+    }
 
-    _onActive : function() {
+    _onActive() {
       if( !this.active ) return;
 
       var parts = window.location.hash.replace(/#/,'').split('/');
       if( parts.length >= 3 ) {
           this._selectZone(parts[2]);
       }
+    }
 
-      // this.redraw();
-    },
+    _selectZone(id) {
+      this._setAppState({
+        selectedCimisLocation : id
+      });
+    }
 
-    _selectZone : function(id) {
-        var event = {
-            id: id, 
-            handler : this._onDataUpdate.bind(this)
-        };
-        this.getEventBus().emit('select-cimis-grid', event);
-    },
-
-    redraw : function() {
+    redraw() {
       if( !this.charts ) return;
 
       for( var i = 0; i < this.datatables.length; i++ ) {
         this.charts[i].draw(this.datatables[i], this.options[i]);
       }
     }
-  })
+
+  }
+  window.customElements.define(DwrPageCimisGrid.is, DwrPageCimisGrid);
 </script>
