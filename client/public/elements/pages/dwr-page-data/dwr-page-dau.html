@@ -36,7 +36,7 @@
   <script>
 
     class DwrPageDau extends Mixin(Polymer.Element)
-      .with(EventBusMixin, AppStateMixin, DauMixin) {
+      .with(EventMixin, ToggleStateMixin, AppStateMixin, DauMixin, ZoneUtilsMixin) {
 
       static get is() { return 'dwr-page-dau'; }
 
@@ -61,6 +61,8 @@
       }
 
       ready() {
+        super.ready();
+
         this._getDauGeometry();
 
         this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);

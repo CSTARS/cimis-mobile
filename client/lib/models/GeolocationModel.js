@@ -1,6 +1,6 @@
 var BaseModel = require('cork-app-utils').BaseModel;
 var GeolocationStore = require('../stores/GeolocationStore');
-var GoogleService = require('../stores/GoogleService');
+var GoogleService = require('../services/GoogleService');
 
 class GeolocationModel extends BaseModel {
 
@@ -20,4 +20,4 @@ class GeolocationModel extends BaseModel {
   }
 }
 
-module.exports = new AppStateModel();
+module.exports = new GeolocationModel();

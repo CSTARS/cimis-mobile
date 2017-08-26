@@ -1,28 +1,19 @@
-<script src="bower_components/proj4/dist/proj4.js"></script>
-<script src="js/etoOverlay.js"></script>
-<script src="js/build.js"></script>
+<!-- <script src="js/etoOverlay.js"></script> -->
+<script src="js/lib.js"></script>
 
-<!-- Glue -->
-<script>
-  var AppUtils = CIMIS.utils;
-  var EtoZoneBehavior = CIMIS.etoZoneUtils;
-  var CimisGridBehavior = CIMIS.grid;
-  var EventBus = CIMIS.eventBus;
-</script>
 
-<link rel="import" href="bower_components/polymer/polymer.html">
-<!--<link rel="import" href="bower_components/paper-drawer-panel/paper-drawer-panel.html">-->
+
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="elements/app-theme.html">
+
+<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
-<link rel="import" href="bower_components/iron-flex-layout/classes/iron-flex-layout.html">
 <link rel="import" href="bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="bower_components/paper-menu/paper-menu.html">
-<link rel="import" href="bower_components/paper-menu/paper-submenu.html">
+<link rel="import" href="bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="bower_components/paper-item/paper-item.html">
 <link rel="import" href="bower_components/paper-material/paper-material.html">
 <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="bower_components/event-bus-behavior/event-bus-behavior.html">
-<link rel="import" href="bower_components/state-toggle-behavior/state-toggle-behavior.html">
 <link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="bower_components/iron-icons/iron-icons.html">
@@ -30,12 +21,10 @@
 <link rel="import" href="bower_components/paper-button/paper-button.html">
 <link rel="import" href="bower_components/paper-input/paper-input.html">
 <link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="bower_components/cork-common-utils/cork-common-utils.html">
 
 
-<script src="elements/behaviors/Zonebehavior.js"></script>
-
-
-<link rel="import" href="elements/app-theme.html">
+<link rel="import" href="elements/mixins/interface-mixins.html">
 <link rel="import" href="elements/dwr-app.html">
 <link rel="import" href="elements/pages/dwr-page-map.html">
 <link rel="import" href="elements/pages/dwr-page-data/dwr-page-data.html">

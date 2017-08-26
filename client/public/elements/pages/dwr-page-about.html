@@ -1,47 +1,46 @@
 <dom-module id="dwr-page-about">
-  <style include="shared-styles"></style>
-  <style>
-    :host {
-      display: block;
-      overflow: hidden;
-    }
-    p {
-      padding : 0 15px;
-      display : block;
-    }
-    .padding {
-      padding : 0 15px;
-      display : block;
-    }
-    iron-pages {
-      margin: 15px;
-    }
-
-    h1, h2, h3, h4 {
-      font-weight: 200;
-    }
-
-    paper-material {
-      padding: 15px;
-      margin: 15px;
-    }
-
-    .checkbox {
-      margin-bottom: 10px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    table td, table th {
-      text-align: left;
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-    }
-  </style>
-
   <template>
+    <style include="shared-styles"></style>
+    <style>
+      :host {
+        display: block;
+        overflow: hidden;
+      }
+      p {
+        padding : 0 15px;
+        display : block;
+      }
+      .padding {
+        padding : 0 15px;
+        display : block;
+      }
+      iron-pages {
+        margin: 15px;
+      }
+  
+      h1, h2, h3, h4 {
+        font-weight: 200;
+      }
+  
+      paper-material {
+        padding: 15px;
+        margin: 15px;
+      }
+  
+      .checkbox {
+        margin-bottom: 10px;
+      }
+  
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table td, table th {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+    </style>
 
     <paper-tabs selected="{{selectedTab}}">
       <paper-tab>About</paper-tab>
@@ -194,54 +193,56 @@
     </iron-pages>
 
   </template>
-</dom-module>
 
-<script>
-  class DwrPageAbout extends Polymer.Element {
-
-    static get is() { return 'dwr-page-about'; }
-
-    static get properties() {
-      return {
-        selectedTab : {
-          type : Number,
-          value : 0
+  <script>
+    class DwrPageAbout extends Polymer.Element {
+  
+      static get is() { return 'dwr-page-about'; }
+  
+      static get properties() {
+        return {
+          selectedTab : {
+            type : Number,
+            value : 0
+          }
         }
       }
-    }
-
-    connectedCallback() {
-      this.connectedCallback();
-
-      this.querySelector('.host').innerHTML = window.location.protocol+'//'+window.location.host;
-      this.createParamsTable();
-
-      if( window.userType ) {
-        this.querySelector('input[value="'+window.userType+'"]').checked = true;
+  
+      ready() {
+        super.ready();
+  
+        this.shadowRoot.querySelector('.host').innerHTML = window.location.protocol+'//'+window.location.host;
+        this._createParamsTable();
+  
+        if( window.userType ) {
+          this.shadowRoot.querySelector('input[value="'+window.userType+'"]').checked = true;
+        }
+      }
+  
+      _createParamsTable() {
+        var tmp = [];
+  
+        for( var param in App.definitions ) {
+          tmp.push({
+            param : param,
+            label : App.definitions[param].label,
+            units : App.definitions[param].units
+          })
+        }
+  
+        this.definitions = tmp;
+      }
+  
+      updateUserType(e) {
+        var type = e.currentTarget.value;
+  
+        window.localStorage.setItem('userType', type);
+        window.userType = type;
       }
     }
+  
+    window.customElements.define(DwrPageAbout.is, DwrPageAbout);
+  </script>
+</dom-module>
 
-    _createParamsTable() {
-      var tmp = [];
 
-      for( var param in CIMIS.definitions ) {
-        tmp.push({
-          param : param,
-          label : CIMIS.definitions[param].label,
-          units : CIMIS.definitions[param].units
-        })
-      }
-
-      this.definitions = tmp;
-    }
-
-    updateUserType(e) {
-      var type = e.currentTarget.value;
-
-      window.localStorage.setItem('userType', type);
-      window.userType = type;
-    }
-  }
-
-  window.customElements.define(DwrPageAbout.is, DwrPageAbout);
-</script>

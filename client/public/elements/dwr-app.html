@@ -1,75 +1,78 @@
 <dom-module id="dwr-app">
-  <style include="shared-styles"></style>
-  <style>
-    :host {
-        display: block;
-        height: 100%;
-    }
-
-    .fullbleed {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-    }
-
-    h2 {
-      font-weight: 200
-    }
-
-    paper-material {
-      margin: 5px;
-    }
-
-    #locationBtn {
-      display: none;
-    }
-  </style>
-
   <template>
+    <style include="shared-styles"></style>
+    <style>
+      :host {
+          display: block;
+          height: 100%;
+          position: relative;
+      }
 
-      <paper-header-panel main>
-        <paper-toolbar>
-          <h2>Spatial CIMIS</h2>
+      .fullbleed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+
+      h2 {
+        font-weight: 200
+      }
+
+      paper-material {
+        margin: 5px;
+      }
+
+      #locationBtn {
+        display: none;
+      }
+    </style>
+
+      <paper-header-panel  style="height:100%">
+        <paper-toolbar slot="header">
+          <div slot="top" style="flex:1">
+          <div style="display:flex; align-items: center">
+            <h2>Spatial CIMIS</h2>
 
 
-          <div style="flex:1"></div>
+            <div style="flex:1"></div>
 
-            <paper-icon-button 
-              id="locationBtn" 
-              icon="maps:my-location" 
-              on-click="_selectLocation">
-            </paper-icon-button>
-            
-            <paper-icon-button 
-              id="backToMapBtn" 
-              icon="arrow-back" 
-              on-click="_backToMap"
-            ></paper-icon-button>
+              <paper-icon-button 
+                id="locationBtn" 
+                icon="maps:my-location" 
+                on-click="_selectLocation">
+              </paper-icon-button>
+              
+              <paper-icon-button 
+                id="backToMapBtn" 
+                icon="arrow-back" 
+                on-click="_backToMap"
+              ></paper-icon-button>
 
-            <paper-menu-button horizontal-align="right">
-              <paper-icon-button icon="more-vert" class="dropdown-trigger" style="margin:0"></paper-icon-button>
-              <paper-menu class="dropdown-content" id="mapLayerMenu" attr-for-selected="page">
+              <paper-menu-button horizontal-align="right">
+                <paper-icon-button icon="more-vert" slot="dropdown-trigger" style="margin:0"></paper-icon-button>
+                <paper-listbox slot="dropdown-content" id="mapLayerMenu" attr-for-selected="page">
 
-                <paper-item page="cimisGrid" on-click="_setLayerFromMenu">
-                  Explore Spatial CIMIS Grid
-                </paper-item>
+                  <paper-item page="cimisGrid" on-click="_setLayerFromMenu">
+                    Explore Spatial CIMIS Grid
+                  </paper-item>
 
-                <paper-item page="etoZones" on-click="_setLayerFromMenu" disabled>
-                  <paper-spinner id="etoSpinner" active ></paper-spinner>
-                  Explore ETo Zones
-                </paper-item>
+                  <paper-item page="etoZones" on-click="_setLayerFromMenu" disabled>
+                    <paper-spinner id="etoSpinner" active ></paper-spinner>
+                    Explore ETo Zones
+                  </paper-item>
 
-                <paper-item page="dauZones" on-click="_setLayerFromMenu" disabled>
-                  <paper-spinner id="dauSpinner" active></paper-spinner>
-                  Explore DAU Zones
-                </paper-item>
+                  <paper-item page="dauZones" on-click="_setLayerFromMenu" disabled>
+                    <paper-spinner id="dauSpinner" active></paper-spinner>
+                    Explore DAU Zones
+                  </paper-item>
 
-                <paper-item page="about" on-click="_setUrlStateFromMenu">About</paper-item>
-              </paper-menu>
-            </paper-menu-button>
-
+                  <paper-item page="about" on-click="_setUrlStateFromMenu">About</paper-item>
+                </paper-listbox>
+              </paper-menu-button>
+            </div>
+          </div>
         </paper-toolbar>
 
         <iron-pages 
@@ -87,143 +90,145 @@
       </paper-header-panel>
 
   </template>
-</dom-module>
 
-<script>
-  class DwrApp extends Mixin(Polymer.Element)
-      .with(EventBusMixin, AppStateMixin, DauMixin, EtoZoneMixin) {
-    
-    static get is() { return 'dwr-app'; }
-
-    static get properties() {
-      return {
-        appState : {
-          type : Object,
-          value : function() {
-            return {
-              section : 'map'
+  <script>
+    class DwrApp extends Mixin(Polymer.Element)
+        .with(EventMixin, AppStateMixin, DauMixin, EtoZonesMixin) {
+      
+      static get is() { return 'dwr-app'; }
+  
+      static get properties() {
+        return {
+          appState : {
+            type : Object,
+            value : function() {
+              return {
+                section : 'map'
+              }
             }
           }
         }
       }
-    }
-
-    ready() {
-      super.ready();
-      window.addEventListener('hashchange', this._setAppStateFromUrl.bind(this));
-      this._setAppStateFromUrl();
-    }
-
-    connectedCallback() {
-      super.connectedCallback();
-
-      if( window.standaloneMode ) {
-        this.$.install.style.display = 'none';
+  
+      ready() {
+        super.ready();
+        window.addEventListener('hashchange', this._setAppStateFromUrl.bind(this));
+        this._setAppStateFromUrl();
       }
-    }
-
-    _setAppStateFromUrl() {
-      var parts = window.location.hash.replace(/#/,'').split('/');
-      var state = {
-        section : 'map'
-      };
-
-      if( parts.length > 0 && parts[0] ) {
-        state.section = parts.splice(0, 1)[0];
-      }
-      if( parts.length > 0 && parts[0]) {
-        if( state.section === 'map' || state.section === 'data' ) {
-          state.mapState = parts.splice(0, 1)[0];
+  
+      connectedCallback() {
+        super.connectedCallback();
+  
+        if( window.standaloneMode ) {
+          this.$.install.style.display = 'none';
         }
       }
-
-      if( parts.length > 0 && parts[0]) {
-        state.extras = parts;
+  
+      _setAppStateFromUrl() {
+        var parts = window.location.hash.replace(/#/,'').split('/');
+        var state = {
+          section : 'map'
+        };
+  
+        if( parts.length > 0 && parts[0] ) {
+          state.section = parts.splice(0, 1)[0];
+        }
+        if( parts.length > 0 && parts[0]) {
+          if( state.section === 'map' || state.section === 'data' ) {
+            state.mapState = parts.splice(0, 1)[0];
+          }
+        }
+  
+        if( parts.length > 0 && parts[0]) {
+          state.extras = parts;
+        }
+  
+        this._setAppState(state);
       }
-
-      this._setAppState(state);
-    }
-
-    _onDauGeometryUpdate(e) {
-      switch(e.state) {
-        case 'loaded':
-          this.querySelector('[page="dauZones"]').removeAttribute('disabled');
-          this.$.dauSpinner.removeAttribute('active');
-          this.$.dauSpinner.style.display = 'none';
-          break;
-        case 'error':
-          this.querySelector('[page="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
+  
+      _onDauGeometryUpdate(e) {
+        switch(e.state) {
+          case 'loaded':
+          this.shadowRoot.querySelector('[page="dauZones"]').removeAttribute('disabled');
+            this.$.dauSpinner.removeAttribute('active');
+            this.$.dauSpinner.style.display = 'none';
+            break;
+          case 'error':
+          this.shadowRoot.querySelector('[page="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
+        }
       }
-    }
-
-    _onEtoZonesGeometryUpdate(e) {
-      switch(e.state) {
-        case 'loaded':
-          this.querySelector('[page="etoZones"]').removeAttribute('disabled');
-          this.$.etoSpinner.removeAttribute('active');
-          this.$.etoSpinner.style.display = 'none';
-          break;
-        case 'error':
-          this.querySelector('[page="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
+  
+      _onEtoZonesGeometryUpdate(e) {
+        switch(e.state) {
+          case 'loaded':
+            this.shadowRoot.querySelector('[page="etoZones"]').removeAttribute('disabled');
+            this.$.etoSpinner.removeAttribute('active');
+            this.$.etoSpinner.style.display = 'none';
+            break;
+          case 'error':
+          this.shadowRoot.querySelector('[page="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
+        }
       }
-    },
-
-    _onAppStateUpdate(e) {
-      this.appState = e;
-
-      if( this.appState.section === 'map' ) {
-        this.$.locationBtn.style.display = 'block';
-        this.$.backToMapBtn.style.display = 'none';
-      } else {
-        this.$.locationBtn.style.display = 'none';
-        this.$.backToMapBtn.style.display = 'block';
+  
+      _onAppStateUpdate(e) {
+        this.appState = e;
+  
+        if( this.appState.section === 'map' ) {
+          this.$.locationBtn.style.display = 'block';
+          this.$.backToMapBtn.style.display = 'none';
+        } else {
+          this.$.locationBtn.style.display = 'none';
+          this.$.backToMapBtn.style.display = 'block';
+        }
       }
-    }
-
-
-    // getDate(index) {
-    //   var d = new Date(new Date().getTime()-(86400000*(index+1)) );
-
-    //   var y = d.getYear()+1900;
-    //   var m = d.getMonth()+1;
-    //   var d = d.getDate();
-
-    //   if( m < 10 ) m = '0'+m;
-    //   if( d < 10 ) d = '0'+d;
-
-    //   return y+'-'+m+'-'+d;
-    // }
-
-    _setUrlStateFromMenu(e) {
-      var newState = this.$.mapLayerMenu.selected;
-      if( !newState || newState === this.appState.section ) {
-        return;
+  
+  
+      // getDate(index) {
+      //   var d = new Date(new Date().getTime()-(86400000*(index+1)) );
+  
+      //   var y = d.getYear()+1900;
+      //   var m = d.getMonth()+1;
+      //   var d = d.getDate();
+  
+      //   if( m < 10 ) m = '0'+m;
+      //   if( d < 10 ) d = '0'+d;
+  
+      //   return y+'-'+m+'-'+d;
+      // }
+  
+      _setUrlStateFromMenu(e) {
+        var newState = this.$.mapLayerMenu.selected;
+        if( !newState || newState === this.appState.section ) {
+          return;
+        }
+  
+        window.location.hash = newState;
       }
-
-      window.location.hash = newState;
-    }
-
-    _setLayerFromMenu(e) {
-      var newState = this.$.mapLayerMenu.selected;
-      if( !newState || newState === this.appState.mapState ) {
-        return;
+  
+      _setLayerFromMenu(e) {
+        var newState = this.$.mapLayerMenu.selected;
+        if( !newState || newState === this.appState.mapState ) {
+          return;
+        }
+  
+        this._setAppState(newState);
+  
+        if( this.appState.section !== 'map' ) {
+          window.location.hash = 'map';
+        }
       }
-
-      this._setAppState(newState);
-
-      if( this.appState.section !== 'map' ) {
+  
+      _selectLocation() {
+        window.location.hash = 'location';
+      }
+  
+      _backToMap() {
         window.location.hash = 'map';
       }
     }
+  
+    window.customElements.define(DwrApp.is, DwrApp);
+  </script>
+    
+</dom-module>
 
-    _selectLocation() {
-      window.location.hash = 'location';
-    }
-
-    _backToMap() {
-      window.location.hash = 'map';
-    }
-  }
-
-  window.customElements.define(DwrApp.is, DwrApp);
-</script>

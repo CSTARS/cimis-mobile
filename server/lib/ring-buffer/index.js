@@ -7,7 +7,7 @@ var db, config, msPerDay = 86400000;
 function init(c) {
   config = c;
   
-  if (config.get('ringBuffer').db === 'redis') {
+  if (config.ringBuffer.db === 'redis') {
     console.log('using redis');
     db = require('./lib/redis');
     db.init(config);
@@ -19,21 +19,21 @@ function init(c) {
 
 // day should be number 1 - 31;
 function getIndex(date) {
-  return Math.floor(date.getTime() / msPerDay) % config.get('ringBuffer').buffer;
+  return Math.floor(date.getTime() / msPerDay) % config.ringBuffer.buffer;
 }
 
 function write (options, callback) {
   var index = getIndex(options.date);
   var keys = Object.keys(options.data);
 
-  if (config.get('ringBuffer').max_keys) {
-    keys = keys.slice(0, config.get('ringBuffer').max_keys);
-    console.log('max_keys:', config.get('ringBuffer').max_keys, keys);
+  if (config.ringBuffer.max_keys) {
+    keys = keys.slice(0, config.ringBuffer.max_keys);
+    console.log('max_keys:', config.ringBuffer.max_keys, keys);
   }
 
   exists(options.date, function(dateIsWritten) {
     console.log('dateIsWritten', dateIsWritten);
-    if( dateIsWritten && !config.get('ringBuffer').force ) {
+    if( dateIsWritten && !config.ringBuffer.force ) {
       console.log(dateUtil.nice(options.date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
       return callback();
     }
@@ -52,7 +52,7 @@ function write (options, callback) {
         });
       },
       function(err) {
-        db.write(config.get('ringBuffer').date_key, index, dateUtil.nice(options.date).join('-'), function(err, resp){
+        db.write(config.ringBuffer.date_key, index, dateUtil.nice(options.date).join('-'), function(err, resp){
           writeAggregates(options, callback);
         });
       }
@@ -64,9 +64,9 @@ function writeAggregates(options, callback) {
   var index = getIndex(options.date);
   var keys = Object.keys(options.aggregate);
   
-  if (config.get('ringBuffer').max_keys) {
-    keys = keys.slice(0, config.get('ringBuffer').max_keys);
-    console.log('max_keys:', config.get('ringBuffer').max_keys, keys);
+  if (config.ringBuffer.max_keys) {
+    keys = keys.slice(0, config.ringBuffer.max_keys);
+    console.log('max_keys:', config.ringBuffer.max_keys, keys);
   }
 
   console.log('Writing '+keys.length+' aggregates to index '+index+' in ring buffer for '+options.date.toDateString());
@@ -97,7 +97,7 @@ function exists(date, callback) {
   var index = getIndex(date);
   date = dateUtil.nice(date).join('-');
 
-  db.valueAt(config.get('ringBuffer').date_key, index, function(val){
+  db.valueAt(config.ringBuffer.date_key, index, function(val){
     if( val === date ) {
       callback(true, index);
     } else {

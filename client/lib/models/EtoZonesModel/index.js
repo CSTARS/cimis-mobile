@@ -1,6 +1,6 @@
 var BaseModel = require('cork-app-utils').BaseModel;
-var EtoZonesStore = require('../stores/EtoZonesStore');
-var EtoZonesService = require('../services/EtoZonesService');
+var EtoZonesStore = require('../../stores/EtoZonesStore');
+var EtoZonesService = require('../../services/EtoZonesService');
 var styles = require('./styles');
 
 class EtoZonesModel extends BaseModel {
@@ -33,7 +33,7 @@ class EtoZonesModel extends BaseModel {
 
   // util method
   mergeZoneMap(geojson) {
-    geojson.features.forEach(function(feature, index){
+    geojson.features.forEach((feature, index) => {
       var zoneData = this.getZoneByAvgDelta(feature.properties.zone);
       if( !zoneData ) return;
       for( var key in zoneData.data ) {

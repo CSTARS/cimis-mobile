@@ -7,8 +7,8 @@
   "scripts": {
     "watch": "./client/build/watch.sh",
     "build": "./client/build/dist.sh",
-    "docker-dev": "node server.js --dev --docker",
-    "docker": "node server.js --docker",
+    "docker-dev": "node server --dev --docker",
+    "docker": "node server --docker",
     "import": "node utils/import.js"
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "async": "^2.5.0",
     "cimis-grid": "^1.0.0",
     "cork-app-utils": "github:UCDavisLibrary/cork-app-utils",
+    "cors": "^2.8.4",
     "express": "^4.15.4",
     "proj4": "^2.3.10",
     "redis": "^0.12.1",

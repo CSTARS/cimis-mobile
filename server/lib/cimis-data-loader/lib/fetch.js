@@ -12,7 +12,7 @@ var request = require('request'),
 
 function init(c) {
   config = c;
-  verbose = config.get('fetch').verbose;
+  verbose = config.fetch.verbose;
 }
 
 function log(txt) {
@@ -22,16 +22,16 @@ function log(txt) {
 }
 
 function getDate(date, callback) {
-  console.log('loading data for '+date.toDateString()+' from '+config.get('cimis').base+' ...');
+  console.log('loading data for '+date.toDateString()+' from '+config.cimis.base+' ...');
   var pathDate = dateUtil.nice(date).join('/');
 
   var data = {};
   var aggregate;
 
   async.eachSeries(
-    config.get('cimis').params,
+    config.cimis.params,
     function(param, next){
-      var url = config.get('cimis').base+'/'+pathDate+'/'+param+'.asc.gz';
+      var url = config.cimis.base+'/'+pathDate+'/'+param+'.asc.gz';
       var readable = request(url);
 
       parse(param, readable, function(err, layer){

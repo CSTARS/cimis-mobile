@@ -6,11 +6,11 @@ class DauService extends BaseService {
 
   constructor() {
     super();
-    this.store = EtoZonesStore;
+    this.store = DauStore;
   }
 
   getHost() {
-    return this.ConfigStore.getHost();
+    return ConfigStore.getHost();
   }
 
   async getGeometry(model) {

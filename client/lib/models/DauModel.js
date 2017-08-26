@@ -1,7 +1,6 @@
 var BaseModel = require('cork-app-utils').BaseModel;
 var DauStore = require('../stores/DauStore');
 var DauService = require('../services/DauService');
-var styles = require('./styles');
 
 class DauModel extends BaseModel {
 
@@ -10,10 +9,6 @@ class DauModel extends BaseModel {
     this.store = DauStore;
     this.service = DauService;
     this.registerIOC('DauModel');
-  }
-
-  getStyles() {
-    return styles;
   }
 
   getGeometry() {

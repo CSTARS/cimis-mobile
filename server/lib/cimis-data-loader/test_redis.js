@@ -54,7 +54,7 @@ function write_to_empty(callback) {
 
 function pretend_to_add_dates(callback) {
   var days=[];
-  for( var i = 0; i < config.get('buffer'); i++ ) {
+  for( var i = 0; i < config.buffer; i++ ) {
     days.push(new Date(new Date().getTime()-(86400000*(i+1))));
   }
   async.eachSeries(

@@ -45,38 +45,38 @@
       <div state="loading">Loading...</div>
       <div state="error">Error Loading ETo Zone :(</div>
 
-  </template>
-  <script>
+    <script>
 
-  class DwrPageEto extends Mixin(Polymer.Element)
-      .with(EventBusMixin, AppStateMixin, EtoZoneMixin) {
+    class DwrPageEto extends Mixin(Polymer.Element)
+        .with(EventMixin, ToggleStateMixin, AppStateMixin, EtoZonesMixin, ZoneUtilsMixin) {
 
-      static get is() { return 'dwr-page-eto'; }
+        static get is() { return 'dwr-page-eto'; }
 
-      static get properties() {
-        return {
-          selected : {
-            type : Object
-          },
-          geometry : {
-            type : Object,
-            value : function() {
-                return {state: 'loading'}
+        static get properties() {
+            return {
+                selected : {
+                type : Object
+                },
+                geometry : {
+                type : Object,
+                value : function() {
+                    return {state: 'loading'}
+                }
+                },
+                currentZoneData : {
+                type : Object,
+                value : function() {
+                    return {
+                    state : 'loading'
+                    }
+                }
+                }
             }
-          },
-          currentZoneData : {
-            type : Object,
-            value : function() {
-              return {
-                state : 'loading'
-              }
-            }
-          }
         }
-      }
 
-      ready() {
+    ready() {
         super.ready();
+        
         this.now = new Date();
         this.nowWeek = this.getWeekOfYear(0, this.now);
 
@@ -113,160 +113,156 @@
     }
 
     _onActive() {
-      if( !this.active ) return;
+        if( !this.active ) return;
 
-      var parts = window.location.hash.replace(/#/,'').split('/');
-      if( parts.length >= 3 ) {
+        var parts = window.location.hash.replace(/#/,'').split('/');
+        if( parts.length >= 3 ) {
         this._selectZone(parts[2]);
-      }
+        }
     }
 
     _onEtoZonesGeometryUpdate(e) {
-      if( e.state !== 'loaded' ) return;
+        if( e.state !== 'loaded' ) return;
 
-      this.geometry = e;
-      this.map.data.addGeoJson(this.geometry.data);
-      this.redraw();
-      this._renderData();
+        this.geometry = e;
+        this.map.data.addGeoJson(this.geometry.data);
+        this.redraw();
+        this._renderData();
     }
 
     _onRegionClick(e) {
-      if( !e.feature ) {
-          return;
-      }
-      window.location.hash = '#data/etoZones/'+this.getRegionNumber(e.feature);
-      this._onActive();
+        if( !e.feature ) {
+            return;
+        }
+        window.location.hash = '#data/etoZones/'+this.getRegionNumber(e.feature);
+        this._onActive();
     }
 
     _onAppStateUpdate(e) {
-      if( this.selected === e.selectedEtoZoneLocation ) return;
-      this.selected = e.selectedEtoZoneLocation;
-      this._onDataUpdate();
+        if( this.selected === e.selectedEtoZoneLocation ) return;
+        this.selected = e.selectedEtoZoneLocation;
+        this._renderData();
     }
 
     _selectZone(id) {
-      this._setAppState({
+        this._setAppState({
         selectedEtoZoneLocation : id
-      });
+        });
     }
 
     _onEtoZonesDataUpdate(e) {
-      this.currentZoneData = e;
+        this.currentZoneData = e;
 
-      if( this.geometry.state !== 'loaded' ) {
-          return;
-      }
+        if( this.geometry.state !== 'loaded' ) {
+            return;
+        }
 
-      this._renderData();
-    }
-
-    _onDataUpdate() {
-      this.debounce('_onDataUpdate', this._onDataUpdateAsync, 50);
+        this._renderData();
     }
 
     _renderData() {
-      this.debounce('_renderData', () => this._renderDataAsync(), 50);
+        this.debounce('_renderData', () => this._renderDataAsync(), 50);
     }
 
     _renderDataAsync() {
-      this.toggleState(this.currentZoneData.state);
+        this.toggleState(this.currentZoneData.state);
 
-      if( this.currentZoneData.state !== 'loaded' ) {
-          return;
-      }
+        if( this.currentZoneData.state !== 'loaded' ) {
+            return;
+        }
 
-      this.map.data.setStyle((feature) => {
-          var label = this.getRegionNumber(feature);
-          if( label+'' === this.selected ){
-              this.feature = feature;
-              return {
-                  fillColor: this.getZone(label).properties.color,
-                  strokeColor: '#fff',
-                  fillOpacity : .6,
-                  strokeWeight: 1
-              };
-          } else {
-              return {
-                  fillColor: '#333',
-                  strokeColor: '#fff',
-                  fillOpacity : .2,
-                  strokeWeight: 1
-              };
-          }
-      });
+        this.map.data.setStyle((feature) => {
+            var label = this.getRegionNumber(feature);
+            if( label+'' === this.selected ){
+                this.feature = feature;
+                return {
+                    fillColor: this.getZone(label).properties.color,
+                    strokeColor: '#fff',
+                    fillOpacity : .6,
+                    strokeWeight: 1
+                };
+            } else {
+                return {
+                    fillColor: '#333',
+                    strokeColor: '#fff',
+                    fillOpacity : .2,
+                    strokeWeight: 1
+                };
+            }
+        });
 
-      var data = this.getZone(this.selected);
-      this.$.average.innerHTML = data.properties.avg.toFixed(1);
-      this.$.delta.innerHTML = data.properties.delta.toFixed(1);
+        var data = this.getZone(this.selected);
+        this.$.average.innerHTML = data.properties.avg.toFixed(1);
+        this.$.delta.innerHTML = data.properties.delta.toFixed(1);
 
-      this.sortedDates = CIMIS.utils.sortDates(this.currentZoneData.data.data);
+        this.sortedDates = CIMIS.utils.sortDates(this.currentZoneData.data.data);
 
-      var p = [data.properties.p0, data.properties.p1, data.properties.p2]; 
-      var h = [0, data.properties.h1, data.properties.h2];
-      var signature = CIMIS.fft.ifft(p, h, 52);
+        var p = [data.properties.p0, data.properties.p1, data.properties.p2]; 
+        var h = [0, data.properties.h1, data.properties.h2];
+        var signature = CIMIS.fft.ifft(p, h, 52);
 
-      var cumSignature = [], prev = 0;
-      for( var i = 0; i < signature.length; i++ ) {
-          prev += signature[i]*7;
-          cumSignature.push(prev);
-      }
+        var cumSignature = [], prev = 0;
+        for( var i = 0; i < signature.length; i++ ) {
+            prev += signature[i]*7;
+            cumSignature.push(prev);
+        }
 
-      // eto chart
-      this.dt = new google.visualization.DataTable();
-      this.dt.addColumn('string', 'Date');
-      this.dt.addColumn('number', 'Avg ETo');
-      this.dt.addColumn('number', 'Expected ETo');
+        // eto chart
+        this.dt = new google.visualization.DataTable();
+        this.dt.addColumn('string', 'Date');
+        this.dt.addColumn('number', 'Avg ETo');
+        this.dt.addColumn('number', 'Expected ETo');
 
-      var weeks = [this.getWeekOfYear(2), this.getWeekOfYear(1), this.getWeekOfYear(0)];
+        var weeks = [this.getWeekOfYear(2), this.getWeekOfYear(1), this.getWeekOfYear(0)];
 
-      var mid = Math.floor(this.sortedDates.length / 2);
-      var end = this.sortedDates.length-1;
+        var mid = Math.floor(this.sortedDates.length / 2);
+        var end = this.sortedDates.length-1;
 
-      this.sortedDates.forEach((date, index) => {
-          d = this.currentZoneData.data.data[date];
-          arr = [date];
+        this.sortedDates.forEach((date, index) => {
+            d = this.currentZoneData.data.data[date];
+            arr = [date];
 
-          arr.push(parseFloat(d) || 0);
+            arr.push(parseFloat(d) || 0);
 
-          if( index === 0 ) {
-              arr.push(signature[this.weekOffsetHelperCurrent(weeks[0])]);
-          } else if( index === mid ) {
-              arr.push(signature[this.weekOffsetHelperCurrent(weeks[1])]);
-          } else if( index === end ) {
-              arr.push(signature[this.weekOffsetHelperCurrent(weeks[2])]);
-          } else {
-              arr.push(null);
-          }
+            if( index === 0 ) {
+                arr.push(signature[this.weekOffsetHelperCurrent(weeks[0])]);
+            } else if( index === mid ) {
+                arr.push(signature[this.weekOffsetHelperCurrent(weeks[1])]);
+            } else if( index === end ) {
+                arr.push(signature[this.weekOffsetHelperCurrent(weeks[2])]);
+            } else {
+                arr.push(null);
+            }
 
-          this.dt.addRow(arr);
-      });
+            this.dt.addRow(arr);
+        });
 
-      if( !this.chart ) {
-          this.chart = new google.visualization.LineChart(this.$.chart);
-          this.options = {
-              title : 'ETo - Evapotranspiration (mm)',
-              curveType: 'function',
-              height : 550,
-              interpolateNulls : true,
-              animation : {
-                  easing : 'out',
-                  startup : true
-              },
-              series: {
-                  1: { 
-                      lineDashStyle: [4, 4] 
-                  }
-              }
-          }
-      }
+        if( !this.chart ) {
+            this.chart = new google.visualization.LineChart(this.$.chart);
+            this.options = {
+                title : 'ETo - Evapotranspiration (mm)',
+                curveType: 'function',
+                height : 550,
+                interpolateNulls : true,
+                animation : {
+                    easing : 'out',
+                    startup : true
+                },
+                series: {
+                    1: { 
+                        lineDashStyle: [4, 4] 
+                    }
+                }
+            }
+        }
 
-      this.dt2 = new google.visualization.DataTable();
-      this.dt2.addColumn('string', 'Week');
-      this.dt2.addColumn('number', 'Eto');
-      this.dt2.addColumn('number', 'Two Weeks Ago');
-      this.dt2.addColumn('number', 'This Week');
+        this.dt2 = new google.visualization.DataTable();
+        this.dt2.addColumn('string', 'Week');
+        this.dt2.addColumn('number', 'Eto');
+        this.dt2.addColumn('number', 'Two Weeks Ago');
+        this.dt2.addColumn('number', 'This Week');
 
-      for( var i = 0; i < signature.length; i++ ) {
+        for( var i = 0; i < signature.length; i++ ) {
         var actualWeek = this.getChartWeekLabel(i);
         var arr = [actualWeek.label, signature[i]];
         
@@ -282,81 +278,81 @@
         }
 
         this.dt2.addRow(arr);
-      }
+        }
 
-      if( !this.chart2 ) {
-          this.chart2 = new google.visualization.ComboChart(this.$.chart2);
-          this.options2 = {
-              title : 'Weekly Expected Evapotranspiration (mm)',
-              curveType: 'function',
-              height : 550,
-              legend : {
-                  position : 'none'
-              },
-              hAxis : {
-                  title : 'Week'
-              },
-              seriesType : 'bars',
-              series: {
-                  0: { 
-                      type : 'line',
-                      targetAxisIndex : 0
-                  }
-              }
-          }
-      }
+        if( !this.chart2 ) {
+            this.chart2 = new google.visualization.ComboChart(this.$.chart2);
+            this.options2 = {
+                title : 'Weekly Expected Evapotranspiration (mm)',
+                curveType: 'function',
+                height : 550,
+                legend : {
+                    position : 'none'
+                },
+                hAxis : {
+                    title : 'Week'
+                },
+                seriesType : 'bars',
+                series: {
+                    0: { 
+                        type : 'line',
+                        targetAxisIndex : 0
+                    }
+                }
+            }
+        }
 
-      this.dt3 = new google.visualization.DataTable();
-      this.dt3.addColumn('string', 'Week');
-      this.dt3.addColumn('number', 'Cumulative ETo');
-      this.dt3.addColumn('number', 'Two Weeks Ago');
-      this.dt3.addColumn('number', 'This Week');
+        this.dt3 = new google.visualization.DataTable();
+        this.dt3.addColumn('string', 'Week');
+        this.dt3.addColumn('number', 'Cumulative ETo');
+        this.dt3.addColumn('number', 'Two Weeks Ago');
+        this.dt3.addColumn('number', 'This Week');
 
-      for( var i = 0; i < cumSignature.length; i++ ) {
-          var actualWeek = this.getChartWeekLabel(i);
-          var arr = [actualWeek.label, cumSignature[i]];
-          
-          if( actualWeek.week === weeks[0] ) {
-              arr.push(cumSignature[i]);
-          } else {
-              arr.push(null);
-          }
-          if( actualWeek.week === weeks[2] ) {
-              arr.push(cumSignature[i]);
-          } else {
-              arr.push(null);
-          }
+        for( var i = 0; i < cumSignature.length; i++ ) {
+            var actualWeek = this.getChartWeekLabel(i);
+            var arr = [actualWeek.label, cumSignature[i]];
+            
+            if( actualWeek.week === weeks[0] ) {
+                arr.push(cumSignature[i]);
+            } else {
+                arr.push(null);
+            }
+            if( actualWeek.week === weeks[2] ) {
+                arr.push(cumSignature[i]);
+            } else {
+                arr.push(null);
+            }
 
-          this.dt3.addRow(arr);
-      }
+            this.dt3.addRow(arr);
+        }
 
-      if( !this.chart3 ) {
-          this.chart3 = new google.visualization.ComboChart(this.$.chart3);
-          this.options3 = {
-              title : 'Expected Cumulative Weekly Evapotranspiration (mm)',
-              curveType: 'function',
-              height : 550,
-              legend : {
-                  position : 'none'
-              },
-              hAxis : {
-                  title : 'Week'
-              },
-              seriesType : 'bars',
-              series: {
-                  0: { 
-                      type : 'line',
-                      targetAxisIndex : 0
-                  }
-              }
-          }
-      }
+        if( !this.chart3 ) {
+            this.chart3 = new google.visualization.ComboChart(this.$.chart3);
+            this.options3 = {
+                title : 'Expected Cumulative Weekly Evapotranspiration (mm)',
+                curveType: 'function',
+                height : 550,
+                legend : {
+                    position : 'none'
+                },
+                hAxis : {
+                    title : 'Week'
+                },
+                seriesType : 'bars',
+                series: {
+                    0: { 
+                        type : 'line',
+                        targetAxisIndex : 0
+                    }
+                }
+            }
+        }
 
-      this.redraw();
+        this.redraw();
     }
 
     redraw() {
-      this.debounce('redraw', () => {
+        this.debounce('redraw', () => {
         google.maps.event.trigger(this.map, "resize");
         this.fitToFeature(this.selected);
 
@@ -364,63 +360,67 @@
         this.chart.draw(this.dt, this.options);
         this.chart2.draw(this.dt2, this.options2);
         this.chart3.draw(this.dt3, this.options3);
-      }, 50);
+        }, 50);
     }
 
     getDayOfYear(offset, now) {
-      var start = new Date(now.getFullYear(), 0, 0);
-      var diff = now - start;
-      var oneDay = 1000 * 60 * 60 * 24;
-      var day = Math.ceil(diff / oneDay) - (offset || 0);
-      if( day < 1 ) 356 + day;
-      return day;
+        var start = new Date(now.getFullYear(), 0, 0);
+        var diff = now - start;
+        var oneDay = 1000 * 60 * 60 * 24;
+        var day = Math.ceil(diff / oneDay) - (offset || 0);
+        if( day < 1 ) 356 + day;
+        return day;
     }
 
     getWeekOfYear(offset, date) {
-      if( !date ) date = new Date();
-      return Math.floor(this.getDayOfYear(7*offset, date) / 7);
+        if( !date ) date = new Date();
+        return Math.floor(this.getDayOfYear(7*offset, date) / 7);
     }
 
     getRegionNumber(feature) {
-      return feature.getProperty('zone');
+        return feature.getProperty('zone');
     }
 
     getDateOfWeek(w) {
-      var y = this.now.getFullYear();
-      
-      if( this.nowWeek >= 40 ) {
-          if( w < 40 ) y++;
-      } else {
-          if( w >= 40 ) y--;
-      }
+        var y = this.now.getFullYear();
+        
+        if( this.nowWeek >= 40 ) {
+            if( w < 40 ) y++;
+        } else {
+            if( w >= 40 ) y--;
+        }
 
-      var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
-      d = new Date(y, 0, d);
+        var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
+        d = new Date(y, 0, d);
 
-      return this.months[d.getMonth()]+' '+d.getDate()+', '+y;
+        return this.months[d.getMonth()]+' '+d.getDate()+', '+y;
     }
 
     getChartWeekLabel(w) {
-      w = this.weekOffsetHelper(w);
-      return {
-          week : w,
-          label : this.getDateOfWeek(w)
-      }
+        w = this.weekOffsetHelper(w);
+        return {
+            week : w,
+            label : this.getDateOfWeek(w)
+        }
     }
 
     weekOffsetHelper(w) {
-      w = w-12;
-      if( w < 0 ) w = w+52; 
-      return w;
+        w = w-12;
+        if( w < 0 ) w = w+52; 
+        return w;
     }
 
     weekOffsetHelperCurrent(w) {
-      w = w+12;
-      if( w > 52 ) w = w-52; 
-      return w;
+        w = w+12;
+        if( w > 52 ) w = w-52; 
+        return w;
     }
-  }
-  window.customElements.define(DwrPageEto.is, DwrPageEto);
+    }
+    window.customElements.define(DwrPageEto.is, DwrPageEto);
 
-  </script>
+    </script>
+            
+            
+
+  </template>
 </dom-module>

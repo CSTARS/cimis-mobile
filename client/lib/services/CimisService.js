@@ -12,7 +12,7 @@ class CimisService extends BaseService {
     }
 
     getHost() {
-      return this.ConfigStore.getHost();
+      return ConfigStore.getHost();
     }
 
     async getDates() {

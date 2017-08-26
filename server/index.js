@@ -1,6 +1,5 @@
 'use strict';
 
-
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -25,6 +24,5 @@ app.use(express.static(assetPath));
 console.log(`CIMIS Mobile in ${config.env} mode, serving ${assetPath}`);
 
 app.listen(config.server.port, function () {
-  console.log(`Wine-Search app listening on port ${config.server.port}`);
-  require('./lib/dataUpdate');
+  console.log(`CIMIS Mobile app listening on port ${config.server.port}`);
 });

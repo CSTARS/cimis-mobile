@@ -4,19 +4,19 @@
     class EtoZonesInterface extends subclass {
         constructor() {
           super();
-          this._iocInject('EtoZoneModel');
+          this._iocInject('EtoZonesModel');
         }
 
         _getEtoZonesGeometry() {
-          return this.EtoZoneModel.getGeometry();
+          return this.EtoZonesModel.getGeometry();
         }
 
         _getEtoZoneGeometry(id) {
-          return this.EtoZoneModel.getZoneGeometry(id);
+          return this.EtoZonesModel.getZoneGeometry(id);
         }
 
         _getEtoZoneData(id) {
-          return this.EtoZOneModel.getZoneData(id);
+          return this.EtoZonesModel.getZoneData(id);
         }
     }
 </script>

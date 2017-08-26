@@ -11,14 +11,14 @@ function connect(callback) {
   if( client ) {
     callback(client);
   } else {
-    if( options.get('docker') ) {
-      client = redis.createClient(options.get('redis').port, 'redis', {no_ready_check:true});
+    if( options.docker ) {
+      client = redis.createClient(options.redis.port, 'redis', {no_ready_check:true});
     } else {
-      client = redis.createClient(options.get('redis').port, options.get('redis').host, {no_ready_check:true});
+      client = redis.createClient(options.redis.port, options.redis.host, {no_ready_check:true});
     }
 
-    if( options.get('redis').password ) {
-      client.auth(options.get('redis').password, function(err) {
+    if( options.redis.password ) {
+      client.auth(options.redis.password, function(err) {
         if (err) {
           throw err;
         }
@@ -36,7 +36,7 @@ function _connect(callback) {
       throw err;
     }
 
-    console.log('Connected to Redis', options.get('redis').host);
+    console.log('Connected to Redis', options.redis.host);
     callback(client);
   });
 }
@@ -52,7 +52,7 @@ function disconnect(callback) {
 function initialize(id, callback) {
   connect(function(client) {
     var keyval = [id];
-    for (var i = 0; i < options.get('ringBuffer').buffer; i++ ) {
+    for (var i = 0; i < options.ringBuffer.buffer; i++ ) {
       keyval.push(i);
     }
     client.del(id,function(err,reply) {

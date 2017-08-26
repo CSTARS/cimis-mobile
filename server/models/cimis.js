@@ -1,11 +1,11 @@
 'use strict';
 
 var ringBuffer = require('../lib/ring-buffer');
-var grid = require('../public/js/lib/cimis-grid');
+var config = require('../config');
+var grid = require('cimis-grid');
 var config;
 
 module.exports = function() {
-  config = global.config;
   ringBuffer.init(config);
 
   return {
@@ -72,7 +72,7 @@ function getRegion(name, callback) {
 }
 
 function getDates(callback) {
-  ringBuffer.read(config.get('ringBuffer').date_key, callback);
+  ringBuffer.read(config.ringBuffer.date_key, callback);
 }
 
 function prepareGet(data, isRegion, callback) {

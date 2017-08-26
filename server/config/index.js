@@ -8,9 +8,11 @@ if( process.argv.indexOf('--docker') > -1 || env === 'production' ) {
 
 module.exports = {
 
+  env : env,
+
   server : {
     assetPath : (env === 'production') ? 'dist' : 'public',
-    port : process.end.CIMIS_MOBILE_PORT || 8080
+    port : process.env.CIMIS_MOBILE_PORT || 8080
   },
 
   ringBuffer : {

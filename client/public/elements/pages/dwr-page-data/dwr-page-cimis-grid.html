@@ -1,24 +1,23 @@
-<dom-module name="dwr-page-cimis-grid">
-  <style>
-    :host {
-      display: block;
-      padding: 10px;
-    }
-
-    paper-material {
-      margin: 15px;
-      padding-right: 15px;
-    }
-
-    h1 {
-      font-weight: 200;
-    }
-    #docs {
-      text-align: right;
-    }
-  </style>
-
+<dom-module id="dwr-page-cimis-grid">
   <template>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+  
+      paper-material {
+        margin: 15px;
+        padding-right: 15px;
+      }
+  
+      h1 {
+        font-weight: 200;
+      }
+      #docs {
+        text-align: right;
+      }
+    </style>
 
     <h1 id="gridLabel"></h1>
     <div id="docs">
@@ -34,16 +33,16 @@
     <div state="error">Error Loading CIMIS grid :(</div>
 
   </template>
-</dom-module>
 
 <script>
   class DwrPageCimisGrid extends Mixin(Polymer.Element)
-      .with(EventBusMixin, AppStateMixin, CimisGridMixin) {
+      .with(EventMixin, ToggleStateMixin, AppStateMixin, CimisGridMixin) {
 
     static get is() { return 'dwr-page-cimis-grid'; }
 
     ready() {
       super.ready();
+
       this.params = ['Rnl','Rso','U2', 'ETo', 'Tdew','Tn','Tx',];
       this.data = null;
 
@@ -119,7 +118,7 @@
       this.charts = null;
       this.datatables = [];
       this.resize();
-      this.toggleState('loading');
+      // this.toggleState('loading');
 
       window.addEventListener('resize', () =>{
         this.resize();
@@ -218,19 +217,24 @@
     _onAppStateUpdate(e) {
       if( this.selected === e.selectedCimisLocation ) return;
       this.selected = e.selectedCimisLocation;
-      this._onDataUpdate();
+      this._renderData();
     }
 
     _onCimisDataUpdate(e) {
       this.currentGridData = e;
+      this._renderData();
+    }
+
+    _renderData() {
       this.debounce('_renderData', function() {
           this._renderDataAsync();
       }, 50);
     }
 
     _renderDataAsync() {
-      this.toggleState(this.currentGridData.state);
+      // this.toggleState(this.currentGridData.state);
 
+      if( !this.currentGridData ) return;
       if( this.currentGridData.state !== 'loaded' ) {
           return;
       }
@@ -292,3 +296,5 @@
   }
   window.customElements.define(DwrPageCimisGrid.is, DwrPageCimisGrid);
 </script>
+</dom-module>
+

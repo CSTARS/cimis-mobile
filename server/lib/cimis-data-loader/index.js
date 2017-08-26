@@ -11,8 +11,8 @@ function init(c) {
   config = c;
   fetch.init(config);
 
-  if( config.get('force') ) {
-    config.get('ringBuffer').force = true;
+  if( config.force ) {
+    config.ringBuffer.force = true;
   }
 
   ringBuffer.init(config);
@@ -20,7 +20,7 @@ function init(c) {
 
 function load(date, callback) {
   ringBuffer.exists(date, function(dateIsWritten, index) {
-    if( dateIsWritten && !config.get('ringBuffer').force ) {
+    if( dateIsWritten && !config.ringBuffer.force ) {
       console.log(dateUtil.nice(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
       return callback();
     }
@@ -36,7 +36,7 @@ function load(date, callback) {
             date : date,
             data : resp.data,
             aggregate : resp.aggregate,
-            force : config.get('ringBuffer').force
+            force : config.ringBuffer.force
           },
           function(err,data) {
             callback();
@@ -46,9 +46,9 @@ function load(date, callback) {
 }
 
 function run() {
-  console.log('Importing last '+config.get('ringBuffer').buffer+' days of CIMIS data from '+config.get('cimis').base);
+  console.log('Importing last '+config.ringBuffer.buffer+' days of CIMIS data from '+config.cimis.base);
 
-  for( var i = 0; i < config.get('ringBuffer').buffer; i++ ) {
+  for( var i = 0; i < config.ringBuffer.buffer; i++ ) {
     days.push(new Date(new Date().getTime()-(86400000*(i+1))));
   }
 
