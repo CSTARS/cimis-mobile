@@ -7,6 +7,7 @@
       }
   
       paper-material {
+        display: block;
         margin: 15px;
         padding-right: 15px;
       }
@@ -118,10 +119,11 @@
       this.charts = null;
       this.datatables = [];
       this.resize();
-      console.log(1);
+
       this.toggleState('loading');
 
-      window.addEventListener('resize', () =>{
+      window.addEventListener('resize', () => {
+        if( !this.active ) return;
         this.resize();
         this.redraw();
       });
@@ -262,12 +264,14 @@
           var decor = document.createElement('paper-material');
           var root = document.createElement('div');
           decor.appendChild(root);
-          Polymer.dom(this.$.charts).appendChild(decor);
+          this.$.charts.appendChild(decor);
  
           //this.charts.push(new google.charts.Line(root));
           this.charts.push(new google.visualization.LineChart(root));
         }
       }
+
+      this.resize();
 
       for( var i = 0; i < this.datatables.length; i++ ) {
         this.charts[i].draw(this.datatables[i], this.options[i]);
@@ -276,6 +280,9 @@
 
     _onActive() {
       if( !this.active ) return;
+
+      this.resize();
+      this.redraw();
 
       var parts = window.location.hash.replace(/#/,'').split('/');
       if( parts.length >= 3 ) {
@@ -291,6 +298,8 @@
 
     redraw() {
       if( !this.charts ) return;
+
+      this.resize();
 
       for( var i = 0; i < this.datatables.length; i++ ) {
         this.charts[i].draw(this.datatables[i], this.options[i]);

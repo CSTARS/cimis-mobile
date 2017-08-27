@@ -18,9 +18,10 @@ class DauStore extends BaseStore {
     }
   }
 
-  setGeometryLoading() {
+  setGeometryLoading(request) {
     this._setGeometryState({
-      state : this.STATE.LOADING
+      state : this.STATE.LOADING,
+      request
     });
   }
 
@@ -42,10 +43,10 @@ class DauStore extends BaseStore {
     this.emit(this.events.ETO_DAU_GEOMETRY_UPDATE, this.data.geometry);
   }
 
-  setDauLoading(id) {
+  setDauLoading(id, request) {
     this._setDauState({
       state : this.STATE.LOADING,
-      id
+      id, request
     });
   }
 
@@ -66,7 +67,7 @@ class DauStore extends BaseStore {
   _setDauState(state) {
     this.data.byId[state.id] = state;
     this.emit(
-      this.events.ETO_DAU_GEOMETRY_UPDATE, 
+      this.events.ETO_DAU_DATA_UPDATE, 
       this.data.byId[state.id]
     );
   }

@@ -48,35 +48,35 @@
 
    </template>
 
-    <script>
+  <script>
     class DwrPageEto extends Mixin(Polymer.Element)
-        .with(EventMixin, ToggleStateMixin, AppStateMixin, AppUtilsMixin, EtoZonesMixin, ZoneUtilsMixin) {
+      .with(EventMixin, ToggleStateMixin, AppStateMixin, AppUtilsMixin, EtoZonesMixin, ZoneUtilsMixin) {
 
-        static get is() { return 'dwr-page-eto'; }
+      static get is() { return 'dwr-page-eto'; }
 
-        static get properties() {
-            return {
-                selected : {
-                type : Object
-                },
-                geometry : {
-                type : Object,
-                value : function() {
-                    return {state: 'loading'}
-                }
-                },
-                currentZoneData : {
-                type : Object,
-                value : function() {
-                    return {
-                    state : 'loading'
-                    }
-                }
-                }
+      static get properties() {
+        return {
+          selected : {
+            type : Object
+          },
+          geometry : {
+            type : Object,
+            value : function() {
+                return {state: 'loading'}
             }
+          },
+          currentZoneData : {
+            type : Object,
+            value : function() {
+              return {
+                state : 'loading'
+              }
+            }
+          }
         }
+      }
 
-    ready() {
+      ready() {
         super.ready();
         
         this.now = new Date();
@@ -112,47 +112,51 @@
         this.map.data.addListener('click', this._onRegionClick.bind(this));
 
         window.addEventListener('resize', this.redraw.bind(this));
-    }
+      }
 
-    _onActive() {
+      _onActive() {
         if( !this.active ) return;
 
         var parts = window.location.hash.replace(/#/,'').split('/');
         if( parts.length >= 3 ) {
             this._selectZone(parts[2]);
         }
-    }
+      }
 
-    _onEtoZonesGeometryUpdate(e) {
+      _onEtoZonesGeometryUpdate(e) {
         if( e.state !== 'loaded' ) return;
 
         this.geometry = e;
-        this.map.data.addGeoJson(this.geometry.data);
+        this.map.data.addGeoJson(this.geometry.payload);
         this.redraw();
         this._renderData();
-    }
+      }
 
-    _onRegionClick(e) {
+      _onRegionClick(e) {
         if( !e.feature ) {
             return;
         }
         window.location.hash = '#data/etoZones/'+this.getRegionNumber(e.feature);
         this._onActive();
-    }
+      }
 
-    _onAppStateUpdate(e) {
+      _onAppStateUpdate(e) {
         if( this.selected === e.selectedEtoZoneLocation ) return;
         this.selected = e.selectedEtoZoneLocation;
-        this._renderData();
-    }
 
-    _selectZone(id) {
+        if( !this.active ) return;
+        
+        this._getEtoZoneData(this.selected)
+            .then(e => this._onEtoZonesDataUpdate(e));
+      }
+
+      _selectZone(id) {
         this._setAppState({
             selectedEtoZoneLocation : id
         });
-    }
+      }
 
-    _onEtoZonesDataUpdate(e) {
+      _onEtoZonesDataUpdate(e) {
         this.currentZoneData = e;
 
         if( this.geometry.state !== 'loaded' ) {
@@ -160,13 +164,13 @@
         }
 
         this._renderData();
-    }
+      }
 
-    _renderData() {
+      _renderData() {
         this.debounce('_renderData', () => this._renderDataAsync(), 50);
-    }
+      }
 
-    _renderDataAsync() {
+      _renderDataAsync() {
         this.toggleState(this.currentZoneData.state);
 
         if( this.currentZoneData.state !== 'loaded' ) {
@@ -178,7 +182,7 @@
             if( label+'' === this.selected ){
                 this.feature = feature;
                 return {
-                    fillColor: this.getZone(label).properties.color,
+                    fillColor: this._getEtoZoneGeometry(label).properties.color,
                     strokeColor: '#fff',
                     fillOpacity : .6,
                     strokeWeight: 1
@@ -193,15 +197,15 @@
             }
         });
 
-        var data = this.getZone(this.selected);
+        var data = this._getEtoZoneGeometry(this.selected);
         this.$.average.innerHTML = data.properties.avg.toFixed(1);
         this.$.delta.innerHTML = data.properties.delta.toFixed(1);
 
-        this.sortedDates = this._sortDates(this.currentZoneData.data.data);
+        this.sortedDates = this._sortDates(this.currentZoneData.payload.data);
 
         var p = [data.properties.p0, data.properties.p1, data.properties.p2]; 
         var h = [0, data.properties.h1, data.properties.h2];
-        var signature = CIMIS.fft.ifft(p, h, 52);
+        var signature = this.AppUtils.fft.ifft(p, h, 52);
 
         var cumSignature = [], prev = 0;
         for( var i = 0; i < signature.length; i++ ) {
@@ -221,7 +225,7 @@
         var end = this.sortedDates.length-1;
 
         this.sortedDates.forEach((date, index) => {
-            d = this.currentZoneData.data.data[date];
+            var d = this.currentZoneData.payload.data[date];
             arr = [date];
 
             arr.push(parseFloat(d) || 0);
@@ -351,39 +355,39 @@
         }
 
         this.redraw();
-    }
+      }
 
-    redraw() {
+      redraw() {
         this.debounce('redraw', () => {
-        google.maps.event.trigger(this.map, "resize");
-        this.fitToFeature(this.selected);
+          google.maps.event.trigger(this.map, "resize");
+          this.fitToFeature(this.selected);
 
-        if( !this.chart ) return;
-        this.chart.draw(this.dt, this.options);
-        this.chart2.draw(this.dt2, this.options2);
-        this.chart3.draw(this.dt3, this.options3);
+          if( !this.chart ) return;
+          this.chart.draw(this.dt, this.options);
+          this.chart2.draw(this.dt2, this.options2);
+          this.chart3.draw(this.dt3, this.options3);
         }, 50);
-    }
+      }
 
-    getDayOfYear(offset, now) {
+      getDayOfYear(offset, now) {
         var start = new Date(now.getFullYear(), 0, 0);
         var diff = now - start;
         var oneDay = 1000 * 60 * 60 * 24;
         var day = Math.ceil(diff / oneDay) - (offset || 0);
         if( day < 1 ) 356 + day;
         return day;
-    }
+      }
 
-    getWeekOfYear(offset, date) {
+      getWeekOfYear(offset, date) {
         if( !date ) date = new Date();
         return Math.floor(this.getDayOfYear(7*offset, date) / 7);
-    }
+      }
 
-    getRegionNumber(feature) {
+      getRegionNumber(feature) {
         return feature.getProperty('zone');
-    }
+      }
 
-    getDateOfWeek(w) {
+      getDateOfWeek(w) {
         var y = this.now.getFullYear();
         
         if( this.nowWeek >= 40 ) {
@@ -396,29 +400,29 @@
         d = new Date(y, 0, d);
 
         return this.months[d.getMonth()]+' '+d.getDate()+', '+y;
-    }
+      }
 
-    getChartWeekLabel(w) {
+      getChartWeekLabel(w) {
         w = this.weekOffsetHelper(w);
         return {
             week : w,
             label : this.getDateOfWeek(w)
         }
-    }
+      }
 
-    weekOffsetHelper(w) {
+      weekOffsetHelper(w) {
         w = w-12;
         if( w < 0 ) w = w+52; 
         return w;
-    }
+      }
 
-    weekOffsetHelperCurrent(w) {
+      weekOffsetHelperCurrent(w) {
         w = w+12;
         if( w > 52 ) w = w-52; 
         return w;
-    }
+      }
     }
     window.customElements.define(DwrPageEto.is, DwrPageEto);
 
-    </script>
+  </script>
 </dom-module>

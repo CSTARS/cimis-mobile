@@ -14,28 +14,22 @@ class DauService extends BaseService {
   }
 
   async getGeometry(model) {
-    var cached = this.store.data.geometry;
-    if( this.isLoaded(cached) ) return cached;
-
-    this.store.setGeometryLoading();
-
     return this.call({
+      checkCached : () => this.store.data.geometry,
       request : this.request.get(`${this.getHost()}/dauco.json`),
-      onError : this.store.setGeometryError,
+      onLoading : request => this.store.setGeometryLoading(request),
+      onError : e => this.store.setGeometryError(a),
       onSuccess : body => this.store.setGeometryLoaded(body)
     });
   }
 
-  async getData(etoZoneId) {
-    var cached = this.store.data.byId[etoZoneId];
-    if( this.isLoaded(cached) ) return cached;
-
-    this.store.setZoneLoading();
-
+  async getData(dauZoneId) {
     return this.call({
+      checkCached : () => this.store.data.byId[dauZoneId],
       request : this.request.get(`${this.getHost()}/cimis/region/DAU${dauZoneId}`),
-      onError : error => this.store.setDauError(etoZoneId, error),
-      onSuccess : body => this.store.setDauLoaded(etoZoneId, body)
+      onLoading : request => this.store.setDauLoading(request),
+      onError : error => this.store.setDauError(dauZoneId, error),
+      onSuccess : body => this.store.setDauLoaded(dauZoneId, body)
     });
   }
 

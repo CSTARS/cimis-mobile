@@ -17,7 +17,7 @@ class DauModel extends BaseModel {
   }
 
   getData(id) {
-    return this.service.getDauData(id);
+    return this.service.getData(id);
   }
 
 }

@@ -14,14 +14,11 @@ class EtoZonesService extends BaseService {
   }
 
   async getGeometry(model) {
-    var cached = this.store.data.geometry;
-    if( this.isLoaded(cached) ) return cached;
-
-    this.store.setGeometryLoading();
-
     return this.call({
+      checkCached : () => this.store.data.geometry,
       request : this.request.get(`${this.getHost()}/eto_zones.json`),
-      onError : this.store.setGeometryError,
+      onLoading : request => this.store.setGeometryLoading(request),
+      onError : e => this.store.setGeometryError(e),
       onSuccess : (body) => {
         model.mergeZoneMap(body);
         this.store.setGeometryLoaded(body);
@@ -30,13 +27,10 @@ class EtoZonesService extends BaseService {
   }
 
   async getData(etoZoneId) {
-    var cached = this.store.data.byId[etoZoneId];
-    if( this.isLoaded(cached) ) return cached;
-
-    this.store.setZoneLoading();
-
     return this.call({
+      checkCached : () => this.store.data.byId[etoZoneId],
       request : this.request.get(`${this.getHost()}/cimis/region/Z${etoZoneId}`),
+      onLoading : request => this.store.setZoneLoading(etoZoneId, request),
       onError : error => this.store.setZoneError(etoZoneId, error),
       onSuccess : body => this.store.setZoneLoaded(etoZoneId, body)
     });

@@ -8,18 +8,30 @@
       :host {
         display: block;
       }
+
+      .center {
+        display: flex;
+        justify-content: center;
+      }
+
+      iron-pages {
+        width: 100%;
+        max-width: 1000px;
+      }
     </style>
 
-    <iron-pages 
-      selected="[[selected]]" 
-      attr-for-selected="page"
-      selected-attribute="active">
+    <div class="center">
+      <iron-pages 
+        selected="[[selected]]" 
+        attr-for-selected="page"
+        selected-attribute="active">
 
-      <dwr-page-cimis-grid page="cimisGrid"></dwr-page-cimis-grid>
-      <dwr-page-dau page="dauZones"></dwr-page-dau>
-      <dwr-page-eto page="etoZones"></dwr-page-eto>
+        <dwr-page-cimis-grid page="cimisGrid"></dwr-page-cimis-grid>
+        <dwr-page-dau page="dauZones"></dwr-page-dau>
+        <dwr-page-eto page="etoZones"></dwr-page-eto>
 
-    </iron-pages>
+      </iron-pages>
+    </div>
     
   </template>
   <script>

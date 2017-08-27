@@ -1,11 +1,13 @@
 'use strict';
 
 var IocRegistration = require('cork-app-utils').IocRegistration;
+var fft = require('./fft');
 
 class AppUtils extends IocRegistration {
 
   constructor() {
     super();
+    this.fft = fft;
     this.registerIOC('AppUtils');    
   }
 

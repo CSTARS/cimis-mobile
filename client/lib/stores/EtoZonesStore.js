@@ -19,9 +19,10 @@ class EtoZonesStore extends BaseStore {
     }
   }
 
-  setGeometryLoading() {
+  setGeometryLoading(request) {
     this._setGeometryState({
-      state : this.STATE.LOADING
+      state : this.STATE.LOADING,
+      request
     });
   }
 
@@ -47,10 +48,10 @@ class EtoZonesStore extends BaseStore {
     this.emit(this.events.ETO_ZONES_GEOMETRY_UPDATE, this.data.geometry);
   }
 
-  setZoneLoading(id) {
+  setZoneLoading(id, request) {
     this._setZoneState({
       state : this.STATE.LOADING,
-      id
+      id, request
     });
   }
 
@@ -71,7 +72,7 @@ class EtoZonesStore extends BaseStore {
   _setZoneState(state) {
     this.data.byId[state.id] = state;
     this.emit(
-      this.events.ETO_ZONES_GEOMETRY_UPDATE, 
+      this.events.ETO_ZONES_DATA_UPDATE, 
       this.data.byId[state.id]
     );
   }

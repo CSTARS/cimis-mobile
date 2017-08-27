@@ -87,7 +87,7 @@
         if( e.state !== 'loaded' ) return;
 
         this.geometry = e;
-        this.map.data.addGeoJson(this.geometry.data);
+        this.map.data.addGeoJson(this.geometry.payload);
         this.redrawMap();
         this._renderData();
       }
@@ -106,11 +106,16 @@
         });
       }
 
-      _onDauSelected(e) {
+      _onAppStateUpdate(e) {
+        if( this.selected === e.selectedDauLocation ) return;
         this.selected = e.selectedDauLocation;
+
+        if( !this.active ) return;
+        this._getDauData(this.selected)
+            .then(e => this._onDauDataUpdate(e));
       }
 
-      _onDataUpdate(e) {
+      _onDauDataUpdate(e) {
         this.currentZoneData = e;
 
         if( this.geometry.state !== 'loaded' ) {
@@ -157,7 +162,7 @@
       }
 
       onZoneDataLoad() {
-        this.sortedDates = this._sortDates(this.currentZoneData.data.data);
+        this.sortedDates = this._sortDates(this.currentZoneData.payload.data);
 
         // eto chart
         this.dt = new google.visualization.DataTable();
@@ -165,8 +170,8 @@
         this.dt.addColumn('number', 'Avg ETo');
 
         this.sortedDates.forEach(function(date, index){
-          d = this.currentZoneData.data.data[date];
-          arr = [date];
+          var d = this.currentZoneData.payload.data[date];
+          var arr = [date];
 
           arr.push(parseFloat(d) || 0);
 

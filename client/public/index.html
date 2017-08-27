@@ -26,19 +26,25 @@
         <meta name="description" content="State of California, CIMIS, California Irrigation Management Information System">
         <meta name="keywords" content="California, state, government, CIMIS, DWR">
 
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyB4rlURkcCLTg4nR8vBhMSLIPHyYKpahck"></script>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-        <script type="text/javascript">
-            google.load('visualization', '1', {packages: ['corechart','line']});
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4rlURkcCLTg4nR8vBhMSLIPHyYKpahck"></script>
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
+        <script>
+          google.charts.load('current', {'packages':['corechart','line']});
+          google.charts.setOnLoadCallback(function() {
+            var link = document.createElement('link');
+            link.rel = 'import';
+            link.href = 'elements.html';
+            document.body.appendChild(link);
+          });
         </script>
 
         <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
-
-        <link rel="import" href="elements.html">
+        <!-- <link rel="import" href="elements.html"> -->
     </head>
 
     <body>
         <dwr-app></dwr-app>
+        <div id="loading-init">Loading...</div>
 
         <script>
           if( window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {

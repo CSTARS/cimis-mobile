@@ -33,6 +33,13 @@
         <paper-toolbar slot="header">
           <div slot="top" style="flex:1">
           <div style="display:flex; align-items: center">
+
+            <paper-icon-button 
+              id="backToMapBtn" 
+              icon="arrow-back" 
+              on-click="_backToMap"
+            ></paper-icon-button>
+
             <h2>Spatial CIMIS</h2>
 
 
@@ -43,32 +50,30 @@
                 icon="maps:my-location" 
                 on-click="_selectLocation">
               </paper-icon-button>
-              
-              <paper-icon-button 
-                id="backToMapBtn" 
-                icon="arrow-back" 
-                on-click="_backToMap"
-              ></paper-icon-button>
 
               <paper-menu-button horizontal-align="right">
                 <paper-icon-button icon="more-vert" slot="dropdown-trigger" style="margin:0"></paper-icon-button>
-                <paper-listbox slot="dropdown-content" id="mapLayerMenu" attr-for-selected="page">
+                <paper-listbox 
+                  slot="dropdown-content" 
+                  id="mapLayerMenu" 
+                  attr-for-selected="page" 
+                  selected="{{selectedMenuItem}}">
 
-                  <paper-item page="cimisGrid" on-click="_setLayerFromMenu">
+                  <paper-item page="cimisGrid">
                     Explore Spatial CIMIS Grid
                   </paper-item>
 
-                  <paper-item page="etoZones" on-click="_setLayerFromMenu" disabled>
+                  <paper-item page="etoZones" disabled>
                     <paper-spinner id="etoSpinner" active ></paper-spinner>
                     Explore ETo Zones
                   </paper-item>
 
-                  <paper-item page="dauZones" on-click="_setLayerFromMenu" disabled>
+                  <paper-item page="dauZones" disabled>
                     <paper-spinner id="dauSpinner" active></paper-spinner>
                     Explore DAU Zones
                   </paper-item>
 
-                  <paper-item page="about" on-click="_setUrlStateFromMenu">About</paper-item>
+                  <paper-item page="about">About</paper-item>
                 </paper-listbox>
               </paper-menu-button>
             </div>
@@ -106,6 +111,11 @@
                 section : 'map'
               }
             }
+          },
+          selectedMenuItem : {
+            type : String,
+            value : '',
+            observer : '_onMenuSelect'
           }
         }
       }
@@ -114,6 +124,9 @@
         super.ready();
         window.addEventListener('hashchange', this._setAppStateFromUrl.bind(this));
         this._setAppStateFromUrl();
+
+        var loadingMsg = document.querySelector('#loading-init');
+        if( loadingMsg ) document.body.removeChild(loadingMsg);
       }
   
       connectedCallback() {
@@ -121,6 +134,21 @@
   
         if( window.standaloneMode ) {
           this.$.install.style.display = 'none';
+        }
+      }
+
+      _onMenuSelect() {
+        if( !this.selectedMenuItem ) return;
+
+        switch(this.selectedMenuItem) {
+          case 'cimisGrid':
+            window.location.hash = 'map';
+            break;
+          case 'about':
+            window.location.hash = 'about';
+            break;
+          default:
+            this._setLayerFromMenu()
         }
       }
   
@@ -154,7 +182,7 @@
             this.$.dauSpinner.style.display = 'none';
             break;
           case 'error':
-          this.shadowRoot.querySelector('[page="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
+            this.shadowRoot.querySelector('[page="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
         }
       }
   
@@ -166,7 +194,7 @@
             this.$.etoSpinner.style.display = 'none';
             break;
           case 'error':
-          this.shadowRoot.querySelector('[page="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
+            this.shadowRoot.querySelector('[page="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
         }
       }
   
@@ -206,12 +234,12 @@
       }
   
       _setLayerFromMenu(e) {
-        var newState = this.$.mapLayerMenu.selected;
+        var newState = this.selectedMenuItem;
         if( !newState || newState === this.appState.mapState ) {
           return;
         }
   
-        this._setAppState(newState);
+        this._setAppState({mapState: newState});
   
         if( this.appState.section !== 'map' ) {
           window.location.hash = 'map';

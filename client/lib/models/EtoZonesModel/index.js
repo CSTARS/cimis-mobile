@@ -27,7 +27,7 @@ class EtoZonesModel extends BaseModel {
   }
 
   getZoneData(id) {
-    return this.service.getZoneData(id);
+    return this.service.getData(id);
   }
 
 

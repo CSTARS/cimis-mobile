@@ -94,14 +94,14 @@
       _onDauGeometryUpdate(e) {
         this.dauGeometry = e;
         if( e.state === 'loaded' && this.mapState === 'dauZones' ) {
-          this._onMapStateUpdate();
+          this._render();
         }
       }
   
       _onEtoZonesGeometryUpdate(e) {
         this.etoGeometry = e;
         if( this.mapState === 'etoZones' ) {
-          this._onMapStateUpdate();
+          this._render();
         }
       }
   
@@ -123,13 +123,13 @@
         }
         
         if( this.mapState === e.mapState ) return;
-  
+        
         this.mapState = e.mapState;
         this._render();
       }
   
       _render() {
-        if( !this.map ) return;
+        if( !this.map || !this.active ) return;
   
         // we only need to render a map state once
         if( this.renderedMapState === this.mapState ) return;
@@ -156,8 +156,8 @@
   
         if( this.mapState === 'etoZones' || this.mapState === 'dauZones' ) {
   
-          if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.etoGeometry.data);
-          else this.map.data.addGeoJson(this.dauGeometry.data);
+          if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.etoGeometry.payload);
+          else this.map.data.addGeoJson(this.dauGeometry.payload);
   
           this.map.data.setStyle((feature) => {
             if( this.mapState === 'dauZones' ) {
@@ -172,7 +172,7 @@
             var label = this._getRegionNumber(feature);
   
             return {
-              fillColor: this.getZone(label).properties.color,
+              fillColor: this._getEtoZoneGeometry(label).properties.color,
               strokeColor: '#ffffff',
               fillOpacity : .6,
               strokeWeight: 1
