@@ -26,7 +26,7 @@ class EtoZonesStore extends BaseStore {
   }
 
   setGeometryLoaded(payload) {
-    payload.data.features.forEach((zone) => {
+    payload.features.forEach((zone) => {
       this.data.zoneGeometryById[zone.properties.zone] = zone;
     });
 
@@ -44,7 +44,7 @@ class EtoZonesStore extends BaseStore {
 
   _setGeometryState(state) {
     this.data.geometry = state;
-    this.emit(this.events.ETO_ZONES_GEOMETRY_UPDATE, this.data);
+    this.emit(this.events.ETO_ZONES_GEOMETRY_UPDATE, this.data.geometry);
   }
 
   setZoneLoading(id) {

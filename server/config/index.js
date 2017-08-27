@@ -34,7 +34,7 @@ module.exports = {
   },
 
   cimis : {
-    rootUrl : 'http://cimis.casil.ucdavis.edu/cimis/',
+    rootUrl : 'http://cimis.casil.ucdavis.edu/cimis',
     params : ['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2']
   }
 }

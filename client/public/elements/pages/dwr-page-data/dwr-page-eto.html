@@ -44,11 +44,13 @@
 
       <div state="loading">Loading...</div>
       <div state="error">Error Loading ETo Zone :(</div>
+                
+
+   </template>
 
     <script>
-
     class DwrPageEto extends Mixin(Polymer.Element)
-        .with(EventMixin, ToggleStateMixin, AppStateMixin, EtoZonesMixin, ZoneUtilsMixin) {
+        .with(EventMixin, ToggleStateMixin, AppStateMixin, AppUtilsMixin, EtoZonesMixin, ZoneUtilsMixin) {
 
         static get is() { return 'dwr-page-eto'; }
 
@@ -79,7 +81,7 @@
         
         this.now = new Date();
         this.nowWeek = this.getWeekOfYear(0, this.now);
-
+    
         this._getEtoZonesGeometry();
         this.toggleState('loading');
 
@@ -117,7 +119,7 @@
 
         var parts = window.location.hash.replace(/#/,'').split('/');
         if( parts.length >= 3 ) {
-        this._selectZone(parts[2]);
+            this._selectZone(parts[2]);
         }
     }
 
@@ -146,7 +148,7 @@
 
     _selectZone(id) {
         this._setAppState({
-        selectedEtoZoneLocation : id
+            selectedEtoZoneLocation : id
         });
     }
 
@@ -195,7 +197,7 @@
         this.$.average.innerHTML = data.properties.avg.toFixed(1);
         this.$.delta.innerHTML = data.properties.delta.toFixed(1);
 
-        this.sortedDates = CIMIS.utils.sortDates(this.currentZoneData.data.data);
+        this.sortedDates = this._sortDates(this.currentZoneData.data.data);
 
         var p = [data.properties.p0, data.properties.p1, data.properties.p2]; 
         var h = [0, data.properties.h1, data.properties.h2];
@@ -419,8 +421,4 @@
     window.customElements.define(DwrPageEto.is, DwrPageEto);
 
     </script>
-            
-            
-
-  </template>
 </dom-module>

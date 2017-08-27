@@ -2,7 +2,8 @@
 
 var ringBuffer = require('../lib/ring-buffer');
 var config = require('../config');
-var grid = require('cimis-grid');
+var CimisGridUtils = require('cimis-grid');
+var grid = new CimisGridUtils();
 var config;
 
 module.exports = function() {

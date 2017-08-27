@@ -16,6 +16,7 @@
       }
       iron-pages {
         margin: 15px;
+        max-width: 900px;
       }
   
       h1, h2, h3, h4 {
@@ -40,6 +41,11 @@
         padding: 10px;
         border-bottom: 1px solid #eee;
       }
+
+      .center {
+        display: flex;
+        justify-content: center;
+      }
     </style>
 
     <paper-tabs selected="{{selectedTab}}">
@@ -51,6 +57,7 @@
       <paper-tab>Grid</paper-tab>
     </paper-tabs>
 
+    <div class="center">
     <iron-pages selected="{{selectedTab}}">
       <div>
         <h1 id="about-header">About</h1>
@@ -191,6 +198,7 @@
         </paper-material>
       </div>
     </iron-pages>
+    </div>
 
   </template>
 

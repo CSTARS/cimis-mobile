@@ -36,7 +36,7 @@
 
 <script>
   class DwrPageCimisGrid extends Mixin(Polymer.Element)
-      .with(EventMixin, ToggleStateMixin, AppStateMixin, CimisGridMixin) {
+      .with(EventMixin, ToggleStateMixin, AppStateMixin, AppUtilsMixin, CimisGridMixin) {
 
     static get is() { return 'dwr-page-cimis-grid'; }
 
@@ -118,7 +118,7 @@
       this.charts = null;
       this.datatables = [];
       this.resize();
-      // this.toggleState('loading');
+      this.toggleState('loading');
 
       window.addEventListener('resize', () =>{
         this.resize();
@@ -143,12 +143,12 @@
       var d, arr;
 
       // eto chart
-      dt = new google.visualization.DataTable();
+      var dt = new google.visualization.DataTable();
       dt.addColumn('string', 'Date');
       dt.addColumn('number', 'ETo');
 
       this.sortedDates.forEach(function(date){
-        d = this.currentGridData.data.data[date];
+        d = this.currentGridData.payload.data[date];
         arr = [date];
 
         arr.push(d.ETo || 0);
@@ -166,7 +166,7 @@
       dt.addColumn('number', 'Min Temperature');
 
       this.sortedDates.forEach(function(date){
-        d = this.currentGridData.data.data[date];
+        d = this.currentGridData.payload.data[date];
         arr = [date];
 
         arr.push(d.Tdew || 0);
@@ -185,7 +185,7 @@
       dt.addColumn('number', 'Shortwave Radiation');
 
       this.sortedDates.forEach(function(date){
-        d = this.currentGridData.data.data[date];
+        d = this.currentGridData.payload.data[date];
         arr = [date];
 
         arr.push(d.Rnl || 0);
@@ -203,7 +203,7 @@
 
 
       this.sortedDates.forEach(function(date){
-        d = this.currentGridData.data.data[date];
+        d = this.currentGridData.payload.data[date];
         arr = [date];
 
         arr.push(d.U2 || 0);
@@ -232,18 +232,18 @@
     }
 
     _renderDataAsync() {
-      // this.toggleState(this.currentGridData.state);
-
       if( !this.currentGridData ) return;
+
+      this.toggleState(this.currentGridData.state);
       if( this.currentGridData.state !== 'loaded' ) {
           return;
       }
 
-      var data = this.currentGridData.data;
+      var payload = this.currentGridData.payload;
 
-      this.sortedDates = CIMIS.utils.sortDates(data.data);
-      this.$.gridLabel.innerHTML = 'Cell: '+data.location.row+', '+data.location.col +
-        ' <a style="float:right" href="/cimis/'+data.location.row+'/'+data.location.col+
+      this.sortedDates = this._sortDates(payload.data);
+      this.$.gridLabel.innerHTML = 'Cell: '+payload.location.row+', '+payload.location.col +
+        ' <a style="float:right" href="/cimis/'+payload.location.row+'/'+payload.location.col+
         '" target="_blank">API</a>';
 
 

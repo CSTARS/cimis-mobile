@@ -6,13 +6,21 @@
             super();
             this._iocInject('CimisGridModel');
           }
+
+          _llToGrid(lng, lat) {
+            return this.CimisGridModel.llToGrid(lng, lat);
+          }
+
+          _gridToBounds(row, col) {
+            return this.CimisGridModel.gridToBounds(row, col);
+          }
           
           _getCimisGridDates() {
             return this.CimisGridModel.getDates();
           }
 
-          _getCimisGridData() {
-            return this.AppStateModel.getData(id);
+          _getCimisGridData(id) {
+            return this.CimisGridModel.getData(id);
           }
       }
     

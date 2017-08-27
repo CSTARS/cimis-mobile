@@ -39,7 +39,7 @@ class DauStore extends BaseStore {
 
   _setGeometryState(state) {
     this.data.geometry = state;
-    this.emit(this.events.ETO_DAU_GEOMETRY_UPDATE, this.data);
+    this.emit(this.events.ETO_DAU_GEOMETRY_UPDATE, this.data.geometry);
   }
 
   setDauLoading(id) {

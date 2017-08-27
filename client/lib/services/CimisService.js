@@ -36,7 +36,7 @@ class CimisService extends BaseService {
       this.store.setDataLoading(cimisGridId);
       
       return this.call({
-        request : this.request.get(`${getHost()}/cimis/${urlId}`),
+        request : this.request.get(`${this.getHost()}/cimis/${urlId}`),
         onError : (error) => this.store.setDatesError(cimisGridId, error),
         onSuccess : (body) => this.store.setDataLoaded(cimisGridId, body)
       });

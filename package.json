@@ -14,12 +14,13 @@
   "dependencies": {
     "@google/maps": "^0.4.3",
     "async": "^2.5.0",
-    "cimis-grid": "^1.0.0",
-    "cork-app-utils": "github:UCDavisLibrary/cork-app-utils",
+    "cimis-grid": "^1.0.1",
+    "cork-app-utils": "^1.0.1",
     "cors": "^2.8.4",
     "express": "^4.15.4",
     "proj4": "^2.3.10",
     "redis": "^0.12.1",
+    "request": "^2.81.0",
     "superagent": "^3.5.2"
   },
   "devDependencies": {

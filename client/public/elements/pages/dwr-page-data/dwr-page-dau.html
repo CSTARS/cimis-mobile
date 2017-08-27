@@ -36,7 +36,7 @@
   <script>
 
     class DwrPageDau extends Mixin(Polymer.Element)
-      .with(EventMixin, ToggleStateMixin, AppStateMixin, DauMixin, ZoneUtilsMixin) {
+      .with(EventMixin, ToggleStateMixin, AppStateMixin, AppUtilsMixin, DauMixin, ZoneUtilsMixin) {
 
       static get is() { return 'dwr-page-dau'; }
 
@@ -157,7 +157,7 @@
       }
 
       onZoneDataLoad() {
-        this.sortedDates = this.sortDates(this.currentZoneData.data.data);
+        this.sortedDates = this._sortDates(this.currentZoneData.data.data);
 
         // eto chart
         this.dt = new google.visualization.DataTable();
@@ -216,5 +216,6 @@
         return feature.getProperty('dau_code');
       } 
     }
+    window.customElements.define(DwrPageDau.is, DwrPageDau);
   </script>
 </dom-module>

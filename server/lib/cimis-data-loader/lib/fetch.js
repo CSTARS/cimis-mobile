@@ -22,7 +22,7 @@ function log(txt) {
 }
 
 function getDate(date, callback) {
-  console.log('loading data for '+date.toDateString()+' from '+config.cimis.base+' ...');
+  console.log('loading data for '+date.toDateString()+' from '+config.cimis.rootUrl+' ...');
   var pathDate = dateUtil.nice(date).join('/');
 
   var data = {};
@@ -31,7 +31,7 @@ function getDate(date, callback) {
   async.eachSeries(
     config.cimis.params,
     function(param, next){
-      var url = config.cimis.base+'/'+pathDate+'/'+param+'.asc.gz';
+      var url = config.cimis.rootUrl+'/'+pathDate+'/'+param+'.asc.gz';
       var readable = request(url);
 
       parse(param, readable, function(err, layer){
@@ -51,6 +51,10 @@ function getDate(date, callback) {
       if( err ) {
         return callback(err);
       }
+      if( Object.keys(data).length === 0 ) {
+        return callback(new Error('No Data'));
+      }
+
       callback(null, {
         data: munge(data),
         aggregate : aggregate
