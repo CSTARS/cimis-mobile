@@ -310,10 +310,11 @@
       // get the latest date
       _onCimisDatesUpdate(e) {
         if( e.state !== 'loaded' ) return;
+
         this.dates = e;
   
         // TODO: add mixin for this
-        dates = this._sortDates(this.dates.data);
+        var dates = this._sortDates(this.dates.payload);
         this.yesterday = dates[dates.length-1];
       }
   

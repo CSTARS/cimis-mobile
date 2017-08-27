@@ -18,9 +18,10 @@ class AppStateStore extends BaseStore {
     }
   }
 
-  setDatesLoading() {
+  setDatesLoading(request) {
     this._setDatesState({
-      state : this.STATE.LOADING
+      state : this.STATE.LOADING,
+      request
     });
   }
 
@@ -40,13 +41,13 @@ class AppStateStore extends BaseStore {
 
   _setDatesState(state) {
     this.data.dates = state;
-    this.emit(this.events.CIMIS_DATES_UPDATE, this.data);
+    this.emit(this.events.CIMIS_DATES_UPDATE, this.data.dates);
   }
 
-  setDataLoading(id) {
+  setDataLoading(id, request) {
     this._setDataState({
       state : this.STATE.LOADING,
-      id
+      id, request
     });
   }
 

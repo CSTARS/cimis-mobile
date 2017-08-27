@@ -16,27 +16,22 @@ class CimisService extends BaseService {
     }
 
     async getDates() {
-      var cached = this.store.data.dates;
-      if( this.isLoaded(cached) ) return cached;
-
-      this.store.setDatesLoading();
-
       return this.call({
+        checkCached : () => this.store.data.dates,
         request : this.request.get(`${this.getHost()}/cimis/dates`),
-        onError : this.store.setDatesError,
-        onSuccess : this.store.setDatesLoaded
+        onLoading : request => this.store.setDatesLoading(request),
+        onError : e => this.store.setDatesError(e),
+        onSuccess : payload => this.store.setDatesLoaded(payload)
       });
     }
 
     async getData(cimisGridId) {
-      var cached = this.store.data.byId[cimisGridId];
-      if( this.isLoaded(cached) ) return cached;
-
       var urlId = cimisGridId.replace(/-/, '/');      
-      this.store.setDataLoading(cimisGridId);
-      
+
       return this.call({
+        checkCached : () => this.store.data.byId[cimisGridId],
         request : this.request.get(`${this.getHost()}/cimis/${urlId}`),
+        onLoading : request => this.store.setDataLoading(cimisGridId, request),
         onError : (error) => this.store.setDatesError(cimisGridId, error),
         onSuccess : (body) => this.store.setDataLoaded(cimisGridId, body)
       });

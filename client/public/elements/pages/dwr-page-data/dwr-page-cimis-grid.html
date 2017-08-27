@@ -118,6 +118,7 @@
       this.charts = null;
       this.datatables = [];
       this.resize();
+      console.log(1);
       this.toggleState('loading');
 
       window.addEventListener('resize', () =>{
@@ -217,7 +218,10 @@
     _onAppStateUpdate(e) {
       if( this.selected === e.selectedCimisLocation ) return;
       this.selected = e.selectedCimisLocation;
-      this._renderData();
+
+      if( !this.selected ) return;
+      this._getCimisGridData(this.selected)
+            .then(e => this._onCimisDataUpdate(e));
     }
 
     _onCimisDataUpdate(e) {
