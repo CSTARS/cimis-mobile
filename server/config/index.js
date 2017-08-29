@@ -23,7 +23,7 @@ module.exports = {
   },
   
   redis : {
-    host : runningInDocker ? 'redis' : 'localhost',
+    host : runningInDocker ? (process.env.REDIS_CONTAINER_NAME || 'redis') : 'localhost',
     port : 6379,
     verbose : true,
     disabled : true

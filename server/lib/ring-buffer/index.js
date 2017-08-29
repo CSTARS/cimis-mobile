@@ -1,121 +1,95 @@
 'use strict';
 
-var async = require('async');
-var dateUtil = require('./lib/date');
-var db, config, msPerDay = 86400000;
+var db = require('./redis');
+var config = require('../../config');
+var MS_PER_DAY = 86400000;
 
-function init(c) {
-  config = c;
+class RingBuffer {
+
+  // day should be number 1 - 31;
+  getIndex(date) {
+    return Math.floor(date.getTime() / MS_PER_DAY) % config.ringBuffer.buffer;
+  }
+
+  async write(options) {
+    var index = getIndex(options.date);
+    var keys = Object.keys(options.data);
   
-  if (config.ringBuffer.db === 'redis') {
-    console.log('using redis');
-    db = require('./lib/redis');
-    db.init(config);
-  } else {
-    console.log('using firebase');
-    db = require('./firebase');
-  }
-}
-
-// day should be number 1 - 31;
-function getIndex(date) {
-  return Math.floor(date.getTime() / msPerDay) % config.ringBuffer.buffer;
-}
-
-function write (options, callback) {
-  var index = getIndex(options.date);
-  var keys = Object.keys(options.data);
-
-  if (config.ringBuffer.max_keys) {
-    keys = keys.slice(0, config.ringBuffer.max_keys);
-    console.log('max_keys:', config.ringBuffer.max_keys, keys);
-  }
-
-  exists(options.date, function(dateIsWritten) {
-    console.log('dateIsWritten', dateIsWritten);
-    if( dateIsWritten && !config.ringBuffer.force ) {
-      console.log(dateUtil.nice(options.date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
-      return callback();
+    if( config.ringBuffer.max_keys ) {
+      keys = keys.slice(0, config.ringBuffer.max_keys);
+      console.log('max_keys:', config.ringBuffer.max_keys, keys);
     }
-
+  
+    var {dateIsWritten, index} = await this.exists(options.date);
+    console.log('dateIsWritten', dateIsWritten);
+    
+    if( dateIsWritten && !config.ringBuffer.force ) {
+      console.log(
+        dateUtil.nice(options.date).join('-') + 
+        ' is already in the buffer at index '+index+' and no force flag set.  ignoring.'
+      );
+      return;
+    }
+  
     console.log('Writing '+keys.length+' cells to index '+index+' in ring buffer for '+options.date.toDateString());
     var count = 0;
-
-    async.eachLimit(
-      keys,
-      25,
-      function(id, next) {
-        db.write(id, index, options.data[id], function(err, resp){
-          count++;
-          display(count, keys.length);
-          next();
-        });
-      },
-      function(err) {
-        db.write(config.ringBuffer.date_key, index, dateUtil.nice(options.date).join('-'), function(err, resp){
-          writeAggregates(options, callback);
-        });
-      }
-    );
-  });
-}
-
-function writeAggregates(options, callback) {
-  var index = getIndex(options.date);
-  var keys = Object.keys(options.aggregate);
   
-  if (config.ringBuffer.max_keys) {
-    keys = keys.slice(0, config.ringBuffer.max_keys);
-    console.log('max_keys:', config.ringBuffer.max_keys, keys);
+    for( var i = 0; i < keys.length; i++ ) {
+      await db.write(keys[i], index, options.data[keys[i]]);
+      display(i, keys.length);
+    }
+
+    await db.write(config.ringBuffer.date_key, index, dateUtil.nice(options.date).join('-'));
+    await this.writeAggregates(options);
   }
 
-  console.log('Writing '+keys.length+' aggregates to index '+index+' in ring buffer for '+options.date.toDateString());
-  var count = 0;
+  async exists(date) {
+    var index = getIndex(date);
+    date = niceDate(date).join('-');
+  
+    var val = await db.valueAt(config.ringBuffer.date_key, index);
+    
+    if( val === date ) return {exists: true, index};
+    return {exists: false, index};
+  }
 
-  async.eachLimit(
-    keys,
-    25,
-    function(id, next) {
-      db.write(id, index, options.aggregate[id], function(err, resp){
-        count++;
-        display(count, keys.length);
-        next();
-      });
-    },
-    function(err) {
-      callback();
+  async writeAggregates(options) {
+    var index = getIndex(options.date);
+    var keys = Object.keys(options.aggregate);
+    
+    if (config.ringBuffer.max_keys) {
+      keys = keys.slice(0, config.ringBuffer.max_keys);
+      console.log('max_keys:', config.ringBuffer.max_keys, keys);
     }
-  );
-}
+  
+    console.log('Writing '+keys.length+' aggregates to index '+index+' in ring buffer for '+options.date.toDateString());
+    var count = 0;
 
-function read(row, col, callback){
-  db.read(row, col, callback);
-}
-
-
-function exists(date, callback) {
-  var index = getIndex(date);
-  date = dateUtil.nice(date).join('-');
-
-  db.valueAt(config.ringBuffer.date_key, index, function(val){
-    if( val === date ) {
-      callback(true, index);
-    } else {
-      callback(false, index);
+    for( var i = 0; i < keys.length; i++ ) {
+      await db.write(keys[i], index, options.aggregate[keys[i]]);
+      display(i, keys.length);
     }
-  });
-}
+  }
 
-function display(count, len) {
-  if( count % 10000 === 0 ) {
-    console.log('  '+((count/len)*100).toFixed(2)+'%');
+  async read(row, col){
+    return await db.read(row, col);
+  }
+
+  display(count, len) {
+    if( count % 10000 === 0 ) {
+      console.log('  '+((count/len)*100).toFixed(2)+'%');
+    }
   }
 }
 
-module.exports = {
-  exists : exists,
-  write : write,
-  read : read,
-  getIndex : getIndex,
-  init : init
+function niceDate(date) {
+  var year = date.getUTCFullYear();
+  var month = (date.getUTCMonth()+1)+'';
+  if( month.length == 1 ) month = '0'+month;
+  var day = date.getUTCDate()+'';
+  if( day.length == 1 ) day = '0'+day;
+
+  return [year, month, day];
 };
+
+module.exports = new RingBuffer();
