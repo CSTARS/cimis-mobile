@@ -5,9 +5,7 @@ var util = require('util');
 var config = require('../../config');
 
 var promisify = ['auth', 'del', 'rpush', 'lset', 'lindex', 'lrange'];
-promisify.forEach((key) => {
-  client[key] = util.promisify(client[key]);
-});
+
 
 class RedisRingBuffer {
 
@@ -19,9 +17,12 @@ class RedisRingBuffer {
     if( this.client ) return this.client;
       
     this.client = redis.createClient(config.redis.port, config.redis.host, {no_ready_check:true});
+    promisify.forEach((key) => {
+      this.client[key] = util.promisify(this.client[key]);
+    });
 
     if( config.redis.password ) {
-      await client.auth(config.redis.password);
+      await this.client.auth(config.redis.password);
     }
     await this._connect();
     
@@ -51,8 +52,8 @@ class RedisRingBuffer {
       keyval.push(i);
     }
     
-    await client.del(id);
-    return await client.rpush(keyval);
+    await this.client.del(id);
+    return await this.client.rpush(keyval);
   }
 
   async write(id, index, value, attempted) {
@@ -63,7 +64,7 @@ class RedisRingBuffer {
     }
     
     try {
-      return await client.lset(id, index, value);
+      return await this.client.lset(id, index, value);
     } catch(e) {
       if( attempted ) throw e;
 
@@ -75,12 +76,12 @@ class RedisRingBuffer {
 
   async valueAt(id, index) {
     await this.connect();
-    return await client.lindex(id, index);
+    return await this.client.lindex(id, index);
   }
 
   async read(id) {
     await this.connect();
-    return await client.lrange(id, 0, -1);
+    return await this.client.lrange(id, 0, -1);
   }
 
 }

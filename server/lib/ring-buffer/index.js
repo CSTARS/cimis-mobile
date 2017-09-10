@@ -2,9 +2,16 @@
 
 var db = require('./redis');
 var config = require('../../config');
+var niceDate = require('../niceDate');
 var MS_PER_DAY = 86400000;
 
 class RingBuffer {
+
+  constructor() {
+    if( config.force ) {
+      config.ringBuffer.force = true;
+    }
+  }
 
   // day should be number 1 - 31;
   getIndex(date) {
@@ -12,7 +19,11 @@ class RingBuffer {
   }
 
   async write(options) {
-    var index = getIndex(options.date);
+    if( !options.data ) {
+      return console.error('No Data');
+    }
+
+    var index = this.getIndex(options.date);
     var keys = Object.keys(options.data);
   
     if( config.ringBuffer.max_keys ) {
@@ -25,7 +36,7 @@ class RingBuffer {
     
     if( dateIsWritten && !config.ringBuffer.force ) {
       console.log(
-        dateUtil.nice(options.date).join('-') + 
+        niceDate(options.date).join('-') + 
         ' is already in the buffer at index '+index+' and no force flag set.  ignoring.'
       );
       return;
@@ -36,25 +47,25 @@ class RingBuffer {
   
     for( var i = 0; i < keys.length; i++ ) {
       await db.write(keys[i], index, options.data[keys[i]]);
-      display(i, keys.length);
+      this.display(i, keys.length);
     }
 
-    await db.write(config.ringBuffer.date_key, index, dateUtil.nice(options.date).join('-'));
+    await db.write(config.ringBuffer.date_key, index, niceDate(options.date).join('-'));
     await this.writeAggregates(options);
   }
 
   async exists(date) {
-    var index = getIndex(date);
+    var index = this.getIndex(date);
     date = niceDate(date).join('-');
   
     var val = await db.valueAt(config.ringBuffer.date_key, index);
     
-    if( val === date ) return {exists: true, index};
-    return {exists: false, index};
+    if( val === date ) return {dateIsWritten: true, index};
+    return {dateIsWritten: false, index};
   }
 
   async writeAggregates(options) {
-    var index = getIndex(options.date);
+    var index = this.getIndex(options.date);
     var keys = Object.keys(options.aggregate);
     
     if (config.ringBuffer.max_keys) {
@@ -67,7 +78,7 @@ class RingBuffer {
 
     for( var i = 0; i < keys.length; i++ ) {
       await db.write(keys[i], index, options.aggregate[keys[i]]);
-      display(i, keys.length);
+      this.display(i, keys.length);
     }
   }
 
@@ -77,19 +88,11 @@ class RingBuffer {
 
   display(count, len) {
     if( count % 10000 === 0 ) {
-      console.log('  '+((count/len)*100).toFixed(2)+'%');
+      process.stdout.clearLine();  // clear current text
+      process.stdout.cursorTo(0);
+      process.stdout.write('  '+((count/len)*100).toFixed(2)+'%');
     }
   }
 }
-
-function niceDate(date) {
-  var year = date.getUTCFullYear();
-  var month = (date.getUTCMonth()+1)+'';
-  if( month.length == 1 ) month = '0'+month;
-  var day = date.getUTCDate()+'';
-  if( day.length == 1 ) day = '0'+day;
-
-  return [year, month, day];
-};
 
 module.exports = new RingBuffer();

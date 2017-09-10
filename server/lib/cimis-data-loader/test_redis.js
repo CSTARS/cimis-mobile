@@ -3,7 +3,7 @@ var config=require('config')
   , rdb=require('./lib/redis')
   , async = require('async')
   , ringBuffer = require('./lib/ringBuffer')(config)
-  , dateUtil = require('./lib/date')
+  , niceDate = require('../niceDate')
   , client
   ;
 
@@ -62,10 +62,10 @@ function pretend_to_add_dates(callback) {
     function(date, next) {
       ringBuffer.exists(date, function(dateIsWritten, index) {
         if( dateIsWritten ) {
-          console.log(dateUtil.nice(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
+          console.log(niceDate(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
           next();
         } else {
-          rdb.write('dates', ringBuffer.getIndex(date), dateUtil.nice(date).join('-'), function(err, resp){
+          rdb.write('dates', ringBuffer.getIndex(date), niceDate(date).join('-'), function(err, resp){
             next();});
           }
         });

@@ -3,8 +3,9 @@
 
 var request = require('superagent');
 var zlib = require('zlib');
-var aggregatesDefinition = require('../aggregates'),
+var aggregatesDefinition = require('./aggregates');
 var config = require('../../config');
+var niceDate = require('../niceDate');
 var util = require('util');
 var verbose = false;
 
@@ -22,7 +23,7 @@ class Fetch {
 
   async getDate(date) {
     console.log('loading data for '+date.toDateString()+' from '+config.cimis.rootUrl+' ...');
-    var pathDate = dateUtil.nice(date).join('/');
+    var pathDate = niceDate(date).join('/');
   
     var data = {};
     var aggregate;
@@ -31,11 +32,19 @@ class Fetch {
       var param = config.cimis.params[i];
       var url = config.cimis.rootUrl+'/'+pathDate+'/'+param+'.asc.gz';
 
-      var resp = await request.get(url);
+      var resp;
+      try {
+        resp = await request.get(url).buffer(true);
+      } catch(e) {
+        console.log(e);
+        return new Error('No Data');
+      }
 
       // this needs to be a buffer...
-      var buffer = await zlib.unzip(resp.body);
-      var layer = await this.parseBuffer(param, buffer.toString());
+      // console.log(resp.body);
+      // console.log(resp.text);
+      // var buffer = await zlib.unzip(Buffer.from(resp.body));
+      var layer = await this.parseBuffer(param, resp.text);
 
       layer.url = url;
       data[param] = layer;
@@ -49,13 +58,13 @@ class Fetch {
     }
 
     return {
-      data: munge(data),
+      data: this.munge(data),
       aggregate : aggregate
     }
   }
 
   munge(data) {
-    log('Munging data...');
+    this.log('Munging data...');
   
     var munged = {}, id;
   
@@ -152,7 +161,7 @@ class Fetch {
       this.aggregate(layer);
     }
 
-    log(parm+'  --Parsed: '+row+'-'+cols+' '+good+'/'+noData+'/'+bad);
+    console.log(parm+'  --Parsed: '+row+'-'+cols+' '+good+'/'+noData+'/'+bad);
     return layer;
   }
 
