@@ -25,6 +25,7 @@ class RingBuffer {
 
     var index = this.getIndex(options.date);
     var keys = Object.keys(options.data);
+    var stationKeys = Object.keys(options.stationData);
   
     if( config.ringBuffer.max_keys ) {
       keys = keys.slice(0, config.ringBuffer.max_keys);
@@ -32,7 +33,6 @@ class RingBuffer {
     }
   
     var {dateIsWritten, index} = await this.exists(options.date);
-    console.log('dateIsWritten', dateIsWritten);
     
     if( dateIsWritten && !config.ringBuffer.force ) {
       console.log(
@@ -50,7 +50,15 @@ class RingBuffer {
       this.display(i, keys.length);
     }
 
-    await db.write(config.ringBuffer.date_key, index, niceDate(options.date).join('-'));
+    console.log('Writing '+stationKeys.length+' station to index '+index+' in ring buffer for '+options.date.toDateString());
+    var stations = [];
+    for( var i = 0; i < stationKeys.length; i++ ) {
+      await db.write('ST'+stationKeys[i], index, options.stationData[stationKeys[i]]);
+      this.display(i, stationKeys.length);
+    }
+
+    await db.write(config.ringBuffer.dateKey, index, niceDate(options.date).join('-'));
+    await db.write(config.ringBuffer.dateKey, index, niceDate(options.date).join('-'));
     await this.writeAggregates(options);
   }
 
@@ -58,7 +66,7 @@ class RingBuffer {
     var index = this.getIndex(date);
     date = niceDate(date).join('-');
   
-    var val = await db.valueAt(config.ringBuffer.date_key, index);
+    var val = await db.valueAt(config.ringBuffer.dateKey, index);
     
     if( val === date ) return {dateIsWritten: true, index};
     return {dateIsWritten: false, index};
@@ -92,6 +100,15 @@ class RingBuffer {
       process.stdout.cursorTo(0);
       process.stdout.write('  '+((count/len)*100).toFixed(2)+'%');
     }
+  }
+
+  async getStations() {
+    var stations = await db.readSingleton(config.ringBuffer.stationKey);
+    return stations ? JSON.parse(stations) : {};
+  }
+
+  async setStations(stations) {
+    await db.writeSingleton(config.ringBuffer.stationKey, JSON.stringify(stations));
   }
 }
 

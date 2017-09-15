@@ -10,7 +10,7 @@ async function load(date) {
   var {dateIsWritten, index} = await ringBuffer.exists(date);
   if( dateIsWritten && !config.ringBuffer.force ) {
     console.log(niceDate(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
-    return;
+    return await fetch.getStationData(date);
   }
 
   var resp = await fetch.getDate(date);
@@ -18,9 +18,12 @@ async function load(date) {
   await ringBuffer.write({
     date : date,
     data : resp.data,
+    stationData : resp.stationData,
     aggregate : resp.aggregate,
     force : config.ringBuffer.force
   });
+
+  return resp.stationData;
 }
 
 async function run() {
@@ -30,13 +33,25 @@ async function run() {
     days.push(new Date(new Date().getTime()-(86400000*(i+1))));
   }
 
+  // keep list of all active stations for this date range
+  var currentStationList = {};
+
   for( var i = 0; i < days.length; i++ ) {
     var t = new Date().getTime();
     var date = days[i];
 
-    await load(date);
+    var stations = await load(date);
+    for( var key in stations ) {
+      currentStationList[key] = {
+        lat : stations[key].lat,
+        lng : stations[key].lng
+      }
+    }
+  
     console.log('  --time: '+(new Date().getTime() - t)+'ms');
   }
+
+  await ringBuffer.setStations(currentStationList);
 }
 
 module.exports = {

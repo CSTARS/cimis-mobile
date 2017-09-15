@@ -2,14 +2,15 @@
 'use strict';
 
 var request = require('superagent');
-var zlib = require('zlib');
+var csvparse = require('csv-parse');
+var proj4 = require('proj4');
 var aggregatesDefinition = require('./aggregates');
 var config = require('../../config');
 var niceDate = require('../niceDate');
-var util = require('util');
 var verbose = false;
-
-zlib.unzip = util.promisify(zlib.unzip);
+proj4.defs('EPSG:3310','+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
+var proj_gmaps = 'EPSG:4326';
+var proj_cimis = 'EPSG:3310';
 
 class Fetch {
 
@@ -26,13 +27,14 @@ class Fetch {
     var pathDate = niceDate(date).join('/');
   
     var data = {};
-    var aggregate;
+    var aggregate, resp;
   
+    var stationData = await this.getStationData(date);
+
     for( var i = 0; i < config.cimis.params.length; i++ ) {
       var param = config.cimis.params[i];
       var url = config.cimis.rootUrl+'/'+pathDate+'/'+param+'.asc.gz';
 
-      var resp;
       try {
         resp = await request.get(url).buffer(true);
       } catch(e) {
@@ -40,10 +42,6 @@ class Fetch {
         return new Error('No Data');
       }
 
-      // this needs to be a buffer...
-      // console.log(resp.body);
-      // console.log(resp.text);
-      // var buffer = await zlib.unzip(Buffer.from(resp.body));
       var layer = await this.parseBuffer(param, resp.text);
 
       layer.url = url;
@@ -59,8 +57,25 @@ class Fetch {
 
     return {
       data: this.munge(data),
+      stationData : stationData,
       aggregate : aggregate
     }
+  }
+
+  async getStationData(date) {
+    var pathDate = niceDate(date).join('/');
+
+    // first we fetch station data
+    var url = config.cimis.rootUrl+'/'+pathDate+'/station.csv';
+    var resp;
+    try {
+      resp = await request.get(url).buffer(true);
+    } catch(e) {
+      console.log(e.message);
+      return new Error('No Station Data');
+    }
+
+    return await this.parseStationCSV(resp.text);
   }
 
   munge(data) {
@@ -86,6 +101,39 @@ class Fetch {
       }
     }
     return munged;
+  }
+
+  parseStationCSV(text) {
+    return new Promise((resolve, reject) => {
+      csvparse(text, {}, (err, output) => {
+
+        var headers = output.splice(0, 1)[0];
+        var data = {};
+
+        
+        output.forEach((row) => {
+          var station = {};
+          row.forEach((col, index) => {
+            station[headers[index]] = col;
+          });
+
+          station.x = parseFloat(station.x);
+          station.y = parseFloat(station.y);
+
+          var latlng = proj4(
+            proj_cimis, 
+            proj_gmaps, 
+            [station.x, station.x]
+          );
+          station.lng = latlng[0];
+          station.lat = latlng[1];
+
+          data[station.station_id] = station;
+        });
+
+        resolve(data);
+      });
+    });
   }
   
   parseBuffer(parm, buffer) {

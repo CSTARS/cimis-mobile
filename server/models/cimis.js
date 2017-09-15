@@ -73,7 +73,11 @@ function getRegion(name, callback) {
 }
 
 function getDates(callback) {
-  ringBuffer.read(config.ringBuffer.date_key, callback);
+  ringBuffer.read(config.ringBuffer.dateKey, callback);
+}
+
+function getStations(callback) {
+  ringBuffer.read(config.ringBuffer.dateKey, callback);
 }
 
 function prepareGet(data, isRegion, callback) {

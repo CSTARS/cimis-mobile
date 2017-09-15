@@ -4,7 +4,7 @@ var redis = require('redis');
 var util = require('util');
 var config = require('../../config');
 
-var promisify = ['auth', 'del', 'rpush', 'lset', 'lindex', 'lrange'];
+var promisify = ['auth', 'del', 'rpush', 'lset', 'lindex', 'lrange', 'get', 'set'];
 
 
 class RedisRingBuffer {
@@ -56,6 +56,10 @@ class RedisRingBuffer {
     return await this.client.rpush(keyval);
   }
 
+  /**
+   * write value to index of array, if it fails, initialize array
+   * then try again.
+   */
   async write(id, index, value, attempted) {
     await this.connect();
     
@@ -74,14 +78,30 @@ class RedisRingBuffer {
     }
   }
 
+  /**
+   * return value at index of array
+   */
   async valueAt(id, index) {
     await this.connect();
     return await this.client.lindex(id, index);
   }
 
+  /**
+   * Read entire array
+   */
   async read(id) {
     await this.connect();
     return await this.client.lrange(id, 0, -1);
+  }
+
+  async writeSingleton(key, value) {
+    await this.connect();
+    return await this.client.set(key, value);
+  }
+
+  async readSingleton(key) {
+    await this.connect();
+    return await this.client.get(key);
   }
 
 }
