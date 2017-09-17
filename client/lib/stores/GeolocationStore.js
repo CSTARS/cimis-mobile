@@ -34,7 +34,7 @@ class GeolocationStore extends BaseStore {
 
   _setState(state) {
     this.data = state;
-    this.emit(this.events.APP_CONFIG_UPDATE, this.data);
+    this.emit(this.events.GEOLOCATION_SEARCH_UPDATE, this.data);
   }
 
   getState() {

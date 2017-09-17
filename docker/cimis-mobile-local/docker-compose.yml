@@ -4,11 +4,11 @@ services:
   redis:
     image: redis:latest
     volumes:
-      - ../../data:/data
+      - redisdata:/data
     ports:
      - "6379:6379"
 
-  node:
+  app:
     image: node:latest
     volumes:
       - ../../:/cimis-mobile
@@ -18,3 +18,7 @@ services:
       - "8080:8080"
     command: bash -c "cd cimis-mobile && npm run docker-dev"
     # command: bash -c "cd cimis-mobile && node server.js --docker"
+
+volumes:
+  redisdata:
+    driver: local

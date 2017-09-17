@@ -16,7 +16,7 @@ class GeolocationModel extends BaseModel {
   }
 
   geolocate(query) {
-    return this.service.geolocate(query);
+    return this.service.geocode(query);
   }
 }
 

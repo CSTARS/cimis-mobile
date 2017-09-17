@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 const cors = require('cors');
 let config = require('./config');
+var dataLoader = require('./lib/cimis-data-loader');
 
 // enable CORS
 app.use(cors());
@@ -26,3 +27,12 @@ console.log(`CIMIS Mobile in ${config.env} mode, serving ${assetPath}`);
 app.listen(config.server.port, function () {
   console.log(`CIMIS Mobile app listening on port ${config.server.port}`);
 });
+
+
+setInterval(() => {
+  dataLoader.run();
+}, 1000 * 60 * 60 * 4);
+
+setTimeout(() => {
+  dataLoader.run();
+}, 1000 * 10);

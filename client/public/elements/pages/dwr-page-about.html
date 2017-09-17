@@ -131,7 +131,7 @@
           <h2>By CIMIS Station</h2>
           
           <paper-material>
-            <p><span class="host"></span>/cimis/station/[STATION ID]]</p>
+            <p><span class="host"></span>/cimis/station/[STATION ID]</p>
             <p>Example: <a href="/cimis/station/7" target="_blank"><span class="host"></span>/cimis/station/7</a></p>
           </paper-material>
 
@@ -239,6 +239,19 @@
   
         if( window.userType ) {
           this.shadowRoot.querySelector('input[value="'+window.userType+'"]').checked = true;
+        }
+
+        window.addEventListener('hashchange', this._setTab.bind(this));
+        this._setTab();
+      }
+
+      _setTab() {
+        var parts = window.location.hash.replace('#', '').split('/');
+        if( parts.length === 0 ) return;
+        if( parts[0] !== 'about' ) return;
+
+        if( parts.length > 1 && parts[1] === 'api' ) {
+          this.selectedTab = 2;
         }
       }
   

@@ -1,20 +1,18 @@
 version: '2'
 
-volumes:
-  - redis-data:
-
 services:
   redis:
     image: redis:latest
     volumes:
-      - redis-data:/data
+      - redisdata:/data
 
-  node:
-    image: node:8.4
-    volumes:
-      - ../../:/cimis-mobile
+  app:
+    build: ../..
     links:
       - redis
     ports:
-      - "8000:8000"
-    command: bash -c "cd cimis-mobile && npm run docker-dev"
+      - "8080:8080"
+
+volumes:
+  redisdata:
+    driver: local

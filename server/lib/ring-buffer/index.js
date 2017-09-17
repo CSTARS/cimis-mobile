@@ -95,6 +95,8 @@ class RingBuffer {
   }
 
   display(count, len) {
+    if( !process.stdout.clearLine ) return;
+
     if( count % 10000 === 0 ) {
       process.stdout.clearLine();  // clear current text
       process.stdout.cursorTo(0);

@@ -28,8 +28,9 @@
       
       static get properties() {
         return {
-            mapState: {
-            type: String
+          mapState: {
+            type: String,
+            value : 'cimisGrid'
           },
           
           dauGeometry: {
@@ -80,13 +81,23 @@
         google.maps.event.addListener(this.map, 'click', this._onMapClick.bind(this));
         this.map.data.addListener('click', this._onRegionClick.bind(this));
   
+        this.getEventBus().on('select-location', (e) => {
+          var ll = {
+            lat : e.location.latitude,
+            lng : e.location.longitude
+          }
+          setTimeout(() => this.map.setCenter(ll), 200);
+        });
+
         this._getCimisGridDates();
         this._getCimisStations();
       }
   
       _onActive() {
-        if( !window.google ) return;
+        if( !window.google || !this.active ) return;
         
+        this._render();
+
         this.debounce('resizeMap', () => {
           google.maps.event.trigger(this.map, 'resize');
           this.map.setCenter(this.latLng);
@@ -108,28 +119,33 @@
       }
   
       _onAppStateUpdate(e) {
-        if( this.location !== e.selectedCimisLocation ) {
+        if( e.mapState === 'cimisGrid' && this.location !== e.selectedCimisLocation ) {
           this.location = e.selectedCimisLocation;
           
-          if( !this.location ) return;
-          var parts = this.location.split('-').map(p => parseInt(p));
-          var location = this._gridToBounds(parts[0], parts[1])[0];
+          if( this.location ) {
+            var parts = this.location.split('-').map(p => parseInt(p));
+            var location = this._gridToBounds(parts[0], parts[1])[0];
 
-          setTimeout(() => {
-            if( !this.map ) return;
-            this.map.setCenter({
-              lat: location[1], 
-              lng: location[0]
-            });
-          }, 300);
+            setTimeout(() => {
+              if( !this.map ) return;
+              this.map.setCenter({
+                lat: location[1], 
+                lng: location[0]
+              });
+            }, 300);
+          }
         }
         
         if( this.mapState === e.mapState ) return;
         
-        this.mapState = e.mapState;
+        this.mapState = e.mapState || 'cimisGrid';
         this._render();
       }
   
+      _render() {
+        this.debounce('_render', this._render, 50);
+      }
+
       _render() {
         if( !this.map || !this.active ) return;
   
@@ -150,11 +166,16 @@
       }
   
       _renderAsync() {
+        if( this.renderedMapState === this.mapState ) return;
+
+        // clear current data layer
         this.map.data.forEach((feature) => {
           this.map.data.remove(feature);
         });
-  
         this.map.data.setStyle({visible: false});
+
+        // remove a cimis grid if one exists
+        this._clearCurrentGrid();
   
         if( this.mapState === 'etoZones' || this.mapState === 'dauZones' ) {
   
@@ -216,6 +237,10 @@
       }
   
       _onMapClick(e){
+        if( !this.active || this.mapState !== 'cimisGrid' ) {
+          return;
+        }
+
         var storage = {
           latitude : e.latLng.lat(),
           longitude : e.latLng.lng()
@@ -355,7 +380,7 @@
         });
 
         marker.addListener('click', function(e) {
-          window.location.hash = 'data/stations/'+key;
+          window.location.hash = 'data/cimisStations/'+key;
         });
 
         return marker;

@@ -21,7 +21,7 @@
         }
       </style>
   
-      <h1 id="gridLabel"></h1>
+      <h1 id="gridLabel">Station #[[selectedStation]]</h1>
       <div id="docs">
         <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
       </div>
@@ -38,6 +38,24 @@
         .with(EventMixin, ToggleStateMixin, AppStateMixin, StationMixin) {
       
       static get is() { return 'dwr-page-cimis-station';}
+
+      static get properties() {
+        return {
+          selectedStation : {
+            type : String,
+            value : ''
+          }
+        }
+      }
+
+      ready() {
+        super.ready();
+
+        window.addEventListener('resize', () => {
+          if( !this.active ) return;
+          this.debounce('_redraw', this._redraw, 200);
+        });
+      }
       
       _onActive() {
         if( !this.active ) return;
@@ -50,10 +68,10 @@
 
       _selectStation(id) {
         this.selectedStation = id;
-        this._draw();
+        this._render();
       }
 
-      async _draw() {
+      async _render() {
         this.toggleState('loading');
         this.datatables = [];
         this.charts = [];
@@ -93,10 +111,10 @@
 
         this.toggleState('loaded');
 
-        this.redraw();
+        this._redraw();
       }
 
-      redraw() {
+      _redraw() {
         if( !this.charts ) return;
 
         // this.resize();

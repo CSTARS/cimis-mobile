@@ -14,6 +14,7 @@
       paper-material {
         padding: 15px;
         margin: 15px;
+        display: block;
       }
 
       .history-item:hover {
@@ -24,65 +25,77 @@
         font-weight: bold;
         cursor: pointer;
       }
+
+      .center {
+        display: flex;
+        justify-content: center;
+      }
+      .center > div {
+        max-width: 1000px;
+        width: 100%;
+      }
     </style>
 
-    <h1>Set Location</h1>
-
-    <paper-material>
-      <h2>My Location</h2>
+    <div class="center">
       <div>
-        <paper-button raised on-click="geolocate" id="geolocate">
-          <iron-icon icon="maps:my-location"></iron-icon>
-          Geolocate
-        </paper-button>
-        <div id="geolocateMsg"></div>
-      </div>
+      <h1>Set Location</h1>
 
-      <h2>Search</h2>
-      <div>
-        <paper-input type="text" id="inputSearch" label="Location name" on-keyup="_onKeyPress" ></paper-input>
+      <paper-material>
+        <h2>My Location</h2>
+        <div>
+          <paper-button raised on-click="geolocate" id="geolocate">
+            <iron-icon icon="maps:my-location"></iron-icon>
+            Geolocate
+          </paper-button>
+          <div id="geolocateMsg"></div>
+        </div>
 
-        <div state="loading">
-          <span class="label label-success"><i class="fa fa-spinner fa-spin"></i> Searching</span>
+        <h2>Search</h2>
+        <div>
+          <paper-input type="text" id="inputSearch" label="Location name" on-keyup="_onKeyPress" ></paper-input>
+
+          <div state="loading">
+            <span class="label label-success"><i class="fa fa-spinner fa-spin"></i> Searching</span>
+          </div>
+          <div state="error">
+            Error loading geocoding results :(
+          </div>
+          <div state="loaded">
+            <div id="noResults" style="display:none"></div>
+            <template is="dom-repeat" items="[[results]]">
+              <div><a index$="[[index]]" on-click="_onLocationSelect" style="cursor:pointer">[[item.address]]</a></div>
+            </template>
+          </div>
         </div>
-        <div state="error">
-          Error loading geocoding results :(
-        </div>
-        <div state="loaded">
-          <div id="noResults" style="display:none"></div>
-          <template is="dom-repeat" items="[[results]]">
-            <div><a index$="[[index]]" on-click="_onLocationSelect" style="cursor:pointer">[[item.address]]</a></div>
+      </paper-material>
+
+      <paper-material>
+        <h2>
+          History
+          <template is="dom-if" if="[[currentLocations.length]]">
+            <paper-icon-button icon="close" on-click="_onHistoryDeleteAll" style="float:right"></paper-icon-button>
           </template>
-        </div>
-      </div>
-    </paper-material>
+        </h2>
 
-    <paper-material>
-      <h2>
-        History
 
-        <template is="dom-if" if="[[currentLocations.length]]">
-          <paper-icon-button icon="close" on-click="_onHistoryDeleteAll" style="float:right"></paper-icon-button>
+
+        <template is="dom-if" if="[[!currentLocations.length]]">
+          <div>Empty</div>
         </template>
-      </h2>
 
-
-
-      <template is="dom-if" if="[[!currentLocations.length]]">
-        <div>Empty</div>
-      </template>
-
-      <template is="dom-repeat" items="[[currentLocations]]">
-        <div class="layout center history-item">
-          <div class="flex">
-            <span class="history-link" on-click="_onHistorySelect" index$="[[index]]">[[item.address]]</span>
+        <template is="dom-repeat" items="[[currentLocations]]">
+          <div class="history-item" style="display: flex; align-items: center">
+            <div style="flex: 1">
+              <span class="history-link" on-click="_onHistorySelect" index$="[[index]]">[[item.address]]</span>
+            </div>
+            <div>
+              <paper-icon-button icon="delete" on-click="_onHistoryDelete" index$="[[index]]"></paper-icon-button>
+            </div>
           </div>
-          <div>
-            <paper-icon-button icon="delete" on-click="_onHistoryDelete" index$="[[index]]"></paper-icon-button>
-          </div>
-        </div>
-      </template>
-    </paper-material>
+        </template>
+      </paper-material>
+      </div>
+    </div>
 
   </template>
 
@@ -133,11 +146,11 @@
         }, 200);
       }
     
-      _onLocationSearch(e) {
+      _onGeolocationSearchUpdate(e) {
         this.toggleState(e.state);
         if( e.state !== 'loaded' ) return;
     
-        var tmp = e.data.map((item) => {
+        var tmp = e.payload.map((item) => {
                       return {
                         name : item.name,
                         address : item.formatted_address,
@@ -149,12 +162,12 @@
         this.results = tmp;
     
         if( this.results.length == 0 ) {
-          this.$.resultList.style.display = 'none';
-          this.$.resultList.innerText = 'No resuls found for "'+this.query+'"';
+          this.$.noResults.style.display = 'block';
+          this.$.noResults.innerText = 'No resuls found for "'+this.query+'"';
           return;
         }
     
-        this.$.resultList.style.display = 'block';
+        this.$.noResults.style.display = 'none';
       }
     
       _onLocationSelect(e) {
@@ -173,13 +186,9 @@
     
       _onHistorySelect(e) {
         var index = parseInt(e.currentTarget.getAttribute('index'));
-    
-        this._setAppState({
-          selectedCimisLocation : this.currentLocations[index]
-        });
-        
-    
-        this._addToHistory(this.currentLocations[index]);
+
+        this.getEventBus().emit('select-location', {location: this.currentLocations[index]});
+  
         this.ga('data', 'location', 'select-history');
     
         window.location.hash = 'map';

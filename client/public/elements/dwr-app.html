@@ -145,9 +145,6 @@
         if( !this.selectedMenuItem ) return;
 
         switch(this.selectedMenuItem) {
-          case 'cimisGrid':
-            window.location.hash = 'map';
-            break;
           case 'about':
             window.location.hash = 'about';
             break;
@@ -213,20 +210,6 @@
           this.$.backToMapBtn.style.display = 'block';
         }
       }
-  
-  
-      // getDate(index) {
-      //   var d = new Date(new Date().getTime()-(86400000*(index+1)) );
-  
-      //   var y = d.getYear()+1900;
-      //   var m = d.getMonth()+1;
-      //   var d = d.getDate();
-  
-      //   if( m < 10 ) m = '0'+m;
-      //   if( d < 10 ) d = '0'+d;
-  
-      //   return y+'-'+m+'-'+d;
-      // }
   
       _setUrlStateFromMenu(e) {
         var newState = this.$.mapLayerMenu.selected;
