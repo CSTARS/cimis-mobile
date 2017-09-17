@@ -1,47 +1,47 @@
 var BaseStore = require('cork-app-utils').BaseStore;
 
-class CimisStore extends BaseStore {
+class StationStore extends BaseStore {
 
   constructor() {
     super();
 
     this.data = {
-      dates : {
+      stations : {
         state : this.STATE.INIT
       },
       byId : {}
     }
 
     this.events = {
-      CIMIS_DATES_UPDATE : 'cimis-dates-update',
-      CIMIS_DATA_UPDATE : 'cimis-data-update'
+      STATIONS_UPDATE : 'stations-update',
+      STATION_UPDATE : 'station-data-update'
     }
   }
 
-  setDatesLoading(request) {
-    this._setDatesState({
+  setStationsLoading(request) {
+    this._setStationsState({
       state : this.STATE.LOADING,
       request
     });
   }
 
-  setDatesLoaded(payload) {
-    this._setDatesState({
+  setStationsLoaded(payload) {
+    this._setStationsState({
       state : this.STATE.LOADED,
       payload
     })
   }
 
-  setDatesError(error) {
-    this._setDatesState({
+  setStationsError(error) {
+    this._setStationsState({
       state : this.STATE.ERROR,
       error
     });
   }
 
-  _setDatesState(state) {
-    this.data.dates = state;
-    this.emit(this.events.CIMIS_DATES_UPDATE, this.data.dates);
+  _setStationsState(state) {
+    this.data.stations = state;
+    this.emit(this.events.STATIONS_UPDATE, this.data.stations);
   }
 
   setDataLoading(id, request) {
@@ -67,9 +67,9 @@ class CimisStore extends BaseStore {
 
   _setDataState(state) {
     this.data.byId[state.id] = state;
-    this.emit(this.events.CIMIS_DATA_UPDATE, this.data.byId[state.id]);
+    this.emit(this.events.STATION_UPDATE, this.data.byId[state.id]);
   }
 
 }
 
-module.exports = new CimisStore();
+module.exports = new StationStore();

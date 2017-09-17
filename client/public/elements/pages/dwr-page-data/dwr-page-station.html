@@ -1,0 +1,111 @@
+<dom-module id="dwr-page-cimis-station">
+    <template>
+      <style>
+        :host {
+          display: block;
+          padding: 10px;
+        }
+    
+        paper-material {
+          display: block;
+          margin: 15px;
+          padding-right: 15px;
+        }
+    
+        h1 {
+          font-weight: 200;
+        }
+
+        #docs {
+          text-align: right;
+        }
+      </style>
+  
+      <h1 id="gridLabel"></h1>
+      <div id="docs">
+        <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
+      </div>
+  
+      <div state="loaded">
+        <div id="charts"></div>
+        <div id="chartRoot"></div>
+      </div>
+  
+    </template>
+  
+  <script>
+    class DwrPageCimisStation extends Mixin(Polymer.Element)
+        .with(EventMixin, ToggleStateMixin, AppStateMixin, StationMixin) {
+      
+      static get is() { return 'dwr-page-cimis-station';}
+      
+      _onActive() {
+        if( !this.active ) return;
+
+        var parts = window.location.hash.replace(/#/,'').split('/');
+        if( parts.length >= 3 ) {
+            this._selectStation(parts[2]);
+        }
+      }
+
+      _selectStation(id) {
+        this.selectedStation = id;
+        this._draw();
+      }
+
+      async _draw() {
+        this.toggleState('loading');
+        this.datatables = [];
+        this.charts = [];
+        this.options = [];
+        this.$.charts.innerHTML = '';
+
+        var chartData = await this._getCimisStationChartData(this.selectedStation);
+
+        chartData.forEach((chartInfo) => {
+          // init the datatable
+          var dt = new google.visualization.DataTable();
+
+          chartInfo.columns.forEach((column) => {
+            dt.addColumn(column.type, column.label);
+          });
+          dt.addRows(chartInfo.rows);
+
+          // create chart options
+          this.options.push({
+            title : chartInfo.title,
+            curveType: 'function',
+            height : 550,
+            legend : {
+              position : 'none'
+            }
+          });
+
+          // create paper root
+          var decor = document.createElement('paper-material');
+          var root = document.createElement('div');
+          decor.appendChild(root);
+          this.$.charts.appendChild(decor);
+
+          this.charts.push(new google.visualization.LineChart(root));
+          this.datatables.push(dt);
+        });
+
+        this.toggleState('loaded');
+
+        this.redraw();
+      }
+
+      redraw() {
+        if( !this.charts ) return;
+
+        // this.resize();
+
+        for( var i = 0; i < this.datatables.length; i++ ) {
+          this.charts[i].draw(this.datatables[i], this.options[i]);
+        }
+      }
+    }
+
+    window.customElements.define(DwrPageCimisStation.is, DwrPageCimisStation);
+  </script>

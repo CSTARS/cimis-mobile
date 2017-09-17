@@ -123,7 +123,7 @@ class Fetch {
           var latlng = proj4(
             proj_cimis, 
             proj_gmaps, 
-            [station.x, station.x]
+            [station.x, station.y]
           );
           station.lng = latlng[0];
           station.lat = latlng[1];

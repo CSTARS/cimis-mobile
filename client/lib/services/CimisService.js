@@ -1,4 +1,3 @@
-var GoogleMaps = require('@google/maps');
 var BaseService = require('cork-app-utils').BaseService;
 var CimisStore = require('../stores/CimisStore');
 var ConfigStore = require('../stores/ConfigStore');

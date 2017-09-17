@@ -3,7 +3,7 @@ var router = require('express').Router();
 var CimisModel = require('../models/cimis');
 var model = new CimisModel();
 
-router.get('/:row/:col', function (req, res) {
+router.get('/:row/:col', async (req, res) => {
   var row = req.params.row;
   var col = req.params.col;
 
@@ -11,24 +11,23 @@ router.get('/:row/:col', function (req, res) {
     return res.send({error: true, message: 'invalid url'});
   }
 
+  var data;
   if( row === 'region' ) {
-    model.getRegion(col, function(err, data){
-      if( err ) {
-        return res.send({error: true, message: err});
-      }
-      res.send(data);
-    });
+    data = await model.getRegion(col);
+  } else if( row === 'station' ) {
+    data = await model.getStation(col);
   } else {
-    model.get(row, col, function(err, data){
-      if( err ) {
-        return res.send({error: true, message: err});
-      }
-      res.send(data);
-    });
+    data = await model.get(row, col);
   }
+
+  if( data instanceof Error ) {
+    return res.send({error: true, message: data.message});
+  } 
+
+  res.send(data);
 });
 
-router.get('/ll/:lng/:lat', function (req, res) {
+router.get('/ll/:lng/:lat', async (req, res) => {
   var lng = req.params.lng;
   var lat = req.params.lat;
 
@@ -36,25 +35,22 @@ router.get('/ll/:lng/:lat', function (req, res) {
     return res.send({error: true, message: 'invalid url'});
   }
 
-  model.getByLatLng(parseFloat(lat), parseFloat(lng), function(err, data){
-    if( err ) {
-      return res.send({error: true, message: err});
-    }
+  var data = await model.getByLatLng(parseFloat(lat), parseFloat(lng));
 
-    data.location.latitude = parseFloat(lat);
-    data.location.longitude = parseFloat(lng);
+  data.location.latitude = parseFloat(lat);
+  data.location.longitude = parseFloat(lng);
 
-    res.send(data);
-  });
+  res.send(data);
 });
 
-router.get('/dates', function(req, res) {
-  model.getDates(function(err, data){
-    if( err ) {
-      return res.send({error: true, message: err});
-    }
-    res.send(data);
-  });
+router.get('/dates', async (req, res) => {
+  var data = await model.getDates();
+  res.json(data);
+});
+
+router.get('/stations', async (req, res) => {
+  var data = await model.getStations();
+  res.json(data);
 });
 
 

@@ -21,7 +21,8 @@
 
   <script>
     class DwrPageMap extends Mixin(Polymer.Element)
-        .with(EventMixin, AppStateMixin, AppUtilsMixin, CimisGridMixin, DauMixin, EtoZonesMixin) {
+        .with(EventMixin, AppStateMixin, AppUtilsMixin, CimisGridMixin, 
+              StationMixin, DauMixin, EtoZonesMixin) {
   
       static get is() { return 'dwr-page-map'; }
       
@@ -80,6 +81,7 @@
         this.map.data.addListener('click', this._onRegionClick.bind(this));
   
         this._getCimisGridDates();
+        this._getCimisStations();
       }
   
       _onActive() {
@@ -182,6 +184,12 @@
           this._clearCurrentGrid();
         } else {
           this.map.data.setStyle({visible: false});
+        }
+
+        if( this.mapState === 'cimisStations' ) {
+          this.showStationMarks();
+        } else {
+          this.hideStationMarks();
         }
   
         this.renderedMapState = this.mapState;
@@ -317,13 +325,48 @@
         var dates = this._sortDates(this.dates.payload);
         this.yesterday = dates[dates.length-1];
       }
+
+      showStationMarks() {
+        for( var key in this.stations ) {
+          this.stations[key].marker.setMap(this.map);
+        }
+      }
+
+      hideStationMarks() {
+        for( var key in this.stations ) {
+          this.stations[key].marker.setMap(null);
+        }
+      }
+
+      _onStationsUpdate(e) {
+        if( e.state !== 'loaded' ) return;
+        this.stations = e.payload;
+
+        for( var key in this.stations ) {
+          this.stations[key].marker = this._createMarker(key, this.stations[key]);
+        }
+      }
   
+      _createMarker(key, latlng) {
+        var marker = new google.maps.Marker({
+          position: Object.assign({}, this.stations[key]),
+          station_id : key,
+          title: 'Cimis Station: '+key
+        });
+
+        marker.addListener('click', function(e) {
+          window.location.hash = 'data/stations/'+key;
+        });
+
+        return marker;
+      }
+
       ga(name, type, value) {
         if( !window.ga ) return;
         ga('send', 'event', name, type, value, 1);
       }
     }
-  
+
     window.customElements.define(DwrPageMap.is, DwrPageMap);
   
   </script>
