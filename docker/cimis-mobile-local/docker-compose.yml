@@ -14,10 +14,11 @@ services:
       - ../../:/cimis-mobile
     links:
       - redis
+    environment:
+      - CIMIS_MOBILE_ENV=production
     ports:
       - "8080:8080"
-    command: bash -c "cd cimis-mobile && npm run docker-dev"
-    # command: bash -c "cd cimis-mobile && node server.js --docker"
+    command: bash -c "cd cimis-mobile && npm run docker"
 
 volumes:
   redisdata:

@@ -10,8 +10,11 @@ services:
     build: ../..
     links:
       - redis
+    environment:
+      - CIMIS_MOBILE_ENV=production
+      - CIMIS_MOBILE_PORT=8000
     ports:
-      - "8080:8080"
+      - "8000:8000"
 
 volumes:
   redisdata:

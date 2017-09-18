@@ -22,10 +22,13 @@ echo 'Bundling js client lib'
 node $DEV_BUILD_ROOT/browserify.js $DIR/js/lib.js
 
 echo 'Copying assets'
-cp -r $DEV_ROOT/css $DIR/css
-cp -r $DEV_ROOT/images $DIR/images
 cp -r $DEV_ROOT/webcomponentsjs $DIR/webcomponentsjs
 cp $DEV_ROOT/index-dist.html $DIR/index.html
+cp $DEV_ROOT/dauco.json $DIR/dauco.json
+cp $DEV_ROOT/eto_zones.json $DIR/eto_zones.json
+cp $DEV_ROOT/favicon.ico $DIR/favicon.ico
+cp $DEV_ROOT/manifest.json $DIR/manifest.json
+cp -r $DEV_ROOT/icons $DIR/icons
 
 echo 'Cleanup'
 rm -rf $BUNDLE_ROOT

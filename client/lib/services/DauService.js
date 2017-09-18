@@ -18,7 +18,7 @@ class DauService extends BaseService {
       checkCached : () => this.store.data.geometry,
       request : this.request.get(`${this.getHost()}/dauco.json`),
       onLoading : request => this.store.setGeometryLoading(request),
-      onError : e => this.store.setGeometryError(a),
+      onError : e => this.store.setGeometryError(e),
       onSuccess : body => this.store.setGeometryLoaded(body)
     });
   }

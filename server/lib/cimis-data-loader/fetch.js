@@ -38,7 +38,6 @@ class Fetch {
       try {
         resp = await request.get(url).buffer(true);
       } catch(e) {
-        console.log(e);
         return new Error('No Data');
       }
 
