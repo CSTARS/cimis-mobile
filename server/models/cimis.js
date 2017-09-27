@@ -40,9 +40,9 @@ async function get(row, col) {
   };
 }
 
-async function getRegion(name, callback) {
+async function getRegion(name) {
   try {
-    var data = ringBuffer.read(name);
+    var data = await ringBuffer.read(name);
     data = await prepareGet(data, true);
 
     return {
