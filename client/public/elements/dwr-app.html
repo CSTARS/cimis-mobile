@@ -126,6 +126,19 @@
   
       ready() {
         super.ready();
+
+        if( google.visualization !== undefined ) {
+          this.onChartsReady();
+        } else {
+          google.charts.setOnLoadCallback(() => {
+            this.onChartsReady();
+          });
+        }
+        
+       
+      }
+
+      onChartsReady() {
         window.addEventListener('hashchange', this._setAppStateFromUrl.bind(this));
         this._setAppStateFromUrl();
 

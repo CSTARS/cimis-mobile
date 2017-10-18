@@ -27,19 +27,16 @@
         <meta name="keywords" content="California, state, government, CIMIS, DWR">
 
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4rlURkcCLTg4nR8vBhMSLIPHyYKpahck"></script>
+        
         <script src="https://www.gstatic.com/charts/loader.js"></script>
         <script>
           google.charts.load('current', {'packages':['corechart','line']});
-          google.charts.setOnLoadCallback(function() {
-            var link = document.createElement('link');
-            link.rel = 'import';
-            link.href = 'elements.html';
-            document.body.appendChild(link);
-          });
         </script>
 
         <script src="webcomponentsjs/webcomponents-loader.js"></script>
         <script src="webcomponentsjs/custom-elements-es5-adapter.js"></script>
+
+        <link rel="import" href="elements.html" />
     </head>
 
     <body>

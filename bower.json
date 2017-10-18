@@ -31,6 +31,6 @@
     "cork-common-utils": "cork-elements/cork-common-utils",
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
     "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0",
-    "webcomponentsjs": "^1.0.8"
+    "webcomponentsjs": "1.0.14"
   }
 }
