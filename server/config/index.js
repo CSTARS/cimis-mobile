@@ -28,7 +28,7 @@ module.exports = {
   },
   
   redis : {
-    host : runningInDocker ? (process.env.REDIS_CONTAINER_NAME || 'redis') : 'localhost',
+    host : runningInDocker ? (process.env.CIMIS_MOBILE_REDIS_SERVER || 'redis') : 'localhost',
     port : 6379,
     verbose : true,
     disabled : true
@@ -39,7 +39,7 @@ module.exports = {
   },
 
   cimis : {
-    rootUrl : 'http://cimis.casil.ucdavis.edu/cimis',
+    rootUrl : process.env.CIMIS_MOBILE_DATA_URL || 'http://cimis.casil.ucdavis.edu/cimis',
     params : ['ETo','K','Rnl','Rso','Tdew','Tn','Tx','U2']
   }
 }
