@@ -52,16 +52,14 @@ The following environmental variables affect the application :
 - `CIMIS_MOBILE_DATA_URL`:(default http://cimis.casil.ucdavis.edu)
 - `CIMIS_MOBILE_REDIS_SERVER`:(default: redis)
 
-
-There are a few configuration files that affect the operation of the cimis-mobile application.
-Thes are all found in the server/config/index.js file. 
-
-
 ## Application Intialization
 
+By default, the redis-server should be up and running.  Verify it's being initialized correctly.
+
+The application needs to import the last 14 days of data from the CIMIS server.  Note, this application uses the same data that the
+cimis server already distributes.  It will parse the ARC/INFO files to retrieve the data for each pixel.
+
 ```bash
-redis-server
-# Now add the data
 node utils/import
 ```
 
