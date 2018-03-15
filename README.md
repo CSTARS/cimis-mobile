@@ -52,6 +52,43 @@ The following environmental variables affect the application :
 - `CIMIS_MOBILE_DATA_URL`:(default http://cimis.casil.ucdavis.edu)
 - `CIMIS_MOBILE_REDIS_SERVER`:(default: redis)
 
+## Non-root node installation.
+
+Some OS's have super old node versions.  In this case, it might be necessary to install node as a non-root user.  This can eliminate the nodejs,
+and npm requirequirements above.  One method for doing this is by using [nave](https://github.com/isaacs/nave), which allows multiple node
+environments.  In addition, we are installing nave using [basher](https://github.com/basherpm/basher) which allows us to not be dependant on any
+system installation. 
+
+
+```bash
+git clone https://github.com/basherpm/basher.git ~/.basher
+echo 'export PATH="$HOME/.basher/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(basher init -)"' >> ~/.bashrc
+source ~/.bash_rc
+basher install isaacs/nave                     # Now we have nave, and...
+nave install lts                               # Now we have LTS version 8.10 installed
+```
+
+If you cannot install these directly, for example if your development environment is completely bonked and you can't download files, then you can
+replicate this setup, by tarring up your home directory, or at least your basher and nave setup, and then setting up your environment with:
+
+```bash
+tar -xzf ~/node_setup.tgz
+echo 'export PATH="$HOME/.basher/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(basher init -)"' >> ~/.bashrc
+source ~/.bashrc
+nave use lts                               # Now we have LTS version 8.10 installed
+```
+
+Note that in the above case, we are running node in a new environment, and so we need to run our application server under this environment as well.  This
+means we can't use a normal inetd script to install our application.
+
+```bash
+node utils/import
+node server
+```
+
+
 ## Application Intialization
 
 By default, the redis-server should be up and running.  Verify it's being initialized correctly.

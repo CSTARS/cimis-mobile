@@ -1,0 +1,26 @@
+{
+  "name": "cork-toggle-state",
+  "authors": [
+    "Justin Merz <jrmerz@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "https://github.com/cork-elements/cork-toggle-state-mixin",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "c49fd2facd",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "c49fd2facd9fec14475dd00c92521a63e08ca150"
+  },
+  "_source": "https://github.com/cork-elements/cork-toggle-state-mixin.git",
+  "_target": "*",
+  "_originalSource": "cork-elements/cork-toggle-state-mixin"
+}

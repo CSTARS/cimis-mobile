@@ -1,0 +1,17 @@
+{
+  "name": "cork-class-mixin-builder",
+  "authors": [
+    "Justin Merz <jrmerz@gmail.com>"
+  ],
+  "description": "base class to extend multiple classes",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

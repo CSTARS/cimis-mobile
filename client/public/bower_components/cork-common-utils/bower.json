@@ -1,0 +1,22 @@
+{
+  "name": "cork-common-utils",
+  "authors": [
+    "Justin Merz <jrmerz@gmail.com>"
+  ],
+  "description": "collection of common utils; mixin builder, event mixin and toggle state mixin",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "cork-class-mixin-builder": "cork-elements/cork-class-mixin-builder",
+    "cork-event-mixin": "cork-elements/cork-event-mixin",
+    "cork-toggle-state": "cork-elements/cork-toggle-state-mixin"
+  }
+}

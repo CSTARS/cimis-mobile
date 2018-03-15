@@ -1,0 +1,26 @@
+{
+  "name": "cork-event-mixin",
+  "authors": [
+    "Justin Merz <jrmerz@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "https://github.com/cork-elements/cork-event-mixin",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "2efeea3ac1",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "2efeea3ac159d6a81aeb69c9e9d24884681eda1e"
+  },
+  "_source": "https://github.com/cork-elements/cork-event-mixin.git",
+  "_target": "*",
+  "_originalSource": "cork-elements/cork-event-mixin"
+}
