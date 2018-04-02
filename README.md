@@ -74,6 +74,7 @@ replicate this setup, by tarring up your home directory, or at least your basher
 
 ```bash
 tar -xzf ~/node_setup.tgz
+ln -s -f ~/.basher/cellar/packages/isaacs/nave/bin/nave ~/.basher/cellar/bin/nave
 echo 'export PATH="$HOME/.basher/bin:$PATH"' >> ~/.bashrc
 echo 'eval "$(basher init -)"' >> ~/.bashrc
 source ~/.bashrc
