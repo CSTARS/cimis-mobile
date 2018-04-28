@@ -3,7 +3,7 @@
 
 var path = require('path');
 
-window.EventBus = require('cork-app-utils').EventBus;
+window.EventBus = require('@ucd-lib/cork-app-utils').EventBus;
 window.App = { "config": require("../lib/config.js"), "fft": require("../lib/fft.js"), "map": { "etoOverlay": require("../lib/map/etoOverlay.js") }, "models": { "AppStateModel": require("../lib/models/AppStateModel.js"), "CimisModel": require("../lib/models/CimisModel.js"), "ConfigModel": require("../lib/models/ConfigModel.js"), "DauModel": require("../lib/models/DauModel.js"), "EtoZonesModel": function () {
       var f = require("../lib/models/EtoZonesModel/index.js");f["index"] = require("../lib/models/EtoZonesModel/index.js");f["styles"] = require("../lib/models/EtoZonesModel/styles.js");return f;
     }(), "GeolocationModel": require("../lib/models/GeolocationModel.js"), "StationModel": require("../lib/models/StationModel.js") }, "services": { "CimisService": require("../lib/services/CimisService.js"), "DauService": require("../lib/services/DauService.js"), "EtoZonesService": require("../lib/services/EtoZonesService.js"), "GoogleService": require("../lib/services/GoogleService.js"), "StationService": require("../lib/services/StationService.js") }, "stores": { "AppStateStore": require("../lib/stores/AppStateStore.js"), "CimisStore": require("../lib/stores/CimisStore.js"), "ConfigStore": require("../lib/stores/ConfigStore.js"), "DauStore": require("../lib/stores/DauStore.js"), "EtoZonesStore": require("../lib/stores/EtoZonesStore.js"), "GeolocationStore": require("../lib/stores/GeolocationStore.js"), "StationStore": require("../lib/stores/StationStore.js") }, "utils": require("../lib/utils.js"), "definitions": require("../lib/definitions.json") };
@@ -245,7 +245,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseModel = require('cork-app-utils').BaseModel;
+var BaseModel = require('@ucd-lib/cork-app-utils').BaseModel;
 var AppStateStore = require('../stores/AppStateStore');
 
 var AppStateModel = function (_BaseModel) {
@@ -290,7 +290,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseModel = require('cork-app-utils').BaseModel;
+var BaseModel = require('@ucd-lib/cork-app-utils').BaseModel;
 var CimisGridStore = require('../stores/CimisStore');
 var CimisGridService = require('../services/CimisService');
 var CimisGrid = require('cimis-grid');
@@ -348,7 +348,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseModel = require('cork-app-utils').BaseModel;
+var BaseModel = require('@ucd-lib/cork-app-utils').BaseModel;
 var ConfigStore = require('../stores/ConfigStore');
 
 var ConfigModel = function (_BaseModel) {
@@ -410,7 +410,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseModel = require('cork-app-utils').BaseModel;
+var BaseModel = require('@ucd-lib/cork-app-utils').BaseModel;
 var DauStore = require('../stores/DauStore');
 var DauService = require('../services/DauService');
 
@@ -457,7 +457,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseModel = require('cork-app-utils').BaseModel;
+var BaseModel = require('@ucd-lib/cork-app-utils').BaseModel;
 var EtoZonesStore = require('../../stores/EtoZonesStore');
 var EtoZonesService = require('../../services/EtoZonesService');
 var styles = require('./styles');
@@ -642,7 +642,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseModel = require('cork-app-utils').BaseModel;
+var BaseModel = require('@ucd-lib/cork-app-utils').BaseModel;
 var GeolocationStore = require('../stores/GeolocationStore');
 var GoogleService = require('../services/GoogleService');
 
@@ -688,7 +688,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseModel = require('cork-app-utils').BaseModel;
+var BaseModel = require('@ucd-lib/cork-app-utils').BaseModel;
 var StationStore = require('../stores/StationStore');
 var StationService = require('../services/StationService');
 var AppUtils = require('../utils');
@@ -816,7 +816,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseService = require('cork-app-utils').BaseService;
+var BaseService = require('@ucd-lib/cork-app-utils').BaseService;
 var CimisStore = require('../stores/CimisStore');
 var ConfigStore = require('../stores/ConfigStore');
 
@@ -900,7 +900,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseService = require('cork-app-utils').BaseService;
+var BaseService = require('@ucd-lib/cork-app-utils').BaseService;
 var DauStore = require('../stores/DauStore');
 var ConfigStore = require('../stores/ConfigStore');
 
@@ -981,7 +981,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseService = require('cork-app-utils').BaseService;
+var BaseService = require('@ucd-lib/cork-app-utils').BaseService;
 var EtoZonesStore = require('../stores/EtoZonesStore');
 var ConfigStore = require('../stores/ConfigStore');
 
@@ -1064,7 +1064,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var GoogleMaps = require('@google/maps');
-var BaseService = require('cork-app-utils').BaseService;
+var BaseService = require('@ucd-lib/cork-app-utils').BaseService;
 var GeolocationStore = require('../stores/GeolocationStore');
 var ConfigStore = require('../stores/ConfigStore');
 
@@ -1135,7 +1135,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseService = require('cork-app-utils').BaseService;
+var BaseService = require('@ucd-lib/cork-app-utils').BaseService;
 var StationStore = require('../stores/StationStore');
 var ConfigStore = require('../stores/ConfigStore');
 
@@ -1216,7 +1216,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseStore = require('cork-app-utils').BaseStore;
+var BaseStore = require('@ucd-lib/cork-app-utils').BaseStore;
 
 var AppStateStore = function (_BaseStore) {
   _inherits(AppStateStore, _BaseStore);
@@ -1286,7 +1286,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseStore = require('cork-app-utils').BaseStore;
+var BaseStore = require('@ucd-lib/cork-app-utils').BaseStore;
 
 var CimisStore = function (_BaseStore) {
   _inherits(CimisStore, _BaseStore);
@@ -1388,7 +1388,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseStore = require('cork-app-utils').BaseStore;
+var BaseStore = require('@ucd-lib/cork-app-utils').BaseStore;
 var initConfig = require('../config');
 
 var ConfigStore = function (_BaseStore) {
@@ -1435,7 +1435,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseStore = require('cork-app-utils').BaseStore;
+var BaseStore = require('@ucd-lib/cork-app-utils').BaseStore;
 
 var DauStore = function (_BaseStore) {
   _inherits(DauStore, _BaseStore);
@@ -1536,7 +1536,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseStore = require('cork-app-utils').BaseStore;
+var BaseStore = require('@ucd-lib/cork-app-utils').BaseStore;
 
 var EtoZonesStore = function (_BaseStore) {
   _inherits(EtoZonesStore, _BaseStore);
@@ -1644,7 +1644,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseStore = require('cork-app-utils').BaseStore;
+var BaseStore = require('@ucd-lib/cork-app-utils').BaseStore;
 
 var GeolocationStore = function (_BaseStore) {
   _inherits(GeolocationStore, _BaseStore);
@@ -1715,7 +1715,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var BaseStore = require('cork-app-utils').BaseStore;
+var BaseStore = require('@ucd-lib/cork-app-utils').BaseStore;
 
 var StationStore = function (_BaseStore) {
   _inherits(StationStore, _BaseStore);
@@ -1817,7 +1817,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var IocRegistration = require('cork-app-utils').IocRegistration;
+var IocRegistration = require('@ucd-lib/cork-app-utils').IocRegistration;
 var fft = require('./fft');
 
 var AppUtils = function (_IocRegistration) {

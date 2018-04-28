@@ -15,10 +15,12 @@ services:
     links:
       - redis
     environment:
-      - CIMIS_MOBILE_ENV=production
+      - CIMIS_MOBILE_ENV=development
+      - CIMIS_DOCKER=true
     ports:
       - "8080:8080"
-    command: bash -c "cd cimis-mobile && npm run docker"
+    # command: node /cimis-mobile/server
+    command: tail -f /dev/null
 
 volumes:
   redisdata:

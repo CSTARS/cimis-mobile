@@ -1,9 +1,11 @@
 'use strict';
 
-var db = require('./redis');
-var config = require('../../config');
-var niceDate = require('../niceDate');
-var MS_PER_DAY = 86400000;
+const db = require('./redis');
+const config = require('../../config');
+const niceDate = require('../niceDate');
+const logger = require('../../logger');
+
+const MS_PER_DAY = 86400000;
 
 class RingBuffer {
 
@@ -20,7 +22,7 @@ class RingBuffer {
 
   async write(options) {
     if( !options.data ) {
-      return console.error('No Data');
+      return logger.error('No Data to write', options);
     }
 
     var index = this.getIndex(options.date);
@@ -29,20 +31,19 @@ class RingBuffer {
   
     if( config.ringBuffer.max_keys ) {
       keys = keys.slice(0, config.ringBuffer.max_keys);
-      console.log('max_keys:', config.ringBuffer.max_keys, keys);
     }
   
     var {dateIsWritten, index} = await this.exists(options.date);
     
     if( dateIsWritten && !config.ringBuffer.force ) {
-      console.log(
+      logger.info(
         niceDate(options.date).join('-') + 
         ' is already in the buffer at index '+index+' and no force flag set.  ignoring.'
       );
       return;
     }
   
-    console.log('Writing '+keys.length+' cells to index '+index+' in ring buffer for '+options.date.toDateString());
+    logger.info('Writing '+keys.length+' cells to index '+index+' in ring buffer for '+options.date.toDateString());
     var count = 0;
   
     for( var i = 0; i < keys.length; i++ ) {
@@ -50,7 +51,7 @@ class RingBuffer {
       this.display(i, keys.length);
     }
 
-    console.log('Writing '+stationKeys.length+' station to index '+index+' in ring buffer for '+options.date.toDateString());
+    logger.info('Writing '+stationKeys.length+' station to index '+index+' in ring buffer for '+options.date.toDateString());
     var stations = [];
     for( var i = 0; i < stationKeys.length; i++ ) {
       await db.write('ST'+stationKeys[i], index, options.stationData[stationKeys[i]]);
@@ -78,10 +79,9 @@ class RingBuffer {
     
     if (config.ringBuffer.max_keys) {
       keys = keys.slice(0, config.ringBuffer.max_keys);
-      console.log('max_keys:', config.ringBuffer.max_keys, keys);
     }
   
-    console.log('Writing '+keys.length+' aggregates to index '+index+' in ring buffer for '+options.date.toDateString());
+    logger.info('Writing '+keys.length+' aggregates to index '+index+' in ring buffer for '+options.date.toDateString());
     var count = 0;
 
     for( var i = 0; i < keys.length; i++ ) {

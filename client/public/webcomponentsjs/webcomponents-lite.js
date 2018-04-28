@@ -1,1 +1,1 @@
-../bower_components/webcomponentsjs/webcomponents-lite.js
+../node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js

@@ -1,1 +1,1 @@
-../bower_components/webcomponentsjs/webcomponents-hi.js
+../node_modules/@webcomponents/webcomponentsjs/webcomponents-hi.js

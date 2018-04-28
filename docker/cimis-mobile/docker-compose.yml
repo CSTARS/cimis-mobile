@@ -12,6 +12,8 @@ services:
       - redis
     environment:
       - CIMIS_MOBILE_ENV=production
+      - CIMIS_CLIENT=production
+      - CIMIS_DOCKER=true
       - CIMIS_MOBILE_PORT=8000
     ports:
       - "8000:8000"

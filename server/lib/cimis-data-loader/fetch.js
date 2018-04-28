@@ -1,13 +1,14 @@
 
 'use strict';
 
-var request = require('superagent');
-var csvparse = require('csv-parse');
-var proj4 = require('proj4');
-var aggregatesDefinition = require('./aggregates');
-var config = require('../../config');
-var niceDate = require('../niceDate');
-var verbose = false;
+const request = require('superagent');
+const csvparse = require('csv-parse');
+const proj4 = require('proj4');
+const aggregatesDefinition = require('./aggregates');
+const config = require('../../config');
+const niceDate = require('../niceDate');
+const logger = require('../../logger');
+
 proj4.defs('EPSG:3310','+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
 var proj_gmaps = 'EPSG:4326';
 var proj_cimis = 'EPSG:3310';
@@ -18,12 +19,8 @@ class Fetch {
     this.verbose = config.fetch.verbose;
   }
 
-  log(txt) {
-    if( this.verbose) console.log(txt);
-  }
-
   async getDate(date) {
-    console.log('loading data for '+date.toDateString()+' from '+config.cimis.rootUrl+' ...');
+    logger.info('data-loader fetching data for '+date.toDateString()+' from '+config.cimis.rootUrl);
     var pathDate = niceDate(date).join('/');
   
     var data = {};
@@ -70,16 +67,14 @@ class Fetch {
     try {
       resp = await request.get(url).buffer(true);
     } catch(e) {
-      console.log(e.message);
+      logger.error(e);
       return new Error('No Station Data');
     }
 
     return await this.parseStationCSV(resp.text);
   }
 
-  munge(data) {
-    this.log('Munging data...');
-  
+  munge(data) {  
     var munged = {}, id;
   
     // Only save data that exists in ETo
@@ -208,7 +203,7 @@ class Fetch {
       this.aggregate(layer);
     }
 
-    console.log(parm+'  --Parsed: '+row+'-'+cols+' '+good+'/'+noData+'/'+bad);
+    logger.info('data-loader parser param', parm, 'Parsed: '+row+'-'+cols, `good=${good}, noData=${noData}, bad=${bad}`);
     return layer;
   }
 

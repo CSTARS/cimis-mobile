@@ -1,49 +1,67 @@
 'use strict';
 
-var ringBuffer = require('../lib/ring-buffer');
-var config = require('../config');
-var CimisGridUtils = require('cimis-grid');
-var grid = new CimisGridUtils();
-var config;
+const ringBuffer = require('../lib/ring-buffer');
+const config = require('../config');
+const CimisGridUtils = require('cimis-grid');
 
-module.exports = function() {
-  return {
-      name: 'cimis',
-      get : get,
-      getByLatLng : getByLatLng,
-      getDates : getDates,
-      getStations : getStations,
-      getStation : getStation,
-      getRegion : getRegion
-  };
-};
 
-async function getByLatLng(lat, lng) {
-  var g = grid.llToGrid(lng, lat);
-  return await get(g.row, g.col);
-}
+class CimisModel {
 
-async function get(row, col) {
-  var data = await ringBuffer.read(row+'-'+col);
-  data = await prepareGet(data, false);
+  constructor() {
+    this.grid = new CimisGridUtils();
+  }
 
-  row = parseInt(row);
-  col = parseInt(col);
+  /**
+   * @method get
+   * @description get cimis grid data by row/col grid location
+   * 
+   * @param {Number} row 
+   * @param {Number} col
+   * 
+   * @returns {Promise} resovle to grid data 
+   */
+  async get(row, col) {
+    var data = await ringBuffer.read(row+'-'+col);
+    data = await this._prepareGridData(data, false);
+  
+    row = parseInt(row);
+    col = parseInt(col);
+  
+    return {
+      location : {
+        row : row,
+        col : col,
+        bounds : this.grid.gridToBounds(row, col)
+      },
+      data : data
+    };
+  }
 
-  return {
-    location : {
-      row : row,
-      col : col,
-      bounds : grid.gridToBounds(row, col)
-    },
-    data : data
-  };
-}
+  /**
+   * @method getByLatLng
+   * @description get cimis grid point by lat/lng
+   * 
+   * @param {Number} lat 
+   * @param {Number} lng 
+   * 
+   * @returns {Promise} resolves to grid data
+   */
+  getByLatLng(lat, lng) {
+    var g = this.grid.llToGrid(lng, lat);
+    return this.get(g.row, g.col);
+  }
 
-async function getRegion(name) {
-  try {
+  /**
+   * @method getRegion
+   * @description get region by name
+   * 
+   * @param {String} name region name
+   * 
+   * @returns {Promise} resolves to region data
+   */
+  async getRegion(name) {
     var data = await ringBuffer.read(name);
-    data = await prepareGet(data, true);
+    data = await this._prepareGridData(data, true);
 
     return {
       location : {
@@ -51,23 +69,23 @@ async function getRegion(name) {
       },
       data : data
     };
-  } catch(e) {
-    return e;
   }
-}
 
-async function getDates() {
-  return await ringBuffer.read(config.ringBuffer.dateKey);
-}
-
-async function getStation(id) {
-  try {
+  /**
+   * @method getStation
+   * @description get station data by id
+   * 
+   * @param {String} id station id
+   * 
+   * @returns {Promise} resolves to station data
+   */
+  async getStation(id) {
     var data = await ringBuffer.read('ST'+id);
     
     var first = data.length > 0 ? JSON.parse(data[0]) : {};
     var location = {
       station : id,
-      stationInfoApi : 'http://et.water.ca.gov/api/station/'+id,
+      stationInfoApi : config.stationInfoApi+id,
       x: first.x,
       y: first.y,
       z: parseFloat(first.z),
@@ -91,33 +109,54 @@ async function getStation(id) {
       return item;
     });
     
-    data = await prepareGet(data, true);
+    data = await this._prepareGridData(data, true);
 
     return {
       location : location,
       data : data
     };
-  } catch(e) {
-    return e;
   }
-}
 
-async function getStations() {
-  return await ringBuffer.getStations();
-}
+  /**
+   * @method getDates
+   * @description return current dates in the ring buffer
+   * 
+   * @returns {Promise} resolves to Array of strings
+   */
+  getDates() {
+    return ringBuffer.read(config.ringBuffer.dateKey);
+  }
 
-async function prepareGet(data, isRegion) {
-  var result = await getDates();
+  /**
+   * @method getStations
+   * @description return the current stations in the ring buffer
+   * 
+   * @returns {Promise} resolves to Array of objects
+   */
+  getStations() {
+    return ringBuffer.getStations();
+  }
 
-  var resp = {};
-
-  try {
+  /**
+   * @method _prepareGridData
+   * @description prepare redis ring buffer response data
+   * 
+   * @param {Object} data ring buffer response object
+   * @param {Boolean} isRegion is this a region object
+   * 
+   * @returns {Promise} resolves to Object
+   */
+  async _prepareGridData(data, isRegion) {
+    var result = await this.getDates();
+  
+    var resp = {};
     for( var i = 0; i < data.length; i++ ) {
       resp[result[i]] = isRegion ? data[i] : JSON.parse(data[i]);
     }
-  } catch(e) {
-    return e;
+  
+    return resp;
   }
 
-  return resp;
 }
+
+module.exports = new CimisModel();

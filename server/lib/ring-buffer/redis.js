@@ -1,8 +1,9 @@
 'use strict';
 
-var redis = require('redis');
-var util = require('util');
-var config = require('../../config');
+const redis = require('redis');
+const util = require('util');
+const config = require('../../config');
+const logger = require('../../logger');
 
 var promisify = ['auth', 'del', 'rpush', 'lset', 'lindex', 'lrange', 'get', 'set'];
 
@@ -26,7 +27,7 @@ class RedisRingBuffer {
     }
     await this._connect();
     
-    console.log('Connected to Redis', config.redis.host);
+    logger.info('RingBuffer connected to Redis host: ', config.redis.host);
   }
   
   _connect() {

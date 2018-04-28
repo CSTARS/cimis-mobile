@@ -1,15 +1,16 @@
 'use strict';
 
-var config = require('../../config');
-var fetch = require('./fetch');
-var ringBuffer = require('../ring-buffer');
-var niceDate = require('../niceDate');
+const config = require('../../config');
+const fetch = require('./fetch');
+const ringBuffer = require('../ring-buffer');
+const niceDate = require('../niceDate');
+const logger = require('../../logger');
 var days = [];
 
 async function load(date) {
   var {dateIsWritten, index} = await ringBuffer.exists(date);
   if( dateIsWritten && !config.ringBuffer.force ) {
-    console.log(niceDate(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
+    logger.info('data-loader '+niceDate(date).join('-')+' is already in the buffer at index '+index+' and no force flag set.  ignoring.');
     return await fetch.getStationData(date);
   }
 
@@ -27,7 +28,7 @@ async function load(date) {
 }
 
 async function run() {
-  console.log('Importing last '+config.ringBuffer.buffer+' days of CIMIS data from '+config.cimis.base);
+  logger.info('data-loader importing last '+config.ringBuffer.buffer+' days of CIMIS data from '+config.cimis.rootUrl);
 
   for( var i = 0; i < config.ringBuffer.buffer; i++ ) {
     days.push(new Date(new Date().getTime()-(86400000*(i+1))));
@@ -48,7 +49,7 @@ async function run() {
       }
     }
   
-    console.log('  --time: '+(new Date().getTime() - t)+'ms');
+    logger.info(`data-loader ${date.toISOString().replace(/T.*/,'')} load time: `+(new Date().getTime() - t)+'ms');
   }
 
   await ringBuffer.setStations(currentStationList);

@@ -1,7 +1,6 @@
 'use strict';
 var router = require('express').Router();
-var CimisModel = require('../models/cimis');
-var model = new CimisModel();
+var model = require('../models/cimis');
 
 router.get('/:row/:col', async (req, res) => {
   var row = req.params.row;
@@ -11,20 +10,25 @@ router.get('/:row/:col', async (req, res) => {
     return res.send({error: true, message: 'invalid url'});
   }
 
-  var data;
-  if( row === 'region' ) {
-    data = await model.getRegion(col);
-  } else if( row === 'station' ) {
-    data = await model.getStation(col);
-  } else {
-    data = await model.get(row, col);
+  try {
+
+    var data;
+    if( row === 'region' ) {
+      data = await model.getRegion(col);
+    } else if( row === 'station' ) {
+      data = await model.getStation(col);
+    } else {
+      data = await model.get(row, col);
+    }
+
+    // if( data instanceof Error ) {
+    //   return res.send({error: true, message: data.message});
+    // } 
+
+    res.json(data);
+  } catch(e) {
+    res.status(500).json({error: true, message: e.message});
   }
-
-  if( data instanceof Error ) {
-    return res.send({error: true, message: data.message});
-  } 
-
-  res.send(data);
 });
 
 router.get('/ll/:lng/:lat', async (req, res) => {
@@ -35,22 +39,32 @@ router.get('/ll/:lng/:lat', async (req, res) => {
     return res.send({error: true, message: 'invalid url'});
   }
 
-  var data = await model.getByLatLng(parseFloat(lat), parseFloat(lng));
+  try {
+    var data = await model.getByLatLng(parseFloat(lat), parseFloat(lng));
 
-  data.location.latitude = parseFloat(lat);
-  data.location.longitude = parseFloat(lng);
+    data.location.latitude = parseFloat(lat);
+    data.location.longitude = parseFloat(lng);
 
-  res.send(data);
+    res.json(data);
+  } catch(e) {
+    res.status(500).json({error: true, message: e.message});
+  }
 });
 
 router.get('/dates', async (req, res) => {
-  var data = await model.getDates();
-  res.json(data);
+  try {
+    res.json(await model.getDates());
+  } catch(e) {
+    res.status(500).json({error: true, message: e.message});
+  }
 });
 
 router.get('/stations', async (req, res) => {
-  var data = await model.getStations();
-  res.json(data);
+  try {
+    res.json(await model.getStations());
+  } catch(e) {
+    res.status(500).json({error: true, message: e.message});
+  }
 });
 
 

@@ -1,1 +1,1 @@
-../bower_components/webcomponentsjs/webcomponents-sd-ce.js
+../node_modules/@webcomponents/webcomponentsjs/webcomponents-sd-ce.js

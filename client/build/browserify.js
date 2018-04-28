@@ -7,7 +7,7 @@ browserify(path.join(__dirname, 'glob.js'),{debug: true})
   .transform(bulkify)
   .transform('babelify', {
     global : true,
-    presets: ['es2015']
+    presets: ['es2015', 'babel-polyfill']
   })
   .bundle()
   .pipe(fs.createWriteStream(process.argv[2]));
