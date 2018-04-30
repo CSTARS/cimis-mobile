@@ -1,12 +1,12 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
-import "@polymer/app-layout/app-header/app-header"
-import "@polymer/app-layout/app-toolbar/app-toolbar"
 import "@polymer/paper-icon-button/paper-icon-button"
 import "@polymer/paper-menu-button/paper-menu-button"
 import "@polymer/paper-listbox/paper-listbox"
+import "@polymer/paper-material/paper-material"
 import "@polymer/paper-item/paper-item"
 import "@polymer/iron-pages/iron-pages"
 import "@polymer/iron-icons/iron-icons"
+import "@polymer/iron-icons/maps-icons"
 
 // sets globals Mixin and EventInterface
 import "@ucd-lib/cork-app-utils";
@@ -44,6 +44,10 @@ class DwrApp extends Mixin(PolymerElement)
         type : String,
         value : '',
         observer : '_onMenuSelect'
+      },
+      menuActive : {
+        type : Boolean,
+        value : false
       }
     }
   }
@@ -62,6 +66,8 @@ class DwrApp extends Mixin(PolymerElement)
         this.onChartsReady();
       });
     }
+
+    window.addEventListener('click', () => this.hideMenu());
   }
 
   onChartsReady() {
@@ -178,6 +184,34 @@ class DwrApp extends Mixin(PolymerElement)
 
   _backToMap() {
     window.location.hash = 'map';
+  }
+
+  /**
+   * @method _onMenuIconClicked
+   * @description called when the menu icon is clicked
+   * 
+   * @param {Object} e html click event
+   */
+  _onMenuIconClicked(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.toggleMenu();
+  }
+
+  /**
+   * @method toggleMenu
+   * @description toggle the main menu
+   */
+  toggleMenu() {
+    this.menuActive = !this.menuActive;
+  }
+
+  /**
+   * @method hideMenu
+   * @description hide the main menu
+   */
+  hideMenu() {
+    this.menuActive = false;
   }
 }
 

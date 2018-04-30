@@ -7,83 +7,125 @@
     position: relative;
   }
 
-/* iron-pages {
-  position: relative;
-} */
+  /* iron-pages {
+    position: relative;
+  } */
 
-h2 {
-  font-weight: 200
-}
+  h2 {
+    font-weight: 200
+  }
 
-paper-material {
-  margin: 5px;
-}
+  paper-material {
+    margin: 5px;
+  }
 
-#locationBtn {
-  display: none;
-}
+  #locationBtn {
+    display: none;
+  }
 
-app-header {
-  z-index: 100;
-  background-color: red;
-}
+  header {
+    display: flex;
+    background-color: var(--default-primary-color);
+    color: var(--primary-background-color);
+    align-items: center;
+  }
+
+  header h2 {
+    padding-left: 10px;
+  }
+
+  @keyframes show {
+    0%   { opacity: .3; transform: scale(.95) }
+    100% { opacity: 1; transform: scale(1) }
+  }
+
+  #menu {
+    position: absolute;
+    top: 50px;
+    right : 0;
+    background: var(--primary-background-color);
+    color: var(--primary-text-color);
+    white-space: nowrap;
+    animation: show 300ms ease-out;
+    z-index: 1000;
+  }
+
+  #menu h3 {
+    padding: 5px 15px;
+    margin: 8px 0;
+  }
+
+  #menu a {
+    color: var(--default-background-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--default-background-color);
+    padding: 15px 15px 15px 20px;
+    cursor: pointer;
+  }
+  #menu a:hover {
+    color: white;
+    background-color: var(--default-primary-color);
+  }
+  #menu a:hover span {
+    transform: scale(1.2);
+  }
+  #menu a span {
+    transform: scale(1);
+    transition: transform 200ms ease-out;
+    margin-right: 20px;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
 </style>
 
-<app-header>
-  <app-toolbar >
-    <div style="flex:1">
-    <div style="display:flex; align-items: center">
+<header>
+  <paper-icon-button 
+    id="backToMapBtn" 
+    icon="arrow-back" 
+    on-click="_backToMap"
+  ></paper-icon-button>
 
-      <paper-icon-button 
-        id="backToMapBtn" 
-        icon="arrow-back" 
-        on-click="_backToMap"
-      ></paper-icon-button>
-
-      <h2>Spatial CIMIS</h2>
+  <h2>Spatial CIMIS</h2>
 
 
-      <div style="flex:1"></div>
+  <div style="flex:1"></div>
 
-        <paper-icon-button 
-          id="locationBtn" 
-          icon="maps:my-location" 
-          on-click="_selectLocation">
-        </paper-icon-button>
+  <paper-icon-button 
+    id="locationBtn" 
+    icon="maps:my-location" 
+    on-click="_selectLocation">
+  </paper-icon-button>
 
-        <paper-menu-button horizontal-align="right">
-          <paper-icon-button icon="more-vert" slot="dropdown-trigger" style="margin:0"></paper-icon-button>
-          <paper-listbox 
-            slot="dropdown-content" 
-            id="mapLayerMenu" 
-            attr-for-selected="page" 
-            selected="{{selectedMenuItem}}">
-
-            <paper-item page="cimisGrid">
-              Explore Spatial CIMIS Grid
-            </paper-item>
-
-            <paper-item page="etoZones" disabled>
-              <paper-spinner id="etoSpinner" active ></paper-spinner>
-              Explore ETo Zones
-            </paper-item>
-
-            <paper-item page="dauZones" disabled>
-              <paper-spinner id="dauSpinner" active></paper-spinner>
-              Explore DAU Zones
-            </paper-item>
-
-            <paper-item page="cimisStations">
-              Explore CIMIS Stations
-            </paper-item>
-
-            <paper-item page="about">About</paper-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </div>
-    </div>
-  </app-toolbar>
-</app-header>
+  <div>
+    <paper-icon-button inverse icon="more-vert" on-click="_onMenuIconClicked"></paper-icon-button>
+  
+    <paper-material id="menu" on-click="_onMenuClicked" hidden$="[[!menuActive]]">
+      <h3>Explore</h3>
+      <a href="#map/cimisGrid" >
+        <span>Spatial CIMIS Grid</span>
+      </a>
+      <a href="#map/etoZones" >
+        <paper-spinner id="etoSpinner" active></paper-spinner>
+        <span>ETo Zones</span>
+      </a>
+      <a href="#map/etoZones">
+        <paper-spinner id="dauSpinner" active></paper-spinner>
+        <span>DAU Zones</span>
+      </a>
+      <a href="#map/cimisStations">
+        <span>CIMIS Stations</span>
+      </a>
+      <h3>About</h3>
+      <a href="#about">
+        <span>About Spatial CIMIS</span>
+      </a>
+    </paper-material>
+  </div>
+</header>
 
 <iron-pages 
   selected-attribute="active" 
