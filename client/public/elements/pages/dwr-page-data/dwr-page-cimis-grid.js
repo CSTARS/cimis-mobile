@@ -3,10 +3,10 @@ import template from "./dwr-page-cimis-grid.html"
 
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import CimisGridInterface from "../../interfaces/CimisGridInterface"
-import ToggleStateInterace from "../../interfaces/ToggleStateInterace"
+import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
 
 class DwrPageCimisGrid extends Mixin(PolymerElement)
-    .with(EventInterface, AppStateInterface, CimisGridInterface, ToggleStateInterace) {
+    .with(EventInterface, AppStateInterface, CimisGridInterface, ElementUtilsInterface) {
 
   static get template() {
     return template;

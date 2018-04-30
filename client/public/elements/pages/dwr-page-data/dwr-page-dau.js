@@ -1,12 +1,14 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
 import template from "./dwr-page-dau.html"
 
+import utils from "../../../lib/utils"
+
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import DauInterface from "../../interfaces/DauInterface"
-import ToggleStateInterace from "../../interfaces/ToggleStateInterace"
+import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
 
 class DwrPageDau extends Mixin(PolymerElement)
-  .with(EventInterface, AppStateInterface, DauInterface, ToggleStateInterace) {
+  .with(EventInterface, AppStateInterface, DauInterface, ElementUtilsInterface) {
 
   static get properties() {
     return {
@@ -185,7 +187,7 @@ class DwrPageDau extends Mixin(PolymerElement)
 
     this.debounce('redrawMap', () => {
       google.maps.event.trigger(this.map, "resize");
-      this.fitToFeature(this.selected);
+      utils.map.fitToFeature(this.selected, this.map, this.getRegionNumber);
     }, 50);
   }
 

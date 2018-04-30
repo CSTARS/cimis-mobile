@@ -1,12 +1,14 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
 import template from "./dwr-page-eto.html"
 
+import utils from "../../../lib/utils"
+
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import EtoZonesInterface from "../../interfaces/EtoZonesInterface"
-import ToggleStateInterace from "../../interfaces/ToggleStateInterace"
+import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
 
 class DwrPageEto extends Mixin(PolymerElement)
-  .with(EventInterface, AppStateInterface, EtoZonesInterface, ToggleStateInterace) {
+  .with(EventInterface, AppStateInterface, EtoZonesInterface, ElementUtilsInterface) {
 
   static get properties() {
     return {
@@ -318,7 +320,7 @@ class DwrPageEto extends Mixin(PolymerElement)
   redraw() {
     this.debounce('redraw', () => {
       google.maps.event.trigger(this.map, "resize");
-      this.fitToFeature(this.selected);
+      utils.map.fitToFeature(this.selected, this.map, this.getRegionNumber);
 
       if( !this.chart ) return;
       this.chart.draw(this.dt, this.options);

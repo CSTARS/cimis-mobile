@@ -3,9 +3,10 @@ import template from "./dwr-page-station.html"
 
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import StationInterface from "../../interfaces/StationInterface"
+import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
 
 class DwrPageCimisStation extends Mixin(PolymerElement)
-    .with(EventInterface, AppStateInterface, StationInterface) {
+    .with(EventInterface, AppStateInterface, StationInterface, ElementUtilsInterface) {
 
   static get properties() {
     return {

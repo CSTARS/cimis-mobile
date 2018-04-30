@@ -1,19 +1,15 @@
 
 <style include="shared-styles"></style>
 <style>
-:host {
+  :host {
     display: block;
     height: 100%;
     position: relative;
-}
+  }
 
-.fullbleed {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
+/* iron-pages {
+  position: relative;
+} */
 
 h2 {
   font-weight: 200
@@ -26,11 +22,16 @@ paper-material {
 #locationBtn {
   display: none;
 }
+
+app-header {
+  z-index: 100;
+  background-color: red;
+}
 </style>
 
-<paper-header-panel  style="height:100%">
-  <paper-toolbar slot="header">
-    <div slot="top" style="flex:1">
+<app-header>
+  <app-toolbar >
+    <div style="flex:1">
     <div style="display:flex; align-items: center">
 
       <paper-icon-button 
@@ -81,18 +82,16 @@ paper-material {
         </paper-menu-button>
       </div>
     </div>
-  </paper-toolbar>
+  </app-toolbar>
+</app-header>
 
-  <iron-pages 
-    class="fullbleed" 
-    selected-attribute="active" 
-    attr-for-selected="id" 
-    selected="[[appState.section]]">
-    
-    <dwr-page-map id="map"></dwr-page-map>
-    <dwr-page-data id="data"></dwr-page-data>
-    <dwr-page-about id="about"></dwr-page-about>
-    <dwr-page-location id="location"></dwr-page-location>
-  </iron-pages>
-
-</paper-header-panel>
+<iron-pages 
+  selected-attribute="active" 
+  attr-for-selected="id" 
+  selected="[[appState.section]]">
+  
+  <dwr-page-map id="map"></dwr-page-map>
+  <dwr-page-data id="data"></dwr-page-data>
+  <dwr-page-about id="about"></dwr-page-about>
+  <dwr-page-location id="location"></dwr-page-location>
+</iron-pages>

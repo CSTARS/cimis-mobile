@@ -1,7 +1,9 @@
 module.exports = subclass => 
-  class ToggleStateInterace extends subclass {
+  class ElementUtilsInterface extends subclass {
     ready() {
       super.ready();
+
+      this._debounce_timers = {};
 
       var states = this.states || [];
       if( states.indexOf('state') === -1 ) {
@@ -27,4 +29,16 @@ module.exports = subclass =>
         ele.style.display = (ele.getAttribute(type) === state) ? 'block' : 'none';
       }
     }
+
+    debounce(name, fn, time) {
+      if( this._debounce_timers[name] ) {
+        clearTimeout(this._debounce_timers[name]);
+      }
+
+      this._debounce_timers[name] = setTimeout(() => {
+        delete this._debounce_timers[name];
+        fn();
+      }, time);
+    }
+
   }

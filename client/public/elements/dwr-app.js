@@ -1,11 +1,12 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
-import "@polymer/paper-header-panel/paper-header-panel"
-import "@polymer/paper-toolbar/paper-toolbar"
+import "@polymer/app-layout/app-header/app-header"
+import "@polymer/app-layout/app-toolbar/app-toolbar"
 import "@polymer/paper-icon-button/paper-icon-button"
 import "@polymer/paper-menu-button/paper-menu-button"
 import "@polymer/paper-listbox/paper-listbox"
 import "@polymer/paper-item/paper-item"
 import "@polymer/iron-pages/iron-pages"
+import "@polymer/iron-icons/iron-icons"
 
 // sets globals Mixin and EventInterface
 import "@ucd-lib/cork-app-utils";

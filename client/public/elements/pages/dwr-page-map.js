@@ -6,10 +6,11 @@ import DauInterface from "../interfaces/DauInterface"
 import EtoZonesInterface from "../interfaces/EtoZonesInterface"
 import StationInterface from "../interfaces/StationInterface"
 import CimisGridInterface from "../interfaces/CimisGridInterface"
+import ElementUtilsInterface from "../interfaces/ElementUtilsInterface"
 
 class DwrPageMap extends Mixin(PolymerElement)
     .with(EventInterface, AppStateInterface, CimisGridInterface, 
-        StationInterface, DauInterface, EtoZonesInterface) {
+        StationInterface, DauInterface, EtoZonesInterface, ElementUtilsInterface) {
   
   static get properties() {
     return {

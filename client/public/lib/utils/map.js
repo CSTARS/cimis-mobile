@@ -1,9 +1,9 @@
 class MapUtils {
 
-  fitToFeature(selectedId) {
+  fitToFeature(selectedId, map, getRegionNumber) {
       var features = [];
-      this.map.data.forEach((feature) => {
-          if( this.getRegionNumber(feature)+'' === selectedId) {
+      map.data.forEach((feature) => {
+          if( getRegionNumber(feature)+'' === selectedId) {
               features.push(feature);
           }
       });
@@ -12,7 +12,7 @@ class MapUtils {
       features.forEach((feature) => {
           this.processPoints(feature.getGeometry(), bounds.extend, bounds);
       });
-      this.map.fitBounds(bounds);
+      map.fitBounds(bounds);
   }
 
   processPoints(geometry, callback, thisArg) {
