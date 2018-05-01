@@ -81,10 +81,10 @@ class DwrPageDau extends Mixin(PolymerElement)
   }
 
   _onAppStateUpdate(e) {
+    if( e.section !== 'map' || e.mapState !== 'dauZone'  ) return;
     if( this.selected === e.selectedDauLocation ) return;
     this.selected = e.selectedDauLocation;
 
-    if( !this.active ) return;
     this._getDauData(this.selected)
         .then(e => this._onDauDataUpdate(e));
   }

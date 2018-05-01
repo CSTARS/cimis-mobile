@@ -15,7 +15,8 @@ class EtoZonesService extends BaseService {
       checkCached : () => this.store.data.geometry,
       onLoading : request => this.store.setGeometryLoading(request),
       onError : e => this.store.setGeometryError(e),
-      onSuccess : (body) => {
+      onLoad : (resp) => {
+        let body = resp.body;
         model.mergeZoneMap(body);
         this.store.setGeometryLoaded(body);
       }
@@ -28,7 +29,7 @@ class EtoZonesService extends BaseService {
       checkCached : () => this.store.data.byId[etoZoneId],
       onLoading : request => this.store.setZoneLoading(etoZoneId, request),
       onError : error => this.store.setZoneError(etoZoneId, error),
-      onSuccess : body => this.store.setZoneLoaded(etoZoneId, body)
+      onLoad : resp => this.store.setZoneLoaded(etoZoneId, resp.body)
     });
   }
 

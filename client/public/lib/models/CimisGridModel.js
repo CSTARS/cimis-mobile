@@ -21,12 +21,14 @@ class CimisGridModel extends BaseModel {
     return this.utils.gridToBounds(row, col);
   }
 
-  getDates() {
-    return this.service.getDates();
+  async getDates() {
+    await this.service.getDates();
+    return this.store.data.dates;
   }
 
-  getData(id) {
-    return this.service.getData(id);
+  async getData(id) {
+    await this.service.getData(id);
+    return this.store.data.byId[id];
   }
 
 }

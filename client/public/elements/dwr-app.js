@@ -48,6 +48,19 @@ class DwrApp extends Mixin(PolymerElement)
       menuActive : {
         type : Boolean,
         value : false
+      },
+      loading : {
+        type : Boolean,
+        value : true
+      },
+
+      loadingDau : {
+        type : Boolean,
+        value : true
+      },
+      loadingEto : {
+        type : Boolean,
+        value : true
       }
     }
   }
@@ -58,24 +71,7 @@ class DwrApp extends Mixin(PolymerElement)
 
   ready() {
     super.ready();
-
-    if( google.visualization !== undefined ) {
-      this.onChartsReady();
-    } else {
-      google.charts.setOnLoadCallback(() => {
-        this.onChartsReady();
-      });
-    }
-
     window.addEventListener('click', () => this.hideMenu());
-  }
-
-  onChartsReady() {
-    window.addEventListener('hashchange', this._setAppStateFromUrl.bind(this));
-    this._setAppStateFromUrl();
-
-    var loadingMsg = document.querySelector('#loading-init');
-    if( loadingMsg ) document.body.removeChild(loadingMsg);
   }
 
   connectedCallback() {
@@ -98,49 +94,21 @@ class DwrApp extends Mixin(PolymerElement)
     }
   }
 
-  _setAppStateFromUrl() {
-    var parts = window.location.hash.replace(/#/,'').split('/');
-    var state = {
-      section : 'map'
-    };
-
-    if( parts.length > 0 && parts[0] ) {
-      state.section = parts.splice(0, 1)[0];
-    }
-    if( parts.length > 0 && parts[0]) {
-      if( state.section === 'map' || state.section === 'data' ) {
-        state.mapState = parts.splice(0, 1)[0];
-      }
-    }
-
-    if( parts.length > 0 && parts[0]) {
-      state.extras = parts;
-    }
-
-    this._setAppState(state);
-  }
-
   _onDauGeometryUpdate(e) {
-    switch(e.state) {
-      case 'loaded':
-        this.shadowRoot.querySelector('[page="dauZones"]').removeAttribute('disabled');
-        this.$.dauSpinner.removeAttribute('active');
-        this.$.dauSpinner.style.display = 'none';
-        break;
-      case 'error':
-        this.shadowRoot.querySelector('[page="dauZones"]').innerHTML = 'Failed to load Dau Zones :('
+    if( e.state === 'loading' ) {
+      this.dauLoading = false;
+    } else if( e.state === 'error' ) {
+      this.$.dauBtn.removeAttribute('href');
+      this.$.dauBtn.innerHTML = 'Failed to load Dau Zones :('
     }
   }
 
   _onEtoZonesGeometryUpdate(e) {
-    switch(e.state) {
-      case 'loaded':
-        this.shadowRoot.querySelector('[page="etoZones"]').removeAttribute('disabled');
-        this.$.etoSpinner.removeAttribute('active');
-        this.$.etoSpinner.style.display = 'none';
-        break;
-      case 'error':
-        this.shadowRoot.querySelector('[page="etoZones"]').innerHTML = 'Failed to load Dau Zones :('
+    if( e.state === 'loading' ) {
+      this.etoLoading = false;
+    } else if( e.state === 'error' ) {
+      this.$.etoBtn.removeAttribute('href');
+      this.$.etoBtn.innerHTML = 'Failed to load Eto Zones :('
     }
   }
 
@@ -154,15 +122,12 @@ class DwrApp extends Mixin(PolymerElement)
       this.$.locationBtn.style.display = 'none';
       this.$.backToMapBtn.style.display = 'block';
     }
-  }
 
-  _setUrlStateFromMenu(e) {
-    var newState = this.$.mapLayerMenu.selected;
-    if( !newState || newState === this.appState.section ) {
-      return;
+    if( this.loading ) {
+      this.loading = false;
+      var loadingMsg = document.querySelector('#loading-init');
+      if( loadingMsg ) document.body.removeChild(loadingMsg);
     }
-
-    window.location.hash = newState;
   }
 
   _setLayerFromMenu(e) {

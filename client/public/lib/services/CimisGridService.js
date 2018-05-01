@@ -15,7 +15,7 @@ class CimisGridService extends BaseService {
         checkCached : () => this.store.data.dates,
         onLoading : request => this.store.setDatesLoading(request),
         onError : e => this.store.setDatesError(e),
-        onSuccess : payload => this.store.setDatesLoaded(payload)
+        onLoad : resp => this.store.setDatesLoaded(resp.body)
       });
     }
 
@@ -27,7 +27,7 @@ class CimisGridService extends BaseService {
         checkCached : () => this.store.data.byId[cimisGridId],
         onLoading : request => this.store.setDataLoading(cimisGridId, request),
         onError : (error) => this.store.setDatesError(cimisGridId, error),
-        onSuccess : (body) => this.store.setDataLoaded(cimisGridId, body)
+        onLoad : resp => this.store.setDataLoaded(cimisGridId, resp.body)
       });
     }
 }

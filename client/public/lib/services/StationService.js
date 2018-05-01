@@ -15,7 +15,7 @@ class StationService extends BaseService {
         checkCached : () => this.store.data.stations,
         onLoading : request => this.store.setStationsLoading(request),
         onError : e => this.store.setStationsError(e),
-        onSuccess : payload => this.store.setStationsLoaded(payload)
+        onLoad : resp => this.store.setStationsLoaded(resp.body)
       });
     }
 
@@ -25,7 +25,7 @@ class StationService extends BaseService {
         checkCached : () => this.store.data.byId[stationId],
         onLoading : request => this.store.setDataLoading(stationId, request),
         onError : (error) => this.store.setDatesError(stationId, error),
-        onSuccess : (body) => this.store.setDataLoaded(stationId, body)
+        onLoad : resp => this.store.setDataLoaded(stationId, resp.body)
       });
     }
 }

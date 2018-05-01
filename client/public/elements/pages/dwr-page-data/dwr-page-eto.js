@@ -41,7 +41,7 @@ class DwrPageEto extends Mixin(PolymerElement)
     
     this.now = new Date();
     this.nowWeek = this.getWeekOfYear(0, this.now);
-
+    
     this._getEtoZonesGeometry();
     this.toggleState('loading');
 

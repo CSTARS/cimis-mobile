@@ -1,6 +1,8 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
 import template from "./dwr-page-cimis-grid.html"
 
+import utils from "../../../lib/utils"
+
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import CimisGridInterface from "../../interfaces/CimisGridInterface"
 import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
@@ -10,6 +12,15 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
 
   static get template() {
     return template;
+  }
+
+  static get properties() {
+    return {
+      currentChartSize : {
+        type : Array,
+        value : () => [0,0]
+      }
+    }
   }
 
   ready() {
@@ -52,7 +63,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
         curveType: 'function',
         height : 550,
         legend : {
-          position : 'none'
+          position : 'top'
         }
       },
       {
@@ -62,7 +73,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
         curveType: 'function',
         height : 550,
         legend : {
-          position : 'none'
+          position : 'top'
         }
       },
       {
@@ -72,7 +83,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
         curveType: 'function',
         height : 550,
         legend : {
-          position : 'none'
+          position : 'top'
         }
       },
       {
@@ -82,34 +93,17 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
         curveType: 'function',
         height : 550,
         legend : {
-          position : 'none'
+          position : 'top'
         }
       }
     ];
 
     this.charts = null;
     this.datatables = [];
-    this.resize();
 
     this.toggleState('loading');
 
-    window.addEventListener('resize', () => {
-      if( !this.active ) return;
-      this.resize();
-      this.redraw();
-    });
-  }
-
-  resize() {
-    if( !this.active ) return;
-    var size = 550;
-    if( window.innerWidth < 768 ) {
-      size = 450;
-    }
-
-    for( var i = 0; i < this.options.length; i++ ) {
-      this.options[i].height = size;
-    }
+    window.addEventListener('resize', () => this.redraw());
   }
 
   createDataTables() {
@@ -118,12 +112,12 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
 
     // eto chart
     var dt = new google.visualization.DataTable();
-    dt.addColumn('string', 'Date');
+    dt.addColumn('date', 'Date');
     dt.addColumn('number', 'ETo');
 
     this.sortedDates.forEach(function(date){
       d = this.currentGridData.payload.data[date];
-      arr = [date];
+      arr = [new Date(date)];
 
       arr.push(d.ETo || 0);
 
@@ -134,14 +128,14 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
 
     // temp chart
     dt = new google.visualization.DataTable();
-    dt.addColumn('string', 'Date');
+    dt.addColumn('date', 'Date');
     dt.addColumn('number', 'Dewpoint Temperature');
     dt.addColumn('number', 'Max Temperature');
     dt.addColumn('number', 'Min Temperature');
 
     this.sortedDates.forEach(function(date){
       d = this.currentGridData.payload.data[date];
-      arr = [date];
+      arr = [new Date(date)];
 
       arr.push(d.Tdew || 0);
       arr.push(d.Tx || 0);
@@ -154,13 +148,13 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
 
     // Radiation chart
     dt = new google.visualization.DataTable();
-    dt.addColumn('string', 'Date');
+    dt.addColumn('date', 'Date');
     dt.addColumn('number', 'Longwave Radiation');
     dt.addColumn('number', 'Shortwave Radiation');
 
     this.sortedDates.forEach(function(date){
       d = this.currentGridData.payload.data[date];
-      arr = [date];
+      arr = [new Date(date)];
 
       arr.push(d.Rnl || 0);
       arr.push(d.Rso || 0);
@@ -172,13 +166,13 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
 
     // wind speed chart
     dt = new google.visualization.DataTable();
-    dt.addColumn('string', 'Date');
+    dt.addColumn('date', 'Date');
     dt.addColumn('number', 'Wind Speed');
 
 
     this.sortedDates.forEach(function(date){
       d = this.currentGridData.payload.data[date];
-      arr = [date];
+      arr = [new Date(date)];
 
       arr.push(d.U2 || 0);
 
@@ -188,23 +182,17 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     this.datatables.push(dt);
   }
 
-  _onAppStateUpdate(e) {
+  async _onAppStateUpdate(e) {
+    if( !e.selectedCimisLocation || e.section !== 'data' ) return;
     if( this.selected === e.selectedCimisLocation ) return;
     this.selected = e.selectedCimisLocation;
-
-    if( !this.selected ) return;
-    this._getCimisGridData(this.selected)
-          .then(e => this._onCimisDataUpdate(e));
-  }
-
-  _onCimisDataUpdate(e) {
-    this.currentGridData = e;
+    this.currentGridData = await this._getCimisGridData(this.selected);
     this._renderData();
   }
 
   _renderData() {
     this.debounce('_renderData', function() {
-        this._renderDataAsync();
+      this._renderDataAsync();
     }, 50);
   }
 
@@ -212,20 +200,17 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     if( !this.currentGridData ) return;
 
     this.toggleState(this.currentGridData.state);
-    if( this.currentGridData.state !== 'loaded' ) {
-        return;
-    }
-
+    if( this.currentGridData.state !== 'loaded' ) return;
+  
     var payload = this.currentGridData.payload;
+    this.sortedDates = utils.sortDates(payload.data);
 
-    this.sortedDates = this._sortDates(payload.data);
-    this.$.gridLabel.innerHTML = 'Cell: '+payload.location.row+', '+payload.location.col +
-      ' <a style="float:right" href="/cimis/'+payload.location.row+'/'+payload.location.col+
-      '" target="_blank">API</a>';
-
+    this.row = payload.location.row;
+    this.col = payload.location.col;
 
     this.createDataTables();
 
+    // first time through we create our charts
     if( !this.charts ) {
       this.charts = [];
       this.$.charts.innerHTML = '';
@@ -233,26 +218,21 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
       for( var i = 0; i < this.datatables.length; i++ ) {
 
         var decor = document.createElement('paper-material');
+        decor.classList.add('chart-card');
         var root = document.createElement('div');
         decor.appendChild(root);
         this.$.charts.appendChild(decor);
-
-        //this.charts.push(new google.charts.Line(root));
         this.charts.push(new google.visualization.LineChart(root));
       }
     }
 
-    this.resize();
-
-    for( var i = 0; i < this.datatables.length; i++ ) {
-      this.charts[i].draw(this.datatables[i], this.options[i]);
-    }
+    this.redraw();
   }
 
   _onActive() {
     if( !this.active ) return;
 
-    this.resize();
+
     this.redraw();
 
     var parts = window.location.hash.replace(/#/,'').split('/');
@@ -270,9 +250,25 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
   redraw() {
     if( !this.charts ) return;
 
-    this.resize();
+    let w = this.shadowRoot.querySelector('paper-material.chart-card').offsetWidth - 10;
+    let h = Math.floor(w * 0.5);
+    this._redraw(h, w);
+
+    setTimeout(() => {
+      let w = this.shadowRoot.querySelector('paper-material.chart-card').offsetWidth - 10;
+      let h = Math.floor(w * 0.5);
+      this._redraw(h, w);
+    }, 100);
+  }
+
+  _redraw(height, width) {
+    if( this.currentChartSize[0] === height && this.currentChartSize[1] === width ) return;
+    this.currentChartSize = [height, width];
 
     for( var i = 0; i < this.datatables.length; i++ ) {
+      this.options[i].height = height;
+      this.options[i].width = width;
+
       this.charts[i].draw(this.datatables[i], this.options[i]);
     }
   }

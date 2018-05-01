@@ -103,17 +103,17 @@
   <div>
     <paper-icon-button inverse icon="more-vert" on-click="_onMenuIconClicked"></paper-icon-button>
   
-    <paper-material id="menu" on-click="_onMenuClicked" hidden$="[[!menuActive]]">
+    <paper-material id="menu" hidden$="[[!menuActive]]">
       <h3>Explore</h3>
       <a href="#map/cimisGrid" >
         <span>Spatial CIMIS Grid</span>
       </a>
-      <a href="#map/etoZones" >
-        <paper-spinner id="etoSpinner" active></paper-spinner>
+      <a id="etoBtn" href="#map/etoZones" disabled$="[[loadingEto]]" >
+        <paper-spinner id="etoSpinner" active$="[[loadingEto]]"></paper-spinner>
         <span>ETo Zones</span>
       </a>
-      <a href="#map/etoZones">
-        <paper-spinner id="dauSpinner" active></paper-spinner>
+      <a id="dauBtn" href="#map/dauZones" disabled$="[[loadingDau]]" >
+        <paper-spinner id="dauSpinner" active$="[[loadingDau]]"></paper-spinner>
         <span>DAU Zones</span>
       </a>
       <a href="#map/cimisStations">
@@ -123,6 +123,7 @@
       <a href="#about">
         <span>About Spatial CIMIS</span>
       </a>
+      <div>[[appState.section]]</div>
     </paper-material>
   </div>
 </header>

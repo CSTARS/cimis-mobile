@@ -22,7 +22,7 @@ module.exports = subclass =>
     toggleState(state, type) {
       if( !type ) type = 'state';
 
-      var eles = this.querySelectorAll('['+type+']');
+      var eles = this.shadowRoot.querySelectorAll('['+type+']');
       var i, ele;
       for( i = 0; i < eles.length; i++ ) {
         ele = eles[i];
@@ -37,7 +37,7 @@ module.exports = subclass =>
 
       this._debounce_timers[name] = setTimeout(() => {
         delete this._debounce_timers[name];
-        fn();
+        fn.call(this);
       }, time);
     }
 

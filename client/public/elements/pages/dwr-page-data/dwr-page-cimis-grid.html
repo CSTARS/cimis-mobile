@@ -1,26 +1,39 @@
-<style>
+<style include="shared-styles">
   :host {
     display: block;
-    padding: 10px;
+    padding: 5px;
+    background-color: var(--secondary-background-color);
   }
 
-  paper-material {
-    display: block;
-    margin: 15px;
-    padding-right: 15px;
+  @media(min-width: 600px) {
+    :host {
+      padding: 10px;
+    }
   }
 
-  h1 {
+  h1, h2 {
+    padding: 0;
+    margin: 5px 0;
     font-weight: 200;
   }
-  #docs {
-    text-align: right;
+
+  .docs {
+    display: flex;
+    align-items: center;
   }
 </style>
 
-<h1 id="gridLabel"></h1>
-<div id="docs">
-  <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
+
+<h1 id="gridLabel">Spatial CIMIS Grid: <b>[[row]],[[col]]</b></h1>
+
+<div class="docs">
+  <h2 style="flex:1">
+    <a href$="/cimis/[[row]]/[[col]]" target="_blank">API: /cimis/[[row]]/[[col]]</a>
+  </h2>
+  <div>
+    <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
+  </div>
+  
 </div>
 
 <div state="loaded">

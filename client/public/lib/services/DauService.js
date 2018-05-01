@@ -15,7 +15,7 @@ class DauService extends BaseService {
       checkCached : () => this.store.data.geometry,
       onLoading : request => this.store.setGeometryLoading(request),
       onError : e => this.store.setGeometryError(e),
-      onSuccess : body => this.store.setGeometryLoaded(body)
+      onLoad : resp => this.store.setGeometryLoaded(resp.body)
     });
   }
 
@@ -25,7 +25,7 @@ class DauService extends BaseService {
       checkCached : () => this.store.data.byId[dauZoneId],
       onLoading : request => this.store.setDauLoading(request),
       onError : error => this.store.setDauError(dauZoneId, error),
-      onSuccess : body => this.store.setDauLoaded(dauZoneId, body)
+      onLoad : resp => this.store.setDauLoaded(dauZoneId, resp.body)
     });
   }
 

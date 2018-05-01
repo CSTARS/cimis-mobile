@@ -1,6 +1,9 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
 import template from "./dwr-page-map.html"
 
+import utils from "../../lib/utils"
+import EtoOverlay from "../../lib/map/etoOverlay"
+
 import AppStateInterface from "../interfaces/AppStateInterface"
 import DauInterface from "../interfaces/DauInterface"
 import EtoZonesInterface from "../interfaces/EtoZonesInterface"
@@ -14,26 +17,30 @@ class DwrPageMap extends Mixin(PolymerElement)
   
   static get properties() {
     return {
-      mapState: {
-        type: String,
-        value : 'cimisGrid'
+      appState: {
+        type: Object,
+        value : () => ({})
       },
       
       dauGeometry: {
         type: Object,
-        value : function() {
-          return {state: 'loading'}
-        }
+        value : () => ({})
       },
+
       etoGeometry: {
         type: Object,
-        value : function() {
-          return {state: 'loading'}
-        }
+        value : () => ({state: 'loading'})
+      },
+
+      location : {
+        type : String,
+        value : '',
+        observer : '_onLocationUpdate'
       },
 
       dates: {
-        type: Object
+        type: Array,
+        value : () => []
       },
       selectedCimisGrid : {
         type: String
@@ -51,8 +58,6 @@ class DwrPageMap extends Mixin(PolymerElement)
   ready() {
     super.ready();
 
-    this.first = true;
-
     this.latLng = new google.maps.LatLng(38.033291, -119.961762);
     var mapOptions = {
       center: { lat: 38.033291, lng: -119.961762 },
@@ -68,7 +73,7 @@ class DwrPageMap extends Mixin(PolymerElement)
 
     this.map.data.setStyle({visible: false});
 
-    google.maps.event.addListener(this.map, 'click', this._onMapClick.bind(this));
+    google.maps.event.addListener(this.map, 'click', (e) => this._onMapClick(e));
     this.map.data.addListener('click', this._onRegionClick.bind(this));
 
     this.MasterController().on('select-location', (e) => {
@@ -83,72 +88,77 @@ class DwrPageMap extends Mixin(PolymerElement)
     this._getCimisStations();
   }
 
-  _onActive() {
-    if( !window.google || !this.active ) return;
-    
-    this._render();
-
-    this.debounce('resizeMap', () => {
-      google.maps.event.trigger(this.map, 'resize');
-      this.map.setCenter(this.latLng);
-    }, 50);
-  }
-
   _onDauGeometryUpdate(e) {
     this.dauGeometry = e;
-    if( e.state === 'loaded' && this.mapState === 'dauZones' ) {
+    if( e.state === 'loaded' && this.appState.mapState === 'dauZones' ) {
       this._render();
     }
   }
 
+  /**
+   * @method _onEtoZonesGeometryUpdate
+   * @param {Object} e eto zone geometry state object
+   */
   _onEtoZonesGeometryUpdate(e) {
     this.etoGeometry = e;
-    if( this.mapState === 'etoZones' ) {
+    if( this.appState.mapState === 'etoZones' ) {
       this._render();
     }
   }
 
   _onAppStateUpdate(e) {
+    this.appState = e;
+    if( e.section !== 'map' ) return;
+
     if( e.mapState === 'cimisGrid' && this.location !== e.selectedCimisLocation ) {
       this.location = e.selectedCimisLocation;
-      
-      if( this.location ) {
-        var parts = this.location.split('-').map(p => parseInt(p));
-        var location = this._gridToBounds(parts[0], parts[1])[0];
-
-        setTimeout(() => {
-          if( !this.map ) return;
-          this.map.setCenter({
-            lat: location[1], 
-            lng: location[0]
-          });
-        }, 300);
-      }
     }
-    
-    if( this.mapState === e.mapState ) return;
-    
-    this.mapState = e.mapState || 'cimisGrid';
+
+    this.debounce('resizeMap', () => {
+      google.maps.event.trigger(this.map, 'resize');
+      this.map.setCenter(this.latLng);
+    }, 50);
+
+    if( this.renderedMapState === e.mapState ) return;
+
     this._render();
   }
 
-  _render() {
-    this.debounce('_render', this._render, 50);
+  /**
+   * @method _onLocationUpdate
+   * @description bound to 'location' property observer
+   */
+  _onLocationUpdate() {
+    if( !this.location ) return;
+
+    var parts = this.location.split('-').map(p => parseInt(p));
+    var location = this._gridToBounds(parts[0], parts[1])[0];
+
+    setTimeout(() => {
+      if( !this.map ) return;
+      this.map.setCenter({
+        lat: location[1], 
+        lng: location[0]
+      });
+    }, 300);
   }
 
+
   _render() {
-    if( !this.map || !this.active ) return;
+    if( !this.map || this.appState.section !== 'map' ) return;
 
     // we only need to render a map state once
-    if( this.renderedMapState === this.mapState ) return;
+    if( this.renderedMapState === this.appState.mapState ) return;
 
     // if we are showing etoZones and they are not loaded, return
-    if( this.mapState === 'etoZones' && this.etoGeometry.state !== 'loaded' ) {
+    if( this.appState.mapState === 'etoZones' && 
+        this.etoGeometry.state !== 'loaded' ) {
       return;
     }
 
     // if we are showing dauZones and they are not loaded, return
-    if( this.mapState === 'dauZones' && this.dauGeometry.state !== 'loaded' ) {
+    if( this.appState.mapState === 'dauZones' && 
+        this.dauGeometry.state !== 'loaded' ) {
       return;
     }
 
@@ -156,7 +166,7 @@ class DwrPageMap extends Mixin(PolymerElement)
   }
 
   _renderAsync() {
-    if( this.renderedMapState === this.mapState ) return;
+    if( this.renderedMapState === this.appState.mapState ) return;
 
     // clear current data layer
     this.map.data.forEach((feature) => {
@@ -167,13 +177,13 @@ class DwrPageMap extends Mixin(PolymerElement)
     // remove a cimis grid if one exists
     this._clearCurrentGrid();
 
-    if( this.mapState === 'etoZones' || this.mapState === 'dauZones' ) {
+    if( this.appState.mapState === 'etoZones' || this.appState.mapState === 'dauZones' ) {
 
-      if( this.mapState === 'etoZones' ) this.map.data.addGeoJson(this.etoGeometry.payload);
+      if( this.appState.mapState === 'etoZones' ) this.map.data.addGeoJson(this.etoGeometry.payload);
       else this.map.data.addGeoJson(this.dauGeometry.payload);
 
       this.map.data.setStyle((feature) => {
-        if( this.mapState === 'dauZones' ) {
+        if( this.appState.mapState === 'dauZones' ) {
           return {
             fillColor: '#aaaaaa',
             strokeColor: '#ffffff',
@@ -197,13 +207,13 @@ class DwrPageMap extends Mixin(PolymerElement)
       this.map.data.setStyle({visible: false});
     }
 
-    if( this.mapState === 'cimisStations' ) {
+    if( this.appState.mapState === 'cimisStations' ) {
       this.showStationMarks();
     } else {
       this.hideStationMarks();
     }
 
-    this.renderedMapState = this.mapState;
+    this.renderedMapState = this.appState.mapState;
   }
 
   _getRegionNumber(feature) {
@@ -220,16 +230,14 @@ class DwrPageMap extends Mixin(PolymerElement)
     this.latLng = e.latLng;
 
     if( e.feature.getProperty('dauco') ) {
-      window.location.hash = '#data/'+this.mapState+'/'+this._getRegionNumber(e.feature);
+      window.location.hash = '#data/'+this.appState.mapState+'/'+this._getRegionNumber(e.feature);
     } else{
-      window.location.hash = '#data/'+this.mapState+'/'+this._getRegionNumber(e.feature);
+      window.location.hash = '#data/'+this.appState.mapState+'/'+this._getRegionNumber(e.feature);
     }
   }
 
   _onMapClick(e){
-    if( !this.active || this.mapState !== 'cimisGrid' ) {
-      return;
-    }
+    if( this.appState.mapState !== 'cimisGrid' ) return;
 
     var storage = {
       latitude : e.latLng.lat(),
@@ -336,8 +344,7 @@ class DwrPageMap extends Mixin(PolymerElement)
 
     this.dates = e;
 
-    // TODO: add mixin for this
-    var dates = this._sortDates(this.dates.payload);
+    var dates = utils.sortDates(this.dates.payload);
     this.yesterday = dates[dates.length-1];
   }
 

@@ -41,7 +41,7 @@ class AppStateStore extends BaseStore {
   }
 
   set(state) {
-    this.data = Object.assign(this.data, state);
+    this.data = Object.assign({}, this.data, state);
     this.emit(this.events.APP_STATE_UPDATE, this.data);
   }
 
