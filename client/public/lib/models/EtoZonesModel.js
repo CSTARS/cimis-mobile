@@ -9,6 +9,9 @@ class EtoZonesModel extends BaseModel {
     super();
     this.store = EtoZonesStore;
     this.service = EtoZonesService;
+
+    this.getGeometry(); // start loading geometry
+
     this.register('EtoZonesModel');
   }
 
@@ -16,9 +19,10 @@ class EtoZonesModel extends BaseModel {
     return styles;
   }
 
-  getGeometry() {
+  async getGeometry() {
     // pass model for access to util method
-    return this.service.getGeometry(this);
+    await this.service.getGeometry(this);
+    return this.store.data.geometry;
   }
 
   getZoneGeometry(id) {
@@ -26,8 +30,9 @@ class EtoZonesModel extends BaseModel {
     return this.store.data.zoneGeometryById[id];
   }
 
-  getZoneData(id) {
-    return this.service.getData(id);
+  async getZoneData(id) {
+    await this.service.getData(id);
+    return this.store.data.byId[id];
   }
 
 

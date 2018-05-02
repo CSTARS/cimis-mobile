@@ -38,6 +38,20 @@ class AppUtils {
   
     return arr.map(item => item.str);
   }
+
+  getDayOfYear(offset, now) {
+    var start = new Date(now.getFullYear(), 0, 0);
+    var diff = now - start;
+    var oneDay = 1000 * 60 * 60 * 24;
+    var day = Math.ceil(diff / oneDay) - (offset || 0);
+    if( day < 1 ) 356 + day;
+    return day;
+  }
+
+  getWeekOfYear(offset, date) {
+    if( !date ) date = new Date();
+    return Math.floor(this.getDayOfYear(7*offset, date) / 7);
+  }
   
   toDate(str) {
     var parts = str.split('-');

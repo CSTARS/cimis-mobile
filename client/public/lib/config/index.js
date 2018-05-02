@@ -4,8 +4,10 @@ const config = {
 
   googleMapsApiKey : 'AIzaSyB4rlURkcCLTg4nR8vBhMSLIPHyYKpahck',
 
-  unknown: {
-    mapOptions : {
+  months : ["Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"],
+
+  etoMap: {
+    options : {
       center: { 
         lat: 38.033291, 
         lng: -119.961762 
@@ -42,7 +44,8 @@ const config = {
   },
 
   dataPages : {
-    cimisGrid : require('./cimis-grid-charts')
+    cimisGrid : require('./cimis-grid-charts'),
+    etoZones : require('./eto-zone-charts')
   },
   
   definitions : require('./definitions.json')

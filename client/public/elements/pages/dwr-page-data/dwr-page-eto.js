@@ -2,6 +2,7 @@ import {PolymerElement} from "@polymer/polymer/polymer-element"
 import template from "./dwr-page-eto.html"
 
 import utils from "../../../lib/utils"
+import config from "../../../lib/config"
 
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import EtoZonesInterface from "../../interfaces/EtoZonesInterface"
@@ -17,17 +18,19 @@ class DwrPageEto extends Mixin(PolymerElement)
       },
       geometry : {
         type : Object,
-        value : function() {
-            return {state: 'loading'}
-        }
+        value : () => null
       },
       currentZoneData : {
         type : Object,
-        value : function() {
-          return {
-            state : 'loading'
-          }
-        }
+        value : () => ({state : 'loading'})
+      },
+      selectedEtoZoneLocation : {
+        type : String,
+        value : null
+      },
+      appState : {
+        type : Object,
+        value : () => ({})
       }
     }
   }
@@ -40,132 +43,103 @@ class DwrPageEto extends Mixin(PolymerElement)
     super.ready();
     
     this.now = new Date();
-    this.nowWeek = this.getWeekOfYear(0, this.now);
-    
-    this._getEtoZonesGeometry();
+    this.nowWeek = utils.getWeekOfYear(0, this.now);
+
     this.toggleState('loading');
-
-    this.months = ["Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"];
-
-    var mapOptions = {
-        center: { lat: 38.033291, lng: -119.961762 },
-        zoom: 5,
-        scrollwheel : false,
-        draggable : false,
-        panControl:true,
-        zoomControl:true,
-        mapTypeControl:false,
-        scaleControl:false,
-        streetViewControl:false,
-        overviewMapControl:false,
-        rotateControl:false,
-        zoomControlOptions : {
-            position : google.maps.ControlPosition.RIGHT_CENTER
-        },
-        panControlOptions : {
-            position : google.maps.ControlPosition.LEFT_TOP,
-        },
-        disableDefaultUI: true
-    };
-
-    this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
+    
+    this.map = new google.maps.Map(this.$.zoneMap, config.etoMap.options);
     this.map.data.addListener('click', this._onRegionClick.bind(this));
 
-    window.addEventListener('resize', this.redraw.bind(this));
+    window.addEventListener('resize', this._redraw.bind(this));
+
+    this._onAppStateUpdate(this._getAppState());
   }
 
-  _onActive() {
-    if( !this.active ) return;
-
-    var parts = window.location.hash.replace(/#/,'').split('/');
-    if( parts.length >= 3 ) {
-        this._selectZone(parts[2]);
-    }
-  }
-
+  /**
+   * @method _onEtoZonesGeometryUpdate
+   * @description via EtoZoneInterface, called when eto zone geometry
+   * state updates
+   * 
+   * @param {Object} e eto zone geometry state object
+   */
   _onEtoZonesGeometryUpdate(e) {
     if( e.state !== 'loaded' ) return;
 
     this.geometry = e;
     this.map.data.addGeoJson(this.geometry.payload);
-    this.redraw();
-    this._renderData();
+
+    // fake a app state update in case we are waiting for geometry to load
+    this._onAppStateUpdate(this.appState);
   }
 
+  /**
+   * @method _onRegionClick
+   * @description bound to google maps data click event (see contructor).
+   * updates window state to clicked region
+   */
   _onRegionClick(e) {
-    if( !e.feature ) {
-        return;
-    }
-    window.location.hash = '#data/etoZones/'+this.getRegionNumber(e.feature);
-    this._onActive();
+    if( !e.feature ) return;
+    window.location.hash = '#data/etoZones/'+this._getRegionNumber(e.feature);
   }
 
-  _onAppStateUpdate(e) {
-    if( this.selected === e.selectedEtoZoneLocation ) return;
-    this.selected = e.selectedEtoZoneLocation;
+  /**
+   * @method _onAppStateUpdate
+   * @description via AppStateInterface.  fires when app state updates
+   * 
+   * @param {Object} e app state object
+   */
+  async _onAppStateUpdate(e) {
+    this.appState = e;
 
-    if( !this.active ) return;
+    if( e.section !== 'data' || e.mapState !== 'etoZones' ) return;
+    if( !this.geometry || !e.selectedEtoZoneLocation ) return;
+    if( this.selectedEtoZoneLocation === e.selectedEtoZoneLocation ) return;
     
-    this._getEtoZoneData(this.selected)
-        .then(e => this._onEtoZonesDataUpdate(e));
-  }
+    this.selectedEtoZoneLocation = e.selectedEtoZoneLocation;
+    
+    this.toggleState('loading');
+    this.currentZoneData = await this._getEtoZoneData(this.selectedEtoZoneLocation);
 
-  _selectZone(id) {
-    this._setAppState({
-        selectedEtoZoneLocation : id
-    });
-  }
-
-  _onEtoZonesDataUpdate(e) {
-    this.currentZoneData = e;
-
-    if( this.geometry.state !== 'loaded' ) {
-        return;
-    }
-
-    this._renderData();
-  }
-
-  _renderData() {
-    this.debounce('_renderData', () => this._renderDataAsync(), 50);
-  }
-
-  _renderDataAsync() {
     this.toggleState(this.currentZoneData.state);
+ 
+    this._render(); 
+  }
 
-    if( this.currentZoneData.state !== 'loaded' ) {
-        return;
-    }
-
+  
+  _render() {
+    // style map
     this.map.data.setStyle((feature) => {
-        var label = this.getRegionNumber(feature);
-        if( label+'' === this.selected ){
-            this.feature = feature;
-            return {
-                fillColor: this._getEtoZoneGeometry(label).properties.color,
-                strokeColor: '#fff',
-                fillOpacity : .6,
-                strokeWeight: 1
-            };
-        } else {
-            return {
-                fillColor: '#333',
-                strokeColor: '#fff',
-                fillOpacity : .2,
-                strokeWeight: 1
-            };
-        }
+      var label = this._getRegionNumber(feature);
+      if( label+'' === this.selectedEtoZoneLocation ){
+        this.feature = feature;
+        return {
+          fillColor: this._getEtoZoneGeometry(label).properties.color,
+          strokeColor: '#fff',
+          fillOpacity : .6,
+          strokeWeight: 1
+        };
+      } else {
+        return {
+          fillColor: '#333',
+          strokeColor: '#fff',
+          fillOpacity : .2,
+          strokeWeight: 1
+        };
+      }
     });
 
-    var data = this._getEtoZoneGeometry(this.selected);
+    // grab values from geometry geojson
+    debugger;
+    var data = this._getEtoZoneGeometry(this.selectedEtoZoneLocation);
     this.$.average.innerHTML = data.properties.avg.toFixed(1);
     this.$.delta.innerHTML = data.properties.delta.toFixed(1);
 
-    this.sortedDates = this._sortDates(this.currentZoneData.payload.data);
+    this.sortedDates = utils.sortDates(this.currentZoneData.payload.data);
 
+    // do mathz
     var p = [data.properties.p0, data.properties.p1, data.properties.p2]; 
     var h = [0, data.properties.h1, data.properties.h2];
-    var signature = this.AppUtils.fft.ifft(p, h, 52);
+    var signature = utils.fft.ifft(p, h, 52);
 
     var cumSignature = [], prev = 0;
     for( var i = 0; i < signature.length; i++ ) {
@@ -174,108 +148,75 @@ class DwrPageEto extends Mixin(PolymerElement)
     }
 
     // eto chart
-    this.dt = new google.visualization.DataTable();
-    this.dt.addColumn('string', 'Date');
-    this.dt.addColumn('number', 'Avg ETo');
-    this.dt.addColumn('number', 'Expected ETo');
+    this.etoDataTable = new google.visualization.DataTable();
+    this.etoDataTable.addColumn('string', 'Date');
+    this.etoDataTable.addColumn('number', 'Avg ETo');
+    this.etoDataTable.addColumn('number', 'Expected ETo');
 
-    var weeks = [this.getWeekOfYear(2), this.getWeekOfYear(1), this.getWeekOfYear(0)];
+    var weeks = [utils.getWeekOfYear(2), utils.getWeekOfYear(1), utils.getWeekOfYear(0)];
 
     var mid = Math.floor(this.sortedDates.length / 2);
     var end = this.sortedDates.length-1;
 
     this.sortedDates.forEach((date, index) => {
-        var d = this.currentZoneData.payload.data[date];
-        arr = [date];
+      var d = this.currentZoneData.payload.data[date];
+      arr = [date];
 
-        arr.push(parseFloat(d) || 0);
+      arr.push(parseFloat(d) || 0);
 
-        if( index === 0 ) {
-            arr.push(signature[this.weekOffsetHelperCurrent(weeks[0])]);
-        } else if( index === mid ) {
-            arr.push(signature[this.weekOffsetHelperCurrent(weeks[1])]);
-        } else if( index === end ) {
-            arr.push(signature[this.weekOffsetHelperCurrent(weeks[2])]);
-        } else {
-            arr.push(null);
-        }
+      if( index === 0 ) {
+          arr.push(signature[this._weekOffsetHelperCurrent(weeks[0])]);
+      } else if( index === mid ) {
+          arr.push(signature[this._weekOffsetHelperCurrent(weeks[1])]);
+      } else if( index === end ) {
+          arr.push(signature[this._weekOffsetHelperCurrent(weeks[2])]);
+      } else {
+          arr.push(null);
+      }
 
-        this.dt.addRow(arr);
+      this.etoDataTable.addRow(arr);
     });
 
-    if( !this.chart ) {
-        this.chart = new google.visualization.LineChart(this.$.chart);
-        this.options = {
-            title : 'ETo - Evapotranspiration (mm)',
-            curveType: 'function',
-            height : 550,
-            interpolateNulls : true,
-            animation : {
-                easing : 'out',
-                startup : true
-            },
-            series: {
-                1: { 
-                    lineDashStyle: [4, 4] 
-                }
-            }
-        }
+    if( !this.etoChart ) {
+      this.etoChart = new google.visualization.LineChart(this.$.eto);
     }
 
-    this.dt2 = new google.visualization.DataTable();
-    this.dt2.addColumn('string', 'Week');
-    this.dt2.addColumn('number', 'Eto');
-    this.dt2.addColumn('number', 'Two Weeks Ago');
-    this.dt2.addColumn('number', 'This Week');
+    this.expectedEtoDataTable = new google.visualization.DataTable();
+    this.expectedEtoDataTable.addColumn('string', 'Week');
+    this.expectedEtoDataTable.addColumn('number', 'Eto');
+    this.expectedEtoDataTable.addColumn('number', 'Two Weeks Ago');
+    this.expectedEtoDataTable.addColumn('number', 'This Week');
 
     for( var i = 0; i < signature.length; i++ ) {
-    var actualWeek = this.getChartWeekLabel(i);
-    var arr = [actualWeek.label, signature[i]];
-    
-    if( actualWeek.week === weeks[0] ) {
-        arr.push(signature[i]);
-    } else {
-        arr.push(null);
-    }
-    if( actualWeek.week === weeks[2] ) {
-        arr.push(signature[i]);
-    } else {
-        arr.push(null);
-    }
+      var actualWeek = this._getChartWeekLabel(i);
+      var arr = [actualWeek.label, signature[i]];
+      
+      if( actualWeek.week === weeks[0] ) {
+          arr.push(signature[i]);
+      } else {
+          arr.push(null);
+      }
+      if( actualWeek.week === weeks[2] ) {
+          arr.push(signature[i]);
+      } else {
+          arr.push(null);
+      }
 
-    this.dt2.addRow(arr);
+      this.expectedEtoDataTable.addRow(arr);
     }
 
     if( !this.chart2 ) {
-        this.chart2 = new google.visualization.ComboChart(this.$.chart2);
-        this.options2 = {
-            title : 'Weekly Expected Evapotranspiration (mm)',
-            curveType: 'function',
-            height : 550,
-            legend : {
-                position : 'none'
-            },
-            hAxis : {
-                title : 'Week'
-            },
-            seriesType : 'bars',
-            series: {
-                0: { 
-                    type : 'line',
-                    targetAxisIndex : 0
-                }
-            }
-        }
+        this.expectedEtoChart = new google.visualization.ComboChart(this.$.expectedEto);
     }
 
-    this.dt3 = new google.visualization.DataTable();
-    this.dt3.addColumn('string', 'Week');
-    this.dt3.addColumn('number', 'Cumulative ETo');
-    this.dt3.addColumn('number', 'Two Weeks Ago');
-    this.dt3.addColumn('number', 'This Week');
+    this.expectedCumEtoDataTable = new google.visualization.DataTable();
+    this.expectedCumEtoDataTable.addColumn('string', 'Week');
+    this.expectedCumEtoDataTable.addColumn('number', 'Cumulative ETo');
+    this.expectedCumEtoDataTable.addColumn('number', 'Two Weeks Ago');
+    this.expectedCumEtoDataTable.addColumn('number', 'This Week');
 
     for( var i = 0; i < cumSignature.length; i++ ) {
-        var actualWeek = this.getChartWeekLabel(i);
+        var actualWeek = this._getChartWeekLabel(i);
         var arr = [actualWeek.label, cumSignature[i]];
         
         if( actualWeek.week === weeks[0] ) {
@@ -289,94 +230,99 @@ class DwrPageEto extends Mixin(PolymerElement)
             arr.push(null);
         }
 
-        this.dt3.addRow(arr);
+        this.expectedCumEtoDataTable.addRow(arr);
     }
 
-    if( !this.chart3 ) {
-        this.chart3 = new google.visualization.ComboChart(this.$.chart3);
-        this.options3 = {
-            title : 'Expected Cumulative Weekly Evapotranspiration (mm)',
-            curveType: 'function',
-            height : 550,
-            legend : {
-                position : 'none'
-            },
-            hAxis : {
-                title : 'Week'
-            },
-            seriesType : 'bars',
-            series: {
-                0: { 
-                    type : 'line',
-                    targetAxisIndex : 0
-                }
-            }
-        }
+    if( !this.expectedCumEtoChart ) {
+      this.expectedCumEtoChart = new google.visualization.ComboChart(this.$.expectedCumEto);
     }
 
-    this.redraw();
+    this._redraw();
   }
+  
+  /**
+   * @method _redraw
+   * @description update map to center on feature, redraw charts with given 
+   * data tables and options.
+   */
+  _redraw() {
+    if( this.appState.section !== 'data' || 
+        this.appState.mapState !== 'mapState' ) {
+      return;
+    }
 
-  redraw() {
     this.debounce('redraw', () => {
       google.maps.event.trigger(this.map, "resize");
-      utils.map.fitToFeature(this.selected, this.map, this.getRegionNumber);
+      utils.map.fitToFeature(this.selectedEtoZoneLocation, this.map, this._);
 
-      if( !this.chart ) return;
-      this.chart.draw(this.dt, this.options);
-      this.chart2.draw(this.dt2, this.options2);
-      this.chart3.draw(this.dt3, this.options3);
+      let options = config.dataPages.etoZones;
+      if( !this.etoChart ) return;
+      this.etoChart.draw(this.etoDataTable, options.etoChartOptions);
+      this.expectedEtoChart.draw(this.expectedEtoDataTable, options.expectedEtoOptions);
+      this.expectedCumEtoChart.draw(this.expectedCumEtoDataTable, options.expectedEtoCumOptions);
     }, 50);
   }
 
-  getDayOfYear(offset, now) {
-    var start = new Date(now.getFullYear(), 0, 0);
-    var diff = now - start;
-    var oneDay = 1000 * 60 * 60 * 24;
-    var day = Math.ceil(diff / oneDay) - (offset || 0);
-    if( day < 1 ) 356 + day;
-    return day;
-  }
-
-  getWeekOfYear(offset, date) {
-    if( !date ) date = new Date();
-    return Math.floor(this.getDayOfYear(7*offset, date) / 7);
-  }
-
-  getRegionNumber(feature) {
+  /**
+   * @method _getRegionNumber
+   * @description given a google maps geojson feature, return zone property
+   * 
+   * @param {Object} feature google maps geojson feature
+   * 
+   * @returns {String}
+   */
+  _getRegionNumber(feature) {
     return feature.getProperty('zone');
   }
 
-  getDateOfWeek(w) {
+  
+  /**
+   * @method _getChartWeekLabel
+   * @description given a week number, return start date of that week
+   * 
+   * @param {Number} week
+   * 
+   * @return {Object}
+   */
+  _getChartWeekLabel(week) {
+    week = this._weekOffsetHelper(week);
+    return {
+      week,
+      label : this._getDateOfWeek(week)
+    }
+  }
+
+  /**
+   * @method _getDateOfWeek
+   * @description helper for _getChartWeekLabel
+   * 
+   * @param {Number} week
+   * 
+   * @return {String}
+   */
+  _getDateOfWeek(week) {
     var y = this.now.getFullYear();
     
+    // relative to water year?
     if( this.nowWeek >= 40 ) {
-        if( w < 40 ) y++;
+        if( week < 40 ) y++;
     } else {
-        if( w >= 40 ) y--;
+        if( week >= 40 ) y--;
     }
 
-    var d = (1 + (w - 1) * 7); // 1st of January + 7 days for each week
+    var d = (1 + (week - 1) * 7); // 1st of January + 7 days for each week
     d = new Date(y, 0, d);
 
     return this.months[d.getMonth()]+' '+d.getDate()+', '+y;
   }
 
-  getChartWeekLabel(w) {
-    w = this.weekOffsetHelper(w);
-    return {
-        week : w,
-        label : this.getDateOfWeek(w)
-    }
-  }
-
-  weekOffsetHelper(w) {
+  _weekOffsetHelper(w) {
     w = w-12;
     if( w < 0 ) w = w+52; 
     return w;
   }
 
-  weekOffsetHelperCurrent(w) {
+  _weekOffsetHelperCurrent(w) {
     w = w+12;
     if( w > 52 ) w = w-52; 
     return w;

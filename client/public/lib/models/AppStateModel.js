@@ -58,6 +58,8 @@ class AppStateModel extends BaseModel {
     if( parts.length > 0 ) {
       if( state.mapState === 'cimisGrid' ) {
         state.selectedCimisLocation = parts[0];
+      } else if( state.mapState === 'etoZones' ) {
+        state.selectedEtoZoneLocation = parts[0];
       }
     }
 
