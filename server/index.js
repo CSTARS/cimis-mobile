@@ -26,6 +26,11 @@ app.use((req, res, next) => {
 app.use('/cimis', require('./controllers/cimis'));
 
 /**
+ * setup main html path to inject data template
+ */
+require('./lib/template')(app, require('./lib/get-current-data'));
+
+/**
  * Set static asset path
  */
 var assetPath = path.resolve(__dirname, '..', 'client', config.server.assetPath);

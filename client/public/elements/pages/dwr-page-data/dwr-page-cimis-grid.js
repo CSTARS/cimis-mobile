@@ -2,6 +2,7 @@ import {PolymerElement} from "@polymer/polymer/polymer-element"
 import template from "./dwr-page-cimis-grid.html"
 
 import utils from "../../../lib/utils"
+import config from "../../../lib/config"
 
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import CimisGridInterface from "../../interfaces/CimisGridInterface"
@@ -19,6 +20,30 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
       currentChartSize : {
         type : Array,
         value : () => [0,0]
+      },
+
+      // google chart objects
+      charts : {
+        type : Array,
+        value : null
+      },
+
+      // array of google chart datatable objects
+      datatables : {
+        type : Array,
+        value : () => []
+      },
+
+      // currently selected grid state object
+      selectedGridData : {
+        type : Object,
+        value : null
+      },
+
+      // currently selected grid id
+      selectedGridId : {
+        type : String,
+        value : null
       }
     }
   }
@@ -26,87 +51,19 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
   ready() {
     super.ready();
 
-    this.params = ['Rnl','Rso','U2', 'ETo', 'Tdew','Tn','Tx'];
-    this.data = null;
+    this.params = config.dataPages.cimisGrid.params;
+    this.options = config.dataPages.cimisGrid.options;
 
-    this.chartOptions = {
-        title : '',
-        height : 600,
-        vAxes: [{
-                title: "Radiation Short/Long (MW/h); Wind Speed (m/s); Temperature Min/Max/Dew (^C);",
-                minValue : -5,
-                maxValue : 35
-              },{
-                title: "ETo (mm)",
-                minValue : 0,
-                maxValue : 10
-              }],
-        hAxis: {title: "Date"},
-        seriesType: "bars",
-        series: {
-            0: {type: "line", targetAxisIndex:0},
-            1: {type: "line", targetAxisIndex:0},
-            2: {type: "line", targetAxisIndex:0},
-            3: {type: "area", targetAxisIndex:1}
-
-        },
-        legend : {
-          maxLines : 3
-        }
-    }
-
-    this.options = [
-      {
-        //chart : {
-          title : 'ETo - Evapotranspiration (mm)',
-        //},
-        curveType: 'function',
-        height : 550,
-        legend : {
-          position : 'top'
-        }
-      },
-      {
-        //chart : {
-          title : 'Temperature Min/Max/Dew (^C)',
-        //},
-        curveType: 'function',
-        height : 550,
-        legend : {
-          position : 'top'
-        }
-      },
-      {
-        //chart : {
-          title : 'Radiation Short/Long (MW/h)',
-        //},
-        curveType: 'function',
-        height : 550,
-        legend : {
-          position : 'top'
-        }
-      },
-      {
-        //chart : {
-          title : 'Wind Speed (m/s)',
-        //},
-        curveType: 'function',
-        height : 550,
-        legend : {
-          position : 'top'
-        }
-      }
-    ];
-
-    this.charts = null;
-    this.datatables = [];
 
     this.toggleState('loading');
-
-    window.addEventListener('resize', () => this.redraw());
+    window.addEventListener('resize', () => this._redraw());
   }
 
-  createDataTables() {
+  /**
+   * @method _createDataTables
+   * @description create google chart data table objects from selectedGridData
+   */
+  _createDataTables() {
     this.datatables = [];
     var d, arr;
 
@@ -116,7 +73,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     dt.addColumn('number', 'ETo');
 
     this.sortedDates.forEach(function(date){
-      d = this.currentGridData.payload.data[date];
+      d = this.selectedGridData.payload.data[date];
       arr = [new Date(date)];
 
       arr.push(d.ETo || 0);
@@ -134,7 +91,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     dt.addColumn('number', 'Min Temperature');
 
     this.sortedDates.forEach(function(date){
-      d = this.currentGridData.payload.data[date];
+      d = this.selectedGridData.payload.data[date];
       arr = [new Date(date)];
 
       arr.push(d.Tdew || 0);
@@ -153,7 +110,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     dt.addColumn('number', 'Shortwave Radiation');
 
     this.sortedDates.forEach(function(date){
-      d = this.currentGridData.payload.data[date];
+      d = this.selectedGridData.payload.data[date];
       arr = [new Date(date)];
 
       arr.push(d.Rnl || 0);
@@ -171,7 +128,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
 
 
     this.sortedDates.forEach(function(date){
-      d = this.currentGridData.payload.data[date];
+      d = this.selectedGridData.payload.data[date];
       arr = [new Date(date)];
 
       arr.push(d.U2 || 0);
@@ -182,33 +139,47 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     this.datatables.push(dt);
   }
 
-  async _onAppStateUpdate(e) {
+  /**
+   * @method _onAppStateUpdate
+   * @description via AppStateInterface. Called when app state updates.  if
+   * we are in the data section and have a selectedGridId that has not been
+   * rendered, render charts 
+   */
+   _onAppStateUpdate(e) {
     if( !e.selectedCimisLocation || e.section !== 'data' ) return;
-    if( this.selected === e.selectedCimisLocation ) return;
-    this.selected = e.selectedCimisLocation;
-    this.currentGridData = await this._getCimisGridData(this.selected);
+    if( this.selectedGridId === e.selectedCimisLocation ) return;
+    this.selectedGridId = e.selectedCimisLocation;
+
+    this.toggleState('loading');
+    
     this._renderData();
   }
 
+  /**
+   * @method _renderData
+   * @description simple debounce for render in its called in sequence
+   */
   _renderData() {
-    this.debounce('_renderData', function() {
-      this._renderDataAsync();
-    }, 50);
+    this.debounce('_renderData', () => this._renderDataAsync(), 50);
   }
 
-  _renderDataAsync() {
-    if( !this.currentGridData ) return;
-
-    this.toggleState(this.currentGridData.state);
-    if( this.currentGridData.state !== 'loaded' ) return;
+  /**
+   * @method _renderDataAsync
+   * @description request grid data for selected grid.  create data tables
+   * and render google charts;
+   */
+  async _renderDataAsync() {
+    this.selectedGridData = await this._getCimisGridData(this.selectedGridId);
+    this.toggleState(this.selectedGridData.state);
+    if( this.selectedGridData.state !== 'loaded' ) return;
   
-    var payload = this.currentGridData.payload;
+    var payload = this.selectedGridData.payload;
     this.sortedDates = utils.sortDates(payload.data);
 
     this.row = payload.location.row;
     this.col = payload.location.col;
 
-    this.createDataTables();
+    this._createDataTables();
 
     // first time through we create our charts
     if( !this.charts ) {
@@ -226,42 +197,39 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
       }
     }
 
-    this.redraw();
+    this._redraw();
   }
 
-  _onActive() {
-    if( !this.active ) return;
 
-
-    this.redraw();
-
-    var parts = window.location.hash.replace(/#/,'').split('/');
-    if( parts.length >= 3 ) {
-        this._selectZone(parts[2]);
-    }
-  }
-
-  _selectZone(id) {
-    this._setAppState({
-      selectedCimisLocation : id
-    });
-  }
-
-  redraw() {
+  /**
+   * @method _redraw
+   * @description redraw takes the already render google charts and makes sure they
+   * are the correct width for the current screensize.
+   */
+  _redraw() {
     if( !this.charts ) return;
 
     let w = this.shadowRoot.querySelector('paper-material.chart-card').offsetWidth - 10;
     let h = Math.floor(w * 0.5);
-    this._redraw(h, w);
+    this._setChartSize(h, w);
 
     setTimeout(() => {
       let w = this.shadowRoot.querySelector('paper-material.chart-card').offsetWidth - 10;
       let h = Math.floor(w * 0.5);
-      this._redraw(h, w);
+      this._setChartSize(h, w);
     }, 100);
   }
 
-  _redraw(height, width) {
+  /**
+   * @method _setChartSize
+   * @description set the height/width options for all charts and then call the
+   * google charts 'draw' method.  This is only called if the current chart size
+   * has changed.
+   * 
+   * @param {Number} height 
+   * @param {Number} width 
+   */
+  _setChartSize(height, width) {
     if( this.currentChartSize[0] === height && this.currentChartSize[1] === width ) return;
     this.currentChartSize = [height, width];
 

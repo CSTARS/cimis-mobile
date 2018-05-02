@@ -29,15 +29,15 @@ class GoogleService extends BaseService {
       this.store.setLoading(query);
 
       return new Promise((resolve, reject) => {
-        this.geocoder.geocode(query, (error, resp) => {
+        this.geocoder.geocode(query, (results, status) => {
           // succcess
-          if (!error && resp && resp.status === 200) {
-            this.store.setLoaded(resp.json.results, query);
-            resolve(resp.json.results);
+          if (status == 'OK') {
+            this.store.setLoaded(results, query);
+            resolve(results);
 
           // fail 
           } else {
-            this.store.setError(error, query);
+            this.store.setError('Failed to geocode: '+status, query);
             reject(error);
           }
         });

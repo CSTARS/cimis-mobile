@@ -12,7 +12,7 @@ module.exports = subclass =>
 
       for( var j = 0; j < states.length; j++ ) {
         var type = states[j];
-        var eles = this.querySelectorAll('['+type+']');
+        var eles = this.shadowRoot.querySelectorAll('['+type+']');
         for( var i = 0; i < eles.length; i++ ) {
           eles[i].style.display = 'none';
         }

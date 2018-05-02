@@ -18,6 +18,10 @@ class GeolocationModel extends BaseModel {
   geolocate(query) {
     return this.service.geocode(query);
   }
+
+  setLocation(location) {
+    this.store.setLocation(location);
+  }
 }
 
 module.exports = new GeolocationModel();

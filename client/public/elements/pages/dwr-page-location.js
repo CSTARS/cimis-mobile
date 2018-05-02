@@ -1,11 +1,13 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
+import "@polymer/paper-input/paper-input"
 import template from "./dwr-page-location.html"
 
 import AppStateInterface from "../interfaces/AppStateInterface"
 import GeolocationInterface from "../interfaces/GeolocationInterface"
+import ElementUtilsInterface  from "../interfaces/ElementUtilsInterface"
 
 class DwrPageLocation extends Mixin(PolymerElement)
-    .with(EventInterface, AppStateInterface, GeolocationInterface) {
+    .with(EventInterface, AppStateInterface, GeolocationInterface, ElementUtilsInterface) {
   
     static get properties() {
       return {
@@ -55,14 +57,13 @@ class DwrPageLocation extends Mixin(PolymerElement)
       this.toggleState(e.state);
       if( e.state !== 'loaded' ) return;
   
-      var tmp = e.payload.map((item) => {
-                    return {
-                      name : item.name,
-                      address : item.formatted_address,
-                      latitude : item.geometry.location.lat,
-                      longitude : item.geometry.location.lng
-                    }
-                  });
+      var tmp = e.payload
+        .map((item) =>({
+          name : item.name,
+          address : item.formatted_address,
+          latitude : item.geometry.location.lat(),
+          longitude : item.geometry.location.lng()
+        }));
   
       this.results = tmp;
   
@@ -78,8 +79,7 @@ class DwrPageLocation extends Mixin(PolymerElement)
     _onLocationSelect(e) {
       var index = parseInt(e.currentTarget.getAttribute('index'));
   
-      this.getEventBus().emit('select-location', {location: this.results[index]});
-  
+      this._setGeolocation({location: this.results[index]});  
       this.ga('data', 'location', 'select-searched');
       
       this._addToHistory(this.results[index]);
@@ -92,7 +92,7 @@ class DwrPageLocation extends Mixin(PolymerElement)
     _onHistorySelect(e) {
       var index = parseInt(e.currentTarget.getAttribute('index'));
 
-      this.getEventBus().emit('select-location', {location: this.currentLocations[index]});
+      this._setGeolocation({location: this.currentLocations[index]});
 
       this.ga('data', 'location', 'select-history');
   
@@ -162,7 +162,7 @@ class DwrPageLocation extends Mixin(PolymerElement)
         address : 'My Location'
       };
   
-      this.getEventBus().emit('select-location', {location: event});
+      this._setGeolocation({location: event});
       window.location.hash = 'map';
   
       this._setLocating(false);

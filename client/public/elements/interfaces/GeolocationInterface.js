@@ -8,4 +8,8 @@ module.exports = subclass =>
     _geolocate(query) {
       return this.GeolocationModel.geolocate(query);
     }
+
+    _setGeolocation(location) {
+      return this.GeolocationModel.setLocation(location);
+    }
   }

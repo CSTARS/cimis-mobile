@@ -46,8 +46,9 @@ class StationModel extends BaseModel {
     this.register('StationModel');
   }
 
-  getStations() {
-    return this.service.getStations();
+  async getStations() {
+    await this.service.getStations();
+    return this.store.getStations();
   }
 
   getData(id) {

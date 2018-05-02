@@ -7,7 +7,8 @@ class StationStore extends BaseStore {
 
     this.data = {
       stations : {
-        state : this.STATE.INIT
+        payload: APP_DATA.stations,
+        state : this.STATE.LOADED
       },
       byId : {}
     }
@@ -37,6 +38,10 @@ class StationStore extends BaseStore {
       state : this.STATE.ERROR,
       error
     });
+  }
+
+  getStations() {
+    return this.data.stations;
   }
 
   _setStationsState(state) {

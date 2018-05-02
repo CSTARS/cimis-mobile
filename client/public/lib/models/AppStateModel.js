@@ -65,6 +65,11 @@ class AppStateModel extends BaseModel {
       state.extras = parts;
     }
 
+    if( state.section === 'map' && !state.mapState ) {
+      state.mapState = 'cimisGrid'
+    }
+
+
     this.set(state);
   }
 

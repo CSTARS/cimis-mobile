@@ -4,41 +4,50 @@ class GeolocationStore extends BaseStore {
 
   constructor() {
     super();
-    this.data = {};
+    this.data = {
+      geolocating : {},
+      location : {}
+    };
 
     this.events = {
-      GEOLOCATION_SEARCH_UPDATE : 'geolocation-search-update'
+      GEOLOCATION_SEARCH_UPDATE : 'geolocation-search-update',
+      SELECTED_GEOLOCATION_UPDATE : 'selected-geolocation-update'
     }
   }
 
   setLoading(params) {
-    this._setState({
+    this._setGeolocatingState({
       state : this.STATE.LOADING,
       params : params
     });
   }
 
   setLoaded(payload, params) {
-    this._setState({
+    this._setGeolocatingState({
       state : this.STATE.LOADED,
       payload, params
     });
   }
 
   setError(error, params) {
-    this._setState({
+    this._setGeolocatingState({
       state : this.STATE.ERROR,
       error, params
     });
   }
 
-  _setState(state) {
-    this.data = state;
-    this.emit(this.events.GEOLOCATION_SEARCH_UPDATE, this.data);
+  _setGeolocatingState(state) {
+    this.data.geolocating = state;
+    this.emit(this.events.GEOLOCATION_SEARCH_UPDATE, state);
   }
 
   getState() {
-    return this.data
+    return this.data.geolocating;
+  }
+
+  setLocation(state) {
+    this.data.location = state;
+    this.emit(this.events.SELECTED_GEOLOCATION_UPDATE, state);
   }
 
 }

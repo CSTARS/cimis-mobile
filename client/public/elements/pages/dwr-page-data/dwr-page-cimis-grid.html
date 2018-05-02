@@ -2,7 +2,7 @@
   :host {
     display: block;
     padding: 5px;
-    background-color: var(--secondary-background-color);
+    animation: pagein 300ms ease-out;
   }
 
   @media(min-width: 600px) {
@@ -14,7 +14,14 @@
   h1, h2 {
     padding: 0;
     margin: 5px 0;
-    font-weight: 200;
+  }
+
+  #charts {
+    text-align: center;
+  }
+
+  #charts > * {
+    margin: 15px auto;
   }
 
   .docs {
@@ -38,7 +45,6 @@
 
 <div state="loaded">
   <div id="charts"></div>
-  <div id="chartRoot"></div>
 </div>
 
 <div state="loading">Loading...</div>

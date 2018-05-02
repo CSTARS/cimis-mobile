@@ -7,7 +7,8 @@ class CimisGridStore extends BaseStore {
 
     this.data = {
       dates : {
-        state : this.STATE.INIT
+        state : this.STATE.LOADED,
+        payload : APP_DATA.dates
       },
       byId : {}
     }
@@ -42,6 +43,10 @@ class CimisGridStore extends BaseStore {
   _setDatesState(state) {
     this.data.dates = state;
     this.emit(this.events.CIMIS_DATES_UPDATE, this.data.dates);
+  }
+
+  getDates() {
+    return this.data.dates;
   }
 
   setDataLoading(id, request) {

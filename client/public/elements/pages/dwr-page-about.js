@@ -1,4 +1,5 @@
 import {PolymerElement} from "@polymer/polymer/polymer-element"
+import "@polymer/paper-tabs/paper-tabs"
 import template from "./dwr-page-about.html"
 
 import config from "../../lib/config"
