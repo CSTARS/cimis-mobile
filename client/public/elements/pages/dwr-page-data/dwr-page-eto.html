@@ -1,43 +1,56 @@
 
-<style>
+<style include="shared-styles">
   :host {
     display: block;
-    padding: 10px;
+    padding: 5px;
+    animation: pagein 300ms ease-out;
   }
+
   #zoneMap {
+    margin:auto;
+    max-width: 800px;
     height: 400px;
+    border: 5px solid white;
+    border-radius: 5px;
   }
-  paper-material {
-    margin: 25px 10px;
+
+  h1 {
+    margin-bottom: 6px;
   }
-  h1,h2,h4 {
-    font-weight: 200;
+  h3 {
+    margin-top: 0
+  }
+
+  paper-material.chart-card {
+    margin: 15px auto !important;
   }
 </style>
 
+<div >
+  <h1 style="flex:1">ETo Zone: <b>[[selectedEtoZoneLocation]]</b></h1>
+  <h3 state="loaded" >
+    Average: <span id="average" style="font-weight:bold"></span>
+    &nbsp;&nbsp;
+    Delta: <span id="delta" style="font-weight:bold"></span>
+  </h3>
+</div>
 
-<h1>ETo Zone <span>[[selected]]</span></h1>
-
-<div state="loaded">
-  <div>
-    <div style="padding: 10px">
-      <h4>Average: <span id="average" style="font-weight:bold"></span></h4>
-      <h4>Delta: <span id="delta" style="font-weight:bold"></span></h4>
-    </div>
+<div state="loaded" >
+  <div style="text-align: center">      
     <div id="zoneMap"></div>
+
+    <paper-material class="chart-card">
+      <div id="eto"></div>
+    </paper-material>
+
+    <paper-material class="chart-card">
+      <div id="expectedEto"></div>
+    </paper-material>
+
+    <paper-material class="chart-card">
+      <div id="expectedCumEto"></div>
+    </paper-material>
   </div>
-
-  <paper-material style="padding-right:15px">
-    <div id="eto"></div>
-  </paper-material>
-
-  <paper-material style="padding-right:15px">
-    <div id="expectedEto"></div>
-  </paper-material>
-
-  <paper-material style="padding-right:15px">
-    <div id="expectedCumEto"></div>
-  </paper-material>
 </div>
 
 <div state="loading">Loading...</div>

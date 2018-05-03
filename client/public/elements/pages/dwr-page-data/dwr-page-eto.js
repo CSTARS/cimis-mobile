@@ -7,9 +7,11 @@ import config from "../../../lib/config"
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import EtoZonesInterface from "../../interfaces/EtoZonesInterface"
 import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
+import ChartUtilsInterface from "../../interfaces/ChartUtilsInterface"
 
 class DwrPageEto extends Mixin(PolymerElement)
-  .with(EventInterface, AppStateInterface, EtoZonesInterface, ElementUtilsInterface) {
+  .with(EventInterface, AppStateInterface, EtoZonesInterface, 
+      ElementUtilsInterface, ChartUtilsInterface) {
 
   static get properties() {
     return {
@@ -129,7 +131,6 @@ class DwrPageEto extends Mixin(PolymerElement)
     });
 
     // grab values from geometry geojson
-    debugger;
     var data = this._getEtoZoneGeometry(this.selectedEtoZoneLocation);
     this.$.average.innerHTML = data.properties.avg.toFixed(1);
     this.$.delta.innerHTML = data.properties.delta.toFixed(1);
@@ -147,11 +148,15 @@ class DwrPageEto extends Mixin(PolymerElement)
         cumSignature.push(prev);
     }
 
+    let options = config.dataPages.etoZones;
+    this.datatables = [];
+
     // eto chart
     this.etoDataTable = new google.visualization.DataTable();
-    this.etoDataTable.addColumn('string', 'Date');
+    this.etoDataTable.addColumn('date', 'Date');
     this.etoDataTable.addColumn('number', 'Avg ETo');
     this.etoDataTable.addColumn('number', 'Expected ETo');
+    this.datatables.push(this.etoDataTable);
 
     var weeks = [utils.getWeekOfYear(2), utils.getWeekOfYear(1), utils.getWeekOfYear(0)];
 
@@ -160,7 +165,7 @@ class DwrPageEto extends Mixin(PolymerElement)
 
     this.sortedDates.forEach((date, index) => {
       var d = this.currentZoneData.payload.data[date];
-      arr = [date];
+      arr = [new Date(date)];
 
       arr.push(parseFloat(d) || 0);
 
@@ -179,13 +184,16 @@ class DwrPageEto extends Mixin(PolymerElement)
 
     if( !this.etoChart ) {
       this.etoChart = new google.visualization.LineChart(this.$.eto);
+      this.charts.push(this.etoChart);
+      this.chartOptions.push(options.etoChartOptions);
     }
 
     this.expectedEtoDataTable = new google.visualization.DataTable();
-    this.expectedEtoDataTable.addColumn('string', 'Week');
+    this.expectedEtoDataTable.addColumn('date', 'Week');
     this.expectedEtoDataTable.addColumn('number', 'Eto');
     this.expectedEtoDataTable.addColumn('number', 'Two Weeks Ago');
     this.expectedEtoDataTable.addColumn('number', 'This Week');
+    this.datatables.push(this.expectedEtoDataTable);
 
     for( var i = 0; i < signature.length; i++ ) {
       var actualWeek = this._getChartWeekLabel(i);
@@ -207,13 +215,16 @@ class DwrPageEto extends Mixin(PolymerElement)
 
     if( !this.chart2 ) {
         this.expectedEtoChart = new google.visualization.ComboChart(this.$.expectedEto);
+        this.charts.push(this.expectedEtoChart);
+        this.chartOptions.push(options.expectedEtoOptions);
     }
 
     this.expectedCumEtoDataTable = new google.visualization.DataTable();
-    this.expectedCumEtoDataTable.addColumn('string', 'Week');
+    this.expectedCumEtoDataTable.addColumn('date', 'Week');
     this.expectedCumEtoDataTable.addColumn('number', 'Cumulative ETo');
     this.expectedCumEtoDataTable.addColumn('number', 'Two Weeks Ago');
     this.expectedCumEtoDataTable.addColumn('number', 'This Week');
+    this.datatables.push(this.expectedCumEtoDataTable);
 
     for( var i = 0; i < cumSignature.length; i++ ) {
         var actualWeek = this._getChartWeekLabel(i);
@@ -235,6 +246,8 @@ class DwrPageEto extends Mixin(PolymerElement)
 
     if( !this.expectedCumEtoChart ) {
       this.expectedCumEtoChart = new google.visualization.ComboChart(this.$.expectedCumEto);
+      this.charts.push(this.expectedCumEtoChart);
+      this.chartOptions.push(options.expectedEtoCumOptions);
     }
 
     this._redraw();
@@ -247,19 +260,15 @@ class DwrPageEto extends Mixin(PolymerElement)
    */
   _redraw() {
     if( this.appState.section !== 'data' || 
-        this.appState.mapState !== 'mapState' ) {
+        this.appState.mapState !== 'etoZones' ) {
       return;
     }
 
+    this._redrawCharts();
+
     this.debounce('redraw', () => {
       google.maps.event.trigger(this.map, "resize");
-      utils.map.fitToFeature(this.selectedEtoZoneLocation, this.map, this._);
-
-      let options = config.dataPages.etoZones;
-      if( !this.etoChart ) return;
-      this.etoChart.draw(this.etoDataTable, options.etoChartOptions);
-      this.expectedEtoChart.draw(this.expectedEtoDataTable, options.expectedEtoOptions);
-      this.expectedCumEtoChart.draw(this.expectedCumEtoDataTable, options.expectedEtoCumOptions);
+      utils.map.fitToFeature(this.selectedEtoZoneLocation, this.map, this._getRegionNumber);
     }, 50);
   }
 
@@ -313,7 +322,8 @@ class DwrPageEto extends Mixin(PolymerElement)
     var d = (1 + (week - 1) * 7); // 1st of January + 7 days for each week
     d = new Date(y, 0, d);
 
-    return this.months[d.getMonth()]+' '+d.getDate()+', '+y;
+    return d;
+    // return config.months[d.getMonth()]+' '+d.getDate()+', '+y;
   }
 
   _weekOffsetHelper(w) {

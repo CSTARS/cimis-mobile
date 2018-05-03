@@ -45,7 +45,19 @@ const config = {
 
   dataPages : {
     cimisGrid : require('./cimis-grid-charts'),
-    etoZones : require('./eto-zone-charts')
+    etoZones : require('./eto-zone-charts'),
+    dauZones : {
+      chartOptions : {
+        title : 'ETo - Evapotranspiration (mm)',
+        curveType: 'function',
+        height : 550,
+        interpolateNulls : true,
+        animation : {
+          easing : 'out',
+          startup : true
+        }
+      }
+    }
   },
   
   definitions : require('./definitions.json')

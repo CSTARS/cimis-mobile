@@ -12,7 +12,7 @@ class MapUtils {
       features.forEach((feature) => {
           this.processPoints(feature.getGeometry(), bounds.extend, bounds);
       });
-      map.fitBounds(bounds);
+      map.panToBounds(bounds);
   }
 
   processPoints(geometry, callback, thisArg) {

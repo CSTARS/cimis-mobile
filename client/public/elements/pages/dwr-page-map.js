@@ -146,15 +146,15 @@ class DwrPageMap extends Mixin(PolymerElement)
       this.selectedCimisLocation = e.selectedCimisLocation;
     }
 
+    // if the mapState hasn't updated, we are done
+    if( this.renderedMapState === e.mapState ) return;
+
     // make sure the map is center where we expect it to be as it might
     // have been display:none and resized
     this.debounce('resizeMap', () => {
       google.maps.event.trigger(this.map, 'resize');
-      this.map.setCenter(this.latLng);
+      this.map.panTo(this.latLng);
     }, 50);
-
-    // if the mapState hasn't updated, we are done
-    if( this.renderedMapState === e.mapState ) return;
 
     this._render();
   }
@@ -169,13 +169,13 @@ class DwrPageMap extends Mixin(PolymerElement)
     var parts = this.selectedCimisLocation.split('-').map(p => parseInt(p));
     var location = this._gridToBounds(parts[0], parts[1])[0];
 
-    setTimeout(() => {
-      if( !this.map ) return;
-      this.map.setCenter({
+    if( !this.map ) return;
+    this.debounce('resizeMap', () => {
+      this.map.panTo({
         lat: location[1], 
         lng: location[0]
       });
-    }, 300);
+    }, 50);
   }
 
   /**

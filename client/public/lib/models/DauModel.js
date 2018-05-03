@@ -8,16 +8,21 @@ class DauModel extends BaseModel {
     super();
     this.store = DauStore;
     this.service = DauService;
+
+    this.getGeometry();
+
     this.register('DauModel');
   }
 
-  getGeometry() {
+  async getGeometry() {
     // pass model for access to util method
-    return this.service.getGeometry(this);
+    await this.service.getGeometry(this);
+    return this.store.data.geometry;
   }
 
-  getData(id) {
-    return this.service.getData(id);
+  async getData(id) {
+    await this.service.getData(id);
+    return this.store.data.byId[id];
   }
 
 }

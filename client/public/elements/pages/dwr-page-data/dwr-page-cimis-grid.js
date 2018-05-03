@@ -7,9 +7,11 @@ import config from "../../../lib/config"
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import CimisGridInterface from "../../interfaces/CimisGridInterface"
 import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
+import ChartUtilsInterface from "../../interfaces/ChartUtilsInterface"
 
 class DwrPageCimisGrid extends Mixin(PolymerElement)
-    .with(EventInterface, AppStateInterface, CimisGridInterface, ElementUtilsInterface) {
+    .with(EventInterface, AppStateInterface, CimisGridInterface, 
+        ElementUtilsInterface, ChartUtilsInterface) {
 
   static get template() {
     return template;
@@ -17,23 +19,6 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
 
   static get properties() {
     return {
-      currentChartSize : {
-        type : Array,
-        value : () => [0,0]
-      },
-
-      // google chart objects
-      charts : {
-        type : Array,
-        value : null
-      },
-
-      // array of google chart datatable objects
-      datatables : {
-        type : Array,
-        value : () => []
-      },
-
       // currently selected grid state object
       selectedGridData : {
         type : Object,
@@ -52,11 +37,10 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     super.ready();
 
     this.params = config.dataPages.cimisGrid.params;
-    this.options = config.dataPages.cimisGrid.options;
+    this.chartOptions = config.dataPages.cimisGrid.options;
 
 
     this.toggleState('loading');
-    window.addEventListener('resize', () => this._redraw());
   }
 
   /**
@@ -182,8 +166,7 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
     this._createDataTables();
 
     // first time through we create our charts
-    if( !this.charts ) {
-      this.charts = [];
+    if( !this.charts.length ) {
       this.$.charts.innerHTML = '';
 
       for( var i = 0; i < this.datatables.length; i++ ) {
@@ -197,49 +180,11 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
       }
     }
 
-    this._redraw();
+    this._redrawCharts();
   }
 
 
-  /**
-   * @method _redraw
-   * @description redraw takes the already render google charts and makes sure they
-   * are the correct width for the current screensize.
-   */
-  _redraw() {
-    if( !this.charts ) return;
 
-    let w = this.shadowRoot.querySelector('paper-material.chart-card').offsetWidth - 10;
-    let h = Math.floor(w * 0.5);
-    this._setChartSize(h, w);
-
-    setTimeout(() => {
-      let w = this.shadowRoot.querySelector('paper-material.chart-card').offsetWidth - 10;
-      let h = Math.floor(w * 0.5);
-      this._setChartSize(h, w);
-    }, 100);
-  }
-
-  /**
-   * @method _setChartSize
-   * @description set the height/width options for all charts and then call the
-   * google charts 'draw' method.  This is only called if the current chart size
-   * has changed.
-   * 
-   * @param {Number} height 
-   * @param {Number} width 
-   */
-  _setChartSize(height, width) {
-    if( this.currentChartSize[0] === height && this.currentChartSize[1] === width ) return;
-    this.currentChartSize = [height, width];
-
-    for( var i = 0; i < this.datatables.length; i++ ) {
-      this.options[i].height = height;
-      this.options[i].width = width;
-
-      this.charts[i].draw(this.datatables[i], this.options[i]);
-    }
-  }
 }
 
 window.customElements.define('dwr-page-cimis-grid', DwrPageCimisGrid);

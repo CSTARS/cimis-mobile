@@ -149,7 +149,8 @@ class DwrApp extends Mixin(PolymerElement)
   }
 
   _backToMap() {
-    window.location.hash = 'map';
+    let layer = this.appState.mapState || '';
+    window.location.hash = layer ? 'map/'+layer : '';
   }
 
   /**

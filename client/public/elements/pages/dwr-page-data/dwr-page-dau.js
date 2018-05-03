@@ -2,18 +2,20 @@ import {PolymerElement} from "@polymer/polymer/polymer-element"
 import template from "./dwr-page-dau.html"
 
 import utils from "../../../lib/utils"
+import config from "../../../lib/config"
 
 import AppStateInterface from "../../interfaces/AppStateInterface"
 import DauInterface from "../../interfaces/DauInterface"
 import ElementUtilsInterface from "../../interfaces/ElementUtilsInterface"
+import ChartUtilsInterface from "../../interfaces/ChartUtilsInterface"
 
 class DwrPageDau extends Mixin(PolymerElement)
-  .with(EventInterface, AppStateInterface, DauInterface, ElementUtilsInterface) {
+  .with(EventInterface, AppStateInterface, DauInterface, ElementUtilsInterface, ChartUtilsInterface) {
 
   static get properties() {
     return {
-      selected : {
-        type : Object
+      selectedDauLocation : {
+        type : String
       },
       geometry : {
         type : Object,
@@ -37,84 +39,73 @@ class DwrPageDau extends Mixin(PolymerElement)
   ready() {
     super.ready();
 
-    this._getDauGeometry();
+    this.map = new google.maps.Map(this.$.zoneMap, config.etoMap.options);
+    this.map.data.addListener('click', e => this._onRegionClick(e));
 
-    this.map = new google.maps.Map(this.$.zoneMap, this.mapOptions);
-    this.map.data.addListener('click', this._onRegionClick.bind(this));
-
-    window.addEventListener('resize', this.redraw.bind(this));
-    window.addEventListener('hashchange', this._onActive.bind(this));
+    window.addEventListener('resize', () => this._redraw());
 
     this.toggleState('loading');
   }
 
-  _onActive() {
-    if( !this.active ) return;
-
-    var parts = window.location.hash.replace(/#/,'').split('/');
-    if( parts.length >= 3 ) {
-      this._selectZone(parts[2]);
-    }
-  }
-
+  /**
+   * @method _onDauGeometryUpdate
+   * @description via DauInterface. Firese when dau geometry state updates
+   */
   _onDauGeometryUpdate(e) {
     if( e.state !== 'loaded' ) return;
 
     this.geometry = e;
     this.map.data.addGeoJson(this.geometry.payload);
-    this.redrawMap();
-    this._renderData();
+
+    // make sure we weren't waiting on geometry
+    this._onAppStateUpdate(this.appState || {});
   }
 
+  /**
+   * @method _onRegionClick
+   * @description bound to google maps click event (See constructor)
+   * 
+   * @param {Object} e google maps click event
+   */
   _onRegionClick(e) {
-    if( !e.feature ) {
-      return;
-    }
-    window.location.hash = '#data/dauZones/'+this.getRegionNumber(e.feature);
-    this._onActive();
+    if( !e.feature ) return;
+
+    window.location.hash = '#data/dauZones/'+this._getRegionNumber(e.feature);
   }
 
-  _selectZone(id) {
-    this._setAppState({
-      selectedDauLocation : id
-    });
+  /**
+   * @method _onAppStateUpdate
+   * 
+   * @param {*} e 
+   */
+  async _onAppStateUpdate(e) {
+    this.appState = e;
+
+    // check app state
+    if( e.section !== 'data' || e.mapState !== 'dauZones'  ) return;
+    // make sure we have geometry
+    if( this.geometry.state !== 'loaded' ) return;
+    // check if we have already rendered location
+    if( !e.selectedDauLocation || this.selectedDauLocation === e.selectedDauLocation ) return;
+
+    this.selectedDauLocation = e.selectedDauLocation;
+
+    this.currentZoneData = await this._getDauData(this.selectedDauLocation)
+    this._render();
   }
 
-  _onAppStateUpdate(e) {
-    if( e.section !== 'map' || e.mapState !== 'dauZone'  ) return;
-    if( this.selected === e.selectedDauLocation ) return;
-    this.selected = e.selectedDauLocation;
-
-    this._getDauData(this.selected)
-        .then(e => this._onDauDataUpdate(e));
-  }
-
-  _onDauDataUpdate(e) {
-    this.currentZoneData = e;
-
-    if( this.geometry.state !== 'loaded' ) {
-      return;
-    }
-
-    this._renderData();
-  }
-
-  _renderData() {
-    this.debounce('_renderData', function() {
-      this._renderDataAsync();
-    }, 50);
-  }
-
-  _renderDataAsync() {
+  /**
+   * @method _render
+   * @description main render function.  setup map and charts
+   */
+  _render() {
     this.toggleState(this.currentZoneData.state);
+    if( this.currentZoneData.state !== 'loaded' ) return;
 
-    if( this.currentZoneData.state !== 'loaded' ) {
-      return;
-    }
-
+    // set map styles
     this.map.data.setStyle(function(feature) {
-      var label = this.getRegionNumber(feature);
-      if( label+'' === this.selected ){
+      var label = this._getRegionNumber(feature);
+      if( label+'' === this.selectedDauLocation ){
         return {
           fillColor: '#2196f3',
           strokeColor: '#fff',
@@ -131,67 +122,57 @@ class DwrPageDau extends Mixin(PolymerElement)
       }
     }.bind(this));
 
-    this.redrawMap();
-    this.onZoneDataLoad();
-  }
 
-  onZoneDataLoad() {
-    this.sortedDates = this._sortDates(this.currentZoneData.payload.data);
+    this.sortedDates = utils.sortDates(this.currentZoneData.payload.data);
 
     // eto chart
+    this.datatables = [];
     this.dt = new google.visualization.DataTable();
-    this.dt.addColumn('string', 'Date');
+    this.dt.addColumn('date', 'Date');
     this.dt.addColumn('number', 'Avg ETo');
+    this.datatables.push(this.dt);
 
     this.sortedDates.forEach(function(date, index){
       var d = this.currentZoneData.payload.data[date];
-      var arr = [date];
+      var arr = [new Date(date)];
 
       arr.push(parseFloat(d) || 0);
 
       this.dt.addRow(arr);
     }.bind(this));
 
+    // if first pass, create chart object
     if( !this.chart ) {
       this.chart = new google.visualization.LineChart(this.$.chart);
-      this.options = {
-        title : 'ETo - Evapotranspiration (mm)',
-        curveType: 'function',
-        height : 550,
-        interpolateNulls : true,
-        animation : {
-          easing : 'out',
-          startup : true
-        }
-      }
+      this.charts.push(this.chart);
+      this.chartOptions.push(config.dataPages.dauZones.chartOptions)
     }
 
-    this.redrawChart();
+    this._redraw();
   }
 
-  redraw() {
-    this.redrawChart();
-    this.redrawMap();
-  }
-
-  redrawChart() {
-    if( !this.active || !this.chart) return;
-
-    this.debounce('redrawChart', () => {
-      this.chart.draw(this.dt, this.options);
-    });
-  }
-
-  redrawMap() {
-    if( !this.active || !this.map ) return;
+  /**
+   * @method _redraw
+   * @description make sure the map and charts are rendered to screen size
+   */
+  _redraw() {
+    if( !this.map ) return;
+    this._redrawCharts();
 
     this.debounce('redrawMap', () => {
       google.maps.event.trigger(this.map, "resize");
-      utils.map.fitToFeature(this.selected, this.map, this.getRegionNumber);
+      utils.map.fitToFeature(this.selectedDauLocation, this.map, this._getRegionNumber);
     }, 50);
   }
 
-  getRegionNumber(feature) {
+  /**
+   * @method _getRegionNumber
+   * @description given a google maps geojson feature return the
+   * dau_code property
+   * 
+   * @param {Object} feature google maps geojson feature
+   */
+  _getRegionNumber(feature) {
     return feature.getProperty('dau_code');
   } 
 }

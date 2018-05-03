@@ -21,7 +21,7 @@ class DauService extends BaseService {
 
   getData(dauZoneId) {
     return this.request({
-      url : `${config.getHost}/cimis/region/DAU${dauZoneId}`,
+      url : `${config.host}/cimis/region/DAU${dauZoneId}`,
       checkCached : () => this.store.data.byId[dauZoneId],
       onLoading : request => this.store.setDauLoading(request),
       onError : error => this.store.setDauError(dauZoneId, error),
