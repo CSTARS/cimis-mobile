@@ -17,10 +17,12 @@ function classSupport() {
 }
 
 addScript('/webcomponentsjs/webcomponents-loader.js');
-if( window.WebComponents && window.WebComponents.ready ) {
-  load();
-} else {
-  window.addEventListener('WebComponentsReady', function() {
-    load();
-  });
-}
+
+load();
+// if( window.WebComponents && window.WebComponents.ready ) {
+//   load();
+// } else {
+//   window.addEventListener('WebComponentsReady', function() {
+//     load();
+//   });
+// }

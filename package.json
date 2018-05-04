@@ -6,8 +6,7 @@
   "main": "index.js",
   "scripts": {
     "watch": "webpack --config client/webpack-watch.config.js --watch",
-    "dist": "webpack --config client/webpack-dist.config.js",
-    "build": "./client/build/dist.sh",
+    "dist": "./client/dist.sh",
     "import": "node utils/import.js"
   },
   "dependencies": {
@@ -23,7 +22,8 @@
     "superagent": "^3.5.2"
   },
   "devDependencies": {
-    "@ucd-lib/cork-app-build": "0.0.2",
+    "@ucd-lib/cork-app-build": "^0.1.0",
+    "babel-polyfill": "^6.26.0",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15"
   }
