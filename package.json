@@ -22,7 +22,7 @@
     "superagent": "^3.5.2"
   },
   "devDependencies": {
-    "@ucd-lib/cork-app-build": "^0.1.0",
+    "@ucd-lib/cork-app-build": "^0.1.2",
     "babel-polyfill": "^6.26.0",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15"

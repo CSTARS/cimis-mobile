@@ -1,109 +1,71 @@
-cimis-mobile
-===========
+# cimis-mobile
 
 Spatial CIMIS mobile app. with [ExpressJS](http://expressjs.com/)/[Kraken](http://krakenjs.com/)/[Redis](http://redis.io/) backend, [Polymer](https://www.polymer-project.org) frontend.
 
 [Demo](http://cimis-mobile.casil.ucdavis.edu)
 
-## Development
+# Development
 
-This project requires [NodeJS](https://nodejs.org/), [Bower](http://bower.io/), and [Redis](http://redis.io/)
+This project requires [Docker](https://www.docker.com/)
 
-#### Init Dev Env
+Build Using
+ - [NodeJS](https://nodejs.org/) / [ExpressJS](https://expressjs.com/)
+ - [Redis](http://redis.io/)
 
-First make sure you have bower installed.
+## Init Development Environment
 
-```
-npm install -g bower
-```
+Install client and server dependencies
 
-You will also need redis installed.  See [website](http://redis.io/) for installation details.  Once installed you can startup redis using
+[yarn](https://yarnpkg.com/en/) and [npm](https://nodejs.org/en/) are required
 
-```
-redis-server
-```
-
-Install client and server dependencies using:
-```
-npm install
-bower install
+```bash
+npm install 
+cd client/public
+yarn install
 ```
 
-#### Import data
-```
-node utils/import
-```
+## Run webpack bundler file watcher 
 
-#### Run Dev server
+This generates /client/public/js/bundle.js.  From root:
 
-Requires Docker
-
-```
-npm run dev
-```
-
-#### Build client
-```
-npm build
-```
-
-#### Serve build code
-```
-npm start
-```
-
-#### Changes to /public/js/app.js
-
-/public/js/app.js is a browserify'd build of /lib/shared.  To build run:
-```
-grunt browserify:build
-# or to continuously build
+```bash
 npm run watch
 ```
 
-## App Config
+## Run Development server
 
-#### ringBuffer
-```
-{
-  // database type to use.  currently only redis is supported
-  "db" : "redis",  
+Requires Docker
 
-  // force overwrites of dates already written to ring buffer
-  "force" : false,
+```bash
+cd docker/cimis-mobile-local
+# start docker
+docker-compose up
+# in a new terminal (same dir) bash into container
+docker-compose exec app bash
+# start mobile server
+node /cimis-mobile/server
+```
 
-  // ring buffer size, how many day of CIMIS data to store
-  "buffer" : 14,
+If this is the first time starting, give the server some time to populate redis.  The server will keep redis in sync, checking CIMIS every 4 hours for new data.  The server also checks on startup.
 
-  // key to be used to store the dates lookup array
-  "date_key" : "dates"
-}
-```
-#### redis
-```
-{
-  // redis host
-  "host": "localhost",
+# Production
 
-  // redis port
-  "port": 6379,
-  "verbose": true,
-  "disabled": true
-}
-```
-#### fetch
-```
-{
-  "verbose": true
-}
-```
-#### cimis
-```
-{
-  // root server url to access cimis data
-  "base": "http://cimis.casil.ucdavis.edu/cimis/",
+## Build production client (/client/dist)
 
-  // CIMIS paramters/filenames to be access from the root server
-  "params": ["ETo","K","Rnl","Rso","Tdew","Tn","Tx","U2"]
-}
+```bash
+npm run dist
+```
+
+## Cut new docker images
+
+```
+cd docker/cimis-mobile
+docker-compose build --no-cache
+```
+
+## Run production server
+
+```
+cd docker/cimis-mobile
+docker-compose up
 ```
