@@ -1,6 +1,6 @@
 # cimis-mobile
 
-Spatial CIMIS mobile app. with [ExpressJS](http://expressjs.com/)/[Kraken](http://krakenjs.com/)/[Redis](http://redis.io/) backend, [Polymer](https://www.polymer-project.org) frontend.
+Spatial CIMIS webapp
 
 [Demo](http://cimis-mobile.casil.ucdavis.edu)
 
