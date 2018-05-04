@@ -156,13 +156,17 @@ class DwrPageDau extends Mixin(PolymerElement)
    * @description make sure the map and charts are rendered to screen size
    */
   _redraw() {
-    if( !this.map ) return;
+    if( this.appState.section !== 'data' || 
+        this.appState.mapState !== 'dauZones' ) {
+      return;
+    }
+
     this._redrawCharts();
 
     this.debounce('redrawMap', () => {
       google.maps.event.trigger(this.map, "resize");
       utils.map.fitToFeature(this.selectedDauLocation, this.map, this._getRegionNumber);
-    }, 50);
+    }, 100);
   }
 
   /**

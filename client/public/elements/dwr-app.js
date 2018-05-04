@@ -5,6 +5,7 @@ import "@polymer/paper-listbox/paper-listbox"
 import "@polymer/paper-material/paper-material"
 import "@polymer/paper-item/paper-item"
 import "@polymer/paper-button/paper-button"
+import "@polymer/paper-tabs/paper-tabs"
 import "@polymer/iron-pages/iron-pages"
 import "@polymer/iron-icons/iron-icons"
 import "@polymer/iron-icons/maps-icons"
@@ -62,6 +63,10 @@ class DwrApp extends Mixin(PolymerElement)
       loadingEto : {
         type : Boolean,
         value : true
+      },
+      subSectionLabel : {
+        type : String,
+        value : ''
       }
     }
   }
@@ -123,6 +128,12 @@ class DwrApp extends Mixin(PolymerElement)
       this.$.locationBtn.style.display = 'none';
       this.$.backToMapBtn.style.display = 'block';
     }
+
+    if( !e.mapState || e.mapState === 'cimisGrid' ) this.subSectionLabel = 'Grid';
+    else if( e.mapState === 'dauZones' ) this.subSectionLabel = 'Dau Zones';
+    else if( e.mapState === 'etoZones' ) this.subSectionLabel = 'Eto Zones';
+    else if( e.mapState === 'cimisStations' ) this.subSectionLabel = 'Stations';
+    else this.subSectionLabel = '';
 
     if( this.loading ) {
       this.loading = false;

@@ -269,7 +269,7 @@ class DwrPageEto extends Mixin(PolymerElement)
     this.debounce('redraw', () => {
       google.maps.event.trigger(this.map, "resize");
       utils.map.fitToFeature(this.selectedEtoZoneLocation, this.map, this._getRegionNumber);
-    }, 50);
+    }, 100);
   }
 
   /**

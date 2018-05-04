@@ -62,6 +62,8 @@ class AppStateModel extends BaseModel {
         state.selectedEtoZoneLocation = parts[0];
       } else if( state.mapState === 'dauZones' ) {
         state.selectedDauLocation = parts[0];
+      } else if( state.mapState === 'cimisStations' ) {
+        state.selectedStation = parts[0];
       }
     }
 

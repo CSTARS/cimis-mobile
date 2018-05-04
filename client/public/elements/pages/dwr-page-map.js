@@ -46,6 +46,11 @@ class DwrPageMap extends Mixin(PolymerElement)
       },
       selectedCimisGrid : {
         type: String
+      },
+      active : {
+        type : Boolean,
+        value : false,
+        observer : '_onActiveChange'
       }
     }
   }
@@ -59,8 +64,16 @@ class DwrPageMap extends Mixin(PolymerElement)
 
     let options = config.mainMap.options;
     this.latLng = new google.maps.LatLng(options.center.lat, options.center.lng);
-    this.map = new google.maps.Map(this.$.map, options);
+    
+    /**
+     * Safari HACK!!!!
+     * Safari dies adding markers to map when div is in shadow dom... so
+     * we are moving it to root document and controlling like a modal :/
+     */
+    this.shadowRoot.removeChild(this.$.map);
+    document.body.appendChild(this.$.map);
 
+    this.map = new google.maps.Map(this.$.map, options);
     this.map.data.setStyle({visible: false});
 
     google.maps.event.addListener(this.map, 'click', (e) => this._onMapClick(e));
@@ -76,6 +89,10 @@ class DwrPageMap extends Mixin(PolymerElement)
     for( var key in this.stations ) {
       this.stations[key].marker = this._createMarker(key, this.stations[key]);
     }
+  }
+
+  _onActiveChange() {
+    this.$.map.style.display = this.active ? 'block' : 'none';
   }
 
   /**

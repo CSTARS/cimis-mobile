@@ -7,24 +7,26 @@
   "license": "MIT",
   "flat": true,
   "dependencies": {
-    "@polymer/app-layout": "^3.0.0-pre.12",
-    "@polymer/iron-icons": "^3.0.0-pre.12",
-    "@polymer/iron-pages": "^3.0.0-pre.12",
-    "@polymer/paper-button": "^3.0.0-pre.12",
-    "@polymer/paper-input": "^3.0.0-pre.12",
-    "@polymer/paper-item": "^3.0.0-pre.12",
-    "@polymer/paper-listbox": "^3.0.0-pre.12",
-    "@polymer/paper-material": "^3.0.0-pre.12",
-    "@polymer/paper-menu-button": "^3.0.0-pre.12",
-    "@polymer/paper-spinner": "^3.0.0-pre.12",
-    "@polymer/paper-tabs": "^3.0.0-pre.12",
-    "@polymer/polymer": "^3.0.0-pre.12",
+    "@polymer/app-layout": "3.0.0-pre.13",
+    "@polymer/iron-icons": "3.0.0-pre.13",
+    "@polymer/iron-pages": "3.0.0-pre.13",
+    "@polymer/paper-button": "3.0.0-pre.13",
+    "@polymer/paper-input": "3.0.0-pre.13",
+    "@polymer/paper-item": "3.0.0-pre.13",
+    "@polymer/paper-listbox": "3.0.0-pre.13",
+    "@polymer/paper-material": "3.0.0-pre.13",
+    "@polymer/paper-menu-button": "3.0.0-pre.13",
+    "@polymer/paper-spinner": "3.0.0-pre.13",
+    "@polymer/paper-tabs": "3.0.0-pre.13",
+    "@polymer/polymer": "^3.0.0-pre.13",
     "@ucd-lib/cork-app-utils": "^3.0.2",
     "cimis-grid": "^1.0.1",
     "proj4": "2.3.10"
   },
   "resolutions": {
     "proj4": "2.3.10",
-    "mgrs": "1.0.0"
+    "mgrs": "1.0.0",
+    "@polymer/polymer": "3.0.0-pre.13",
+    "@webcomponents/shadycss": "1.2.0-0"
   }
 }

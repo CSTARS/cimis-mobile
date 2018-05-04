@@ -1,21 +1,23 @@
 <style>
   :host {
     display: block;
-    position: absolute;
-    top: 58px;
+    /* undo once we don't have to do safari hack */
+    /* position: absolute;
+    top: 63px;
     left: 0;
     bottom: 0;
-    right: 0;
+    right: 0; */
   }
   #zoomTo {
     position: absolute;
-    top: 25px;
-    right: 10px;
+    bottom: 25px;
+    left: 10px;
+    z-index: 1000;
   }
 </style>
 
 
-<div id="map" style="height: 100%"></div>
+<div id="map" style="display: none; position: absolute; top: 63px; left: 0; bottom: 0; right: 0"></div>
 <div id="zoomTo" style="display:none">
-  <a class="btn btn-default" on-click="zoomToGrid"><i class="fa fa-compress"></i></a>
+  <paper-icon-button on-click="zoomToGrid"></paper-icon-button>
 </div>

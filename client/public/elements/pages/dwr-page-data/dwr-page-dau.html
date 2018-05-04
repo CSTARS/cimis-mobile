@@ -13,6 +13,16 @@
     border-radius: 5px;
   }
 
+  h1, h2 {
+    padding: 0;
+    margin: 5px 0;
+  }
+
+  .docs {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
 
   paper-material.chart-card {
     margin: 15px auto !important;
@@ -20,6 +30,15 @@
 </style>
 
 <h1>DAU Zone: <b>[[selectedDauLocation]]</b></h1>
+
+<div class="docs">
+  <h2 style="flex:1">
+    <a href$="/cimis/region/DAU[[selectedDauLocation]]" target="_blank">API: /cimis/region/DAU[[selectedDauLocation]]</a>
+  </h2>
+  <div>
+    <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
+  </div>
+</div>
 
 <div state="loaded">
   <div style="text-align: center">      

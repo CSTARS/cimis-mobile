@@ -14,11 +14,18 @@
     border-radius: 5px;
   }
 
-  h1 {
-    margin-bottom: 6px;
+  h1, h2 {
+    padding: 0;
+    margin: 5px 0;
   }
+  
   h3 {
     margin-top: 0
+  }
+
+  .docs {
+    display: flex;
+    align-items: center;
   }
 
   paper-material.chart-card {
@@ -26,14 +33,24 @@
   }
 </style>
 
-<div >
-  <h1 style="flex:1">ETo Zone: <b>[[selectedEtoZoneLocation]]</b></h1>
-  <h3 state="loaded" >
-    Average: <span id="average" style="font-weight:bold"></span>
-    &nbsp;&nbsp;
-    Delta: <span id="delta" style="font-weight:bold"></span>
-  </h3>
+
+<h1>ETo Zone: <b>[[selectedEtoZoneLocation]]</b></h1>
+
+<div class="docs">
+  <h2 style="flex:1">
+    <a href$="/cimis/region/Z[[selectedEtoZoneLocation]]" target="_blank">API: /cimis/region/Z[[selectedEtoZoneLocation]]</a>
+  </h2>
+  <div>
+    <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
+  </div>
 </div>
+
+<h3 state="loaded" >
+  Average: <span id="average" style="font-weight:bold"></span>
+  &nbsp;&nbsp;
+  Delta: <span id="delta" style="font-weight:bold"></span>
+</h3>
+
 
 <div state="loaded" >
   <div style="text-align: center">      

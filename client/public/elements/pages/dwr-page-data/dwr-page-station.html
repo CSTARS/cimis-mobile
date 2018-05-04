@@ -1,30 +1,37 @@
-<style>
+<style include="shared-styles">
   :host {
     display: block;
     padding: 10px;
+    animation: pagein 300ms ease-out;
   }
 
-  paper-material {
-    display: block;
-    margin: 15px;
-    padding-right: 15px;
+  paper-material.chart-card {
+    margin: 15px auto;
   }
 
-  h1 {
-    font-weight: 200;
+  h1, h2 {
+    padding: 0;
+    margin: 5px 0;
   }
 
-  #docs {
-    text-align: right;
+  .docs {
+    display: flex;
+    align-items: center;
   }
 </style>
 
 <h1 id="gridLabel">Station #[[selectedStation]]</h1>
-<div id="docs">
-  <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
+
+<div class="docs">
+  <h2 style="flex:1">
+    <a href$="/cimis/station/[[selectedStation]]" target="_blank">API: /cimis/station/[[selectedStation]]</a>
+  </h2>
+  <div>
+    <a href="#about/api"><i class="fa fa-book"></i> API Documentation</a>
+  </div>
 </div>
 
-<div state="loaded">
+
+<div state="loaded" style="text-align: center">
   <div id="charts"></div>
-  <div id="chartRoot"></div>
 </div>

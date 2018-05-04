@@ -11,12 +11,8 @@
     position: relative;
   } */
 
-  h2 {
-    font-weight: 200
-  }
-
-  paper-material {
-    margin: 5px;
+  h1 {
+    margin: 15px 0;
   }
 
   #locationBtn {
@@ -24,15 +20,13 @@
   }
 
   header {
+    padding: 0 15px;
     display: flex;
     background-color: var(--default-primary-color);
     color: var(--primary-background-color);
     align-items: center;
   }
 
-  header h2 {
-    padding-left: 10px;
-  }
 
   @keyframes show {
     0%   { opacity: .3; transform: scale(.95) }
@@ -53,6 +47,7 @@
   #menu h3 {
     padding: 5px 15px;
     margin: 8px 0;
+    font-weight: bold;
   }
 
   #menu a {
@@ -77,6 +72,10 @@
     margin-right: 20px;
   }
 
+  #backToMapBtn {
+    display: none;
+  }
+
   [hidden] {
     display: none !important;
   }
@@ -89,7 +88,7 @@
     on-click="_backToMap"
   ></paper-icon-button>
 
-  <h2>Spatial CIMIS</h2>
+  <h1>Spatial CIMIS: <small>[[subSectionLabel]]</small></h1>
 
   <div style="flex:1"></div>
 
