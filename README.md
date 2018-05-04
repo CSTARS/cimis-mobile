@@ -8,15 +8,13 @@ Spatial CIMIS webapp
 
 This project requires [Docker](https://www.docker.com/)
 
-Build Using
+Built Using
  - [NodeJS](https://nodejs.org/) / [ExpressJS](https://expressjs.com/)
  - [Redis](http://redis.io/)
 
 ## Init Development Environment
 
-Install client and server dependencies
-
-[yarn](https://yarnpkg.com/en/) and [npm](https://nodejs.org/en/) are required
+Install client and server dependencies. [yarn](https://yarnpkg.com/en/) and [npm](https://nodejs.org/en/) are required.
 
 ```bash
 npm install 
@@ -26,7 +24,7 @@ yarn install
 
 ## Run webpack bundler file watcher 
 
-This generates /client/public/js/bundle.js.  From root:
+This generates /client/public/js/bundle.js.  From root of repo:
 
 ```bash
 npm run watch
@@ -42,11 +40,11 @@ cd docker/cimis-mobile-local
 docker-compose up
 # in a new terminal (same dir) bash into container
 docker-compose exec app bash
-# start mobile server
+# start express server
 node /cimis-mobile/server
 ```
 
-If this is the first time starting, give the server some time to populate redis.  The server will keep redis in sync, checking CIMIS every 4 hours for new data.  The server also checks on startup.
+If this is the first time starting, give the server some time to populate redis.  The server will keep redis in sync, checking CIMIS every 4 hours for new data.  The server also checks data on startup.
 
 # Production
 
