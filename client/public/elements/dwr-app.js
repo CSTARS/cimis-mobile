@@ -64,6 +64,11 @@ class DwrApp extends Mixin(PolymerElement)
       subSectionLabel : {
         type : String,
         value : ''
+      },
+
+      etoZonesEnabled : {
+        type : Boolean,
+        value : false
       }
     }
   }
@@ -74,6 +79,9 @@ class DwrApp extends Mixin(PolymerElement)
 
   ready() {
     super.ready();
+
+    this.etoZonesEnabled = this._etoZonesEnabled();
+
     window.addEventListener('click', () => this.hideMenu());
   }
 

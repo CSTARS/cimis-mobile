@@ -6,6 +6,10 @@ module.exports = subclass =>
       this._injectModel('EtoZonesModel');
     }
 
+    _etoZonesEnabled() {
+      return this.EtoZonesModel.enabled();
+    }
+
     _getEtoZonesGeometry() {
       return this.EtoZonesModel.getGeometry();
     }

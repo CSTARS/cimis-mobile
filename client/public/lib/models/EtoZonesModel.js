@@ -10,13 +10,19 @@ class EtoZonesModel extends BaseModel {
     this.store = EtoZonesStore;
     this.service = EtoZonesService;
 
-    this.getGeometry(); // start loading geometry
+    if( this.enabled() ) {
+      this.getGeometry(); // start loading geometry
+    }
 
     this.register('EtoZonesModel');
   }
 
   getStyles() {
     return styles;
+  }
+
+  enabled() {
+    return this.store.data.enabled;
   }
 
   async getGeometry() {

@@ -1,0 +1,12 @@
+[Unit]
+Description=CIMIS Mobile
+After=network.target docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cimis-mobile/docker/cimis-mobile
+ExecStart=/usr/local/bin/docker-compose -f /opt/cimis-mobile/docker/cimis-mobile/docker-compose.yml up
+ExecStop=/usr/local/bin/docker-compose -f /opt/cimis-mobile/docker/cimis-mobile/docker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target

@@ -106,7 +106,7 @@
       <a href="#map/cimisGrid" >
         <span>Spatial CIMIS Grid</span>
       </a>
-      <a id="etoBtn" href="#map/etoZones" disabled$="[[loadingEto]]" >
+      <a id="etoBtn" href="#map/etoZones" disabled$="[[loadingEto]]" hidden$="[[!etoZonesEnabled]]">
         <paper-spinner id="etoSpinner" active$="[[loadingEto]]"></paper-spinner>
         <span>ETo Zones</span>
       </a>

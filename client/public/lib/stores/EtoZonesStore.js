@@ -6,6 +6,7 @@ class EtoZonesStore extends BaseStore {
     super();
 
     this.data = {
+      enabled : false,
       geometry : {
         state : this.STATE.INIT
       },
