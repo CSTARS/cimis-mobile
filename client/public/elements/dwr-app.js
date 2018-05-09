@@ -1,4 +1,4 @@
-import {PolymerElement} from "@polymer/polymer/polymer-element"
+import {PolymerElement, html} from '@polymer/polymer';
 import "@polymer/paper-icon-button/paper-icon-button"
 import "@polymer/paper-menu-button/paper-menu-button"
 import "@polymer/paper-material/paper-material"
@@ -74,7 +74,9 @@ class DwrApp extends Mixin(PolymerElement)
   }
 
   static get template() {
-    return template;
+    let tag = document.createElement('template');    
+    tag.innerHTML = template;    
+    return tag;
   }
 
   ready() {

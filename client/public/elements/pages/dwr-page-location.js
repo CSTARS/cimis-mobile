@@ -1,4 +1,4 @@
-import {PolymerElement} from "@polymer/polymer/polymer-element"
+import {PolymerElement, html} from '@polymer/polymer';
 import "@polymer/paper-input/paper-input"
 import template from "./dwr-page-location.html"
 
@@ -27,7 +27,9 @@ class DwrPageLocation extends Mixin(PolymerElement)
     }
 
     static get template() {
-      return template;
+      let tag = document.createElement('template');
+      tag.innerHTML = template;
+      return tag;
     }
   
     ready() {

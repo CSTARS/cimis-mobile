@@ -1,4 +1,4 @@
-import {PolymerElement} from "@polymer/polymer/polymer-element"
+import {PolymerElement, html} from '@polymer/polymer';
 import template from "./dwr-page-map.html"
 
 import utils from "../../lib/utils"
@@ -56,7 +56,9 @@ class DwrPageMap extends Mixin(PolymerElement)
   }
 
   static get template() {
-    return template;
+    let tag = document.createElement('template');
+    tag.innerHTML = template;
+    return tag;
   }
 
   async ready() {

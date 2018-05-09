@@ -1,4 +1,4 @@
-import {PolymerElement} from "@polymer/polymer/polymer-element"
+import {PolymerElement, html} from '@polymer/polymer';
 import "@polymer/paper-tabs/paper-tabs"
 import template from "./dwr-page-about.html"
 
@@ -16,7 +16,9 @@ class DwrPageAbout extends PolymerElement {
   }
 
   static get template() {
-    return template;
+    let tag = document.createElement('template');
+    tag.innerHTML = template;
+    return tag;
   }
 
   ready() {

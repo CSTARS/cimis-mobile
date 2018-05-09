@@ -1,4 +1,4 @@
-import {PolymerElement} from "@polymer/polymer/polymer-element"
+import {PolymerElement, html} from '@polymer/polymer';
 import template from "./dwr-page-data.html"
 
 import "./dwr-page-dau"
@@ -26,7 +26,9 @@ class DwrPageData extends Mixin(PolymerElement)
   }
 
   static get template() {
-    return template;
+    let tag = document.createElement('template');    
+    tag.innerHTML = template;    
+    return tag;
   }
 
   _onAppStateUpdate(e) {

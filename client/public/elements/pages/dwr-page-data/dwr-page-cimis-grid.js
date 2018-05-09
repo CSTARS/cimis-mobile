@@ -1,4 +1,4 @@
-import {PolymerElement} from "@polymer/polymer/polymer-element"
+import {PolymerElement, html} from '@polymer/polymer';
 import template from "./dwr-page-cimis-grid.html"
 
 import utils from "../../../lib/utils"
@@ -14,7 +14,9 @@ class DwrPageCimisGrid extends Mixin(PolymerElement)
         ElementUtilsInterface, ChartUtilsInterface) {
 
   static get template() {
-    return template;
+    let tag = document.createElement('template');    
+    tag.innerHTML = template;    
+    return tag;
   }
 
   static get properties() {

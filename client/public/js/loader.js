@@ -16,13 +16,4 @@ function classSupport() {
   return true;
 }
 
-addScript('/webcomponentsjs/webcomponents-loader.js');
-
 load();
-// if( window.WebComponents && window.WebComponents.ready ) {
-//   load();
-// } else {
-//   window.addEventListener('WebComponentsReady', function() {
-//     load();
-//   });
-// }
