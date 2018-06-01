@@ -6,6 +6,7 @@ import "@polymer/paper-button/paper-button"
 import "@polymer/iron-pages/iron-pages"
 import "@polymer/iron-icons/iron-icons"
 import "@polymer/iron-icons/maps-icons"
+import "@polymer/paper-toast"
 
 // sets globals Mixin and EventInterface
 import "@ucd-lib/cork-app-utils";
@@ -82,6 +83,7 @@ class DwrApp extends Mixin(PolymerElement)
   ready() {
     super.ready();
 
+    this.toastShown = false;
     this.etoZonesEnabled = this._etoZonesEnabled();
 
     window.addEventListener('click', () => this.hideMenu());
@@ -134,6 +136,13 @@ class DwrApp extends Mixin(PolymerElement)
     } else {
       this.$.locationBtn.style.display = 'none';
       this.$.backToMapBtn.style.display = 'block';
+    }
+
+    if( !this.toastShown && 
+        this.appState.section === 'map' && 
+        (!e.mapState || e.mapState === 'cimisGrid') ) {
+      this.toastShown = true;
+      this.$.gridToast.open();
     }
 
     if( !e.mapState || e.mapState === 'cimisGrid' ) this.subSectionLabel = 'Grid';

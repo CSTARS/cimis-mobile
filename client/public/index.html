@@ -31,17 +31,16 @@
         
         <script src="https://www.gstatic.com/charts/loader.js"></script>
         <script>
-          google.charts.load('current', {'packages':['corechart','line']});
+          google.charts.load('current', {'packages':['corechart','bar','line']});
         </script>
         {{data}}
 
-        <script src="/webcomponentsjs/webcomponents-loader.js"></script>
-        <script src="/js/loader.js"></script>
+        <script src="/loader/loader.js"></script>
     </head>
 
     <body>
         <dwr-app></dwr-app>
-        <test-ele></test-ele>
+
         <div id="loading-init">Loading...</div>
 
         <script>

@@ -1,7 +1,6 @@
 module.exports = {
   etoChartOptions : {
     title : 'ETo - Evapotranspiration (mm)',
-    curveType: 'function',
     height : 550,
     interpolateNulls : true,
     animation : {
@@ -17,7 +16,6 @@ module.exports = {
 
   expectedEtoOptions : {
     title : 'Weekly Expected Evapotranspiration (mm)',
-    curveType: 'function',
     height : 550,
     legend : {
         position : 'none'
@@ -36,7 +34,6 @@ module.exports = {
 
   expectedEtoCumOptions : {
     title : 'Expected Cumulative Weekly Evapotranspiration (mm)',
-    curveType: 'function',
     height : 550,
     legend : {
         position : 'none'

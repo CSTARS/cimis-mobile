@@ -63,7 +63,8 @@ class DwrPageCimisStation extends Mixin(PolymerElement)
 
     this.chartOptions = [];
     this.datatables = [];
-    
+
+    var chartTypes = [];
     for( var title in config.dataPages.stations ) {
       let c = config.dataPages.stations[title];
       let dt = new google.visualization.DataTable();
@@ -90,17 +91,25 @@ class DwrPageCimisStation extends Mixin(PolymerElement)
       // create chart options
       this.chartOptions.push({
         title : `${title} (${c.units})`,
-        curveType: 'function',
         height : 550,
+        vAxis : {
+          minValue : 0
+        },
         legend : {
           position : 'top'
         }
       });
       this.datatables.push(dt);
+
+      if( title.toLowerCase() === 'precip' ) {
+        chartTypes.push(google.visualization.ColumnChart)
+      } else {
+        chartTypes.push(google.visualization.LineChart);
+      }
     }
 
     if( !this.charts.length ) {
-      this.chartOptions.forEach(() => {
+      chartTypes.forEach(ChartClass => {
         // create paper root
         var decor = document.createElement('paper-material');
         decor.classList.add('chart-card');
@@ -108,7 +117,7 @@ class DwrPageCimisStation extends Mixin(PolymerElement)
         decor.appendChild(root);
         this.$.charts.appendChild(decor);
 
-        this.charts.push(new google.visualization.LineChart(root));
+        this.charts.push(new ChartClass(root));
       });
     }
 

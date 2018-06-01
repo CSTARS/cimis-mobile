@@ -50,12 +50,10 @@ const config = {
     dauZones : {
       chartOptions : {
         title : 'ETo - Evapotranspiration (mm)',
-        curveType: 'function',
         height : 550,
         interpolateNulls : true,
-        animation : {
-          easing : 'out',
-          startup : true
+        legend : {
+          position : 'top'
         }
       }
     }

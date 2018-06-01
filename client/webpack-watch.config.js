@@ -1,4 +1,5 @@
 const path = require('path');
+const BUILD_IE = false;
 
 let config = require('@ucd-lib/cork-app-build').watch({
   root : path.join(__dirname, 'public'),
@@ -6,6 +7,6 @@ let config = require('@ucd-lib/cork-app-build').watch({
   ie : 'ie-bundle.js',
   preview : 'js',
   clientModules : 'node_modules'
-}, true);
+}, BUILD_IE);
 
 module.exports = config;

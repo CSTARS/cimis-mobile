@@ -79,6 +79,10 @@
   [hidden] {
     display: none !important;
   }
+
+  paper-toast {
+    z-index: 1000;
+  }
 </style>
 
 <header>
@@ -124,6 +128,12 @@
     </paper-material>
   </div>
 </header>
+
+<paper-toast id="gridToast" duration="10000">
+  Tab or click on map in California to see 
+  Spatial CIMIS grid.  Then tap or click grid 
+  square to see data.
+</paper-toast>
 
 <iron-pages 
   selected-attribute="active" 
