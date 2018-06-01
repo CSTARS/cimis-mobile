@@ -5,7 +5,7 @@ These files expect this repo checkout out to /opt/cimis-mobile.  Then symlink to
 Next, tell systemd to start on boot
 
 ```
-> sudo systemctl enable /opt/systemd/docker/systemd/cimis-mobile.service
+> sudo systemctl enable /opt/cimis-mobile/docker/systemd/cimis-mobile.service
 ```
 
 Then
