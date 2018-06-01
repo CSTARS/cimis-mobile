@@ -7,15 +7,14 @@ DIR=$ROOT/dist
 DEV_ROOT=$ROOT/public
 
 rm -rf $DIR
-mkdir -p $DIR/js
 
 # bundle app
 echo 'Bundling app'
 webpack --config webpack-dist.config.js
 
 echo 'Copying assets'
-cp -r $DEV_ROOT/webcomponentsjs $DIR/webcomponentsjs
-cp $DEV_ROOT/js/loader.js $DIR/js/loader.js
+cp -r $DEV_ROOT/js $DIR/js
+cp -r $DEV_ROOT/loader $DIR/loader
 cp $DEV_ROOT/index.html $DIR/index.html
 cp $DEV_ROOT/dauco.json $DIR/dauco.json
 cp $DEV_ROOT/eto_zones.json $DIR/eto_zones.json

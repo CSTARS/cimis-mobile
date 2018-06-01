@@ -31,17 +31,19 @@
         
         <script src="https://www.gstatic.com/charts/loader.js"></script>
         <script>
-          google.charts.load('current', {'packages':['corechart','line']});
+          google.charts.load('current', {'packages':['corechart','bar','line']});
         </script>
         {{data}}
 
-        <script src="/js/loader.js"></script>
+        <script src="/loader/loader.js"></script>
     </head>
 
     <body>
         <dwr-app></dwr-app>
-        <test-ele></test-ele>
-        <div id="loading-init">Loading...</div>
+
+        <div id="loading-init" style="display:flex; height:100vh; align-items:center; justify-content: center">
+          <img src="/icons/cimis_icon_128.png" />
+        </div>
 
         <script>
           if( window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {

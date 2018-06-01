@@ -1,5 +1,5 @@
 const path = require('path');
-const BUILD_IE = false;
+const BUILD_IE = true;
 
 let config = require('@ucd-lib/cork-app-build').watch({
   root : path.join(__dirname, 'public'),

@@ -5,6 +5,5 @@ let config = require('@ucd-lib/cork-app-build').dist({
   ie : 'ie-bundle.js',
   clientModules : 'public/node_modules'
 });
-console.log(config);
 
 module.exports = config;
